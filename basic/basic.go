@@ -1,6 +1,6 @@
 package basic
 
-import(
+import (
 	gui "github.com/guigui-gui/guigui"
 )
 
@@ -68,22 +68,33 @@ func align(items []gui.LinearLayoutItem, alignment Alignment) []gui.LinearLayout
 	return items
 }
 
-func Align(items []gui.LinearLayoutItem, horizontal, vertical Alignment) gui.LinearLayout {
-	items = align(items, vertical)
-	vertical_layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionVertical,
-		Items:     items,
+func getOppositeLayout(direction gui.LayoutDirection) gui.LayoutDirection {
+	if direction == gui.LayoutDirectionHorizontal {
+		return gui.LayoutDirectionVertical
 	}
+	return gui.LayoutDirectionHorizontal
+}
 
-	horizontal_layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionHorizontal,
+func getLayoutAlignment(direction gui.LayoutDirection, horizontal, vertical Alignment) Alignment {
+	if direction == gui.LayoutDirectionHorizontal {
+		return horizontal
+	} else {
+		return vertical
+	}
+}
+
+func Align(layout1 gui.LinearLayout, horizontal, vertical Alignment) gui.LinearLayout {
+	layout1.Items = align(layout1.Items, getLayoutAlignment(layout1.Direction, horizontal, vertical))
+
+	layout2 := gui.LinearLayout{
+		Direction: getOppositeLayout(layout1.Direction),
 		Items: []gui.LinearLayoutItem{
 			{
-				Layout: vertical_layout,
+				Layout: layout1,
 			},
 		},
 	}
-	horizontal_layout.Items = align(horizontal_layout.Items, horizontal)
+	layout2.Items = align(layout2.Items, getLayoutAlignment(layout2.Direction, horizontal, vertical))
 
-	return horizontal_layout
+	return layout2
 }
