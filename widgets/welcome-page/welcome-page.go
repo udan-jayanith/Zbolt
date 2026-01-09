@@ -31,7 +31,7 @@ func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	wp.open.SetText("Open project")
 	wp.open.SetTextBold(true)
 	adder.AddChild(&wp.open)
-
+	
 	wp.new_request.SetText("New Request")
 	wp.new_request.SetTextBold(true)
 	adder.AddChild(&wp.new_request)
@@ -45,10 +45,17 @@ func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	wp.recent_projects.SetScale(basic.HeadingSize)
 	adder.AddChild(&wp.recent_projects)
 
-	wp.recent_list.Clear()
-	wp.recent_list.Add("Hello world")
-	wp.recent_list.Add("Lorem")
-	wp.recent_list.Add("Hello world Lorem hi man apple global")
+	wp.recent_list.Add([]*RecentItem{
+		{
+			Text: basic.NewTextWidget(`C:\Users\Udan\Documents\Dev\oss-contributions\guigui\example\todo`),
+		},
+		{
+			Text: basic.NewTextWidget(`C:\Users\Udan\Documents\DIIT98\Internet and Email\00307060`),
+		},
+		{
+			Text: basic.NewTextWidget(`C:\Users\Udan\Pictures\Camera Roll`),
+		},
+	})
 	adder.AddChild(&wp.recent_list)
 	return nil
 }

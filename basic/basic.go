@@ -2,6 +2,7 @@ package basic
 
 import (
 	gui "github.com/guigui-gui/guigui"
+	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
 const (
@@ -35,6 +36,12 @@ func NewPadding(padding ...int) gui.Padding {
 		Start:  padding[0],
 		End:    padding[0],
 	}
+}
+
+func NewTextWidget(text string) *widget.Text {
+	text_widget := widget.Text{}
+	text_widget.SetValue(text)
+	return &text_widget
 }
 
 type Alignment int8

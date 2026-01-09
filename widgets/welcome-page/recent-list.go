@@ -7,15 +7,23 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
+type RecentItem struct {
+	Text *widget.Text
+}
+
 type RecentList struct {
 	gui.DefaultWidget
 
-	recent_projects []*widget.Text
+	recent_projects []*RecentItem
 }
 
 func (rl *RecentList) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	if rl.recent_projects == nil {
+		return nil
+	}
+	
 	for _, recent_project := range rl.recent_projects {
-		adder.AddChild(recent_project)
+		adder.AddChild(recent_project.Text)
 	}
 	return nil
 }
@@ -29,7 +37,7 @@ func (rl *RecentList) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	}
 	for i, recent_project := range rl.recent_projects {
 		layout.Items[i] = gui.LinearLayoutItem{
-			Widget: recent_project,
+			Widget: recent_project.Text,
 			Size:   gui.FlexibleSize(1),
 		}
 	}
@@ -41,7 +49,7 @@ func (rl *RecentList) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 	h := u * 4
 	l := len(rl.recent_projects)
 	if l > 0 {
-		project := rl.recent_projects[0]
+		project := rl.recent_projects[0].Text
 		points := project.Measure(ctx, constraints)
 		h = points.Y * l
 	}
@@ -53,12 +61,6 @@ func (rl *RecentList) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 	return image.Pt(u*4, u*2)
 }
 
-func (rl *RecentList) Clear(){
-	rl.recent_projects = make([]*widget.Text, 0, 4)
-}
-
-func (rl *RecentList) Add(text string) {
-	text_widget := &widget.Text{}
-	text_widget.SetValue(text)
-	rl.recent_projects = append(rl.recent_projects, text_widget)
+func (rl *RecentList) Add(recent_items []*RecentItem) {
+	rl.recent_projects = recent_items
 }
