@@ -16,6 +16,7 @@ type WelcomePage struct {
 	new_request     widget.Button
 	create_project  widget.Button
 	recent_projects widget.Text
+	recent_list RecentList
 }
 
 func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -41,8 +42,14 @@ func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	wp.recent_projects.SetValue("Recent projects")
 	wp.recent_projects.SetBold(true)
+	wp.recent_projects.SetScale(basic.HeadingSize)
 	adder.AddChild(&wp.recent_projects)
 
+	wp.recent_list.Clear()
+	wp.recent_list.Add("Hello world")
+	wp.recent_list.Add("Lorem")
+	wp.recent_list.Add("Hello world Lorem hi man apple global")
+	adder.AddChild(&wp.recent_list)
 	return nil
 }
 
@@ -75,6 +82,15 @@ func (wp *WelcomePage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 						},
 					},
 				},
+			},
+			{
+				Size: gui.FixedSize(u*2),
+			},
+			{
+				Widget: &wp.recent_projects,
+			},
+			{
+				Widget: &wp.recent_list,
 			},
 		},
 	}
