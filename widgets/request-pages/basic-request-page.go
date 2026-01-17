@@ -25,12 +25,14 @@ func (rib *RequestInputBar) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 		"Options",
 		"Head",
 	})
+	rib.method_select_widget.SelectItemByIndex(0)
 	adder.AddChild(&rib.method_select_widget)
 	
 	rib.input_widget.SetEditable(true)	
 	adder.AddChild(&rib.input_widget)
 	
 	rib.request_btn_widget.SetText("Request")
+	rib.request_btn_widget.SetTextBold(true)
 	adder.AddChild(&rib.request_btn_widget)
 	return nil
 }
@@ -39,7 +41,7 @@ func (rib *RequestInputBar) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBou
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap: u,
+		Gap: u/4,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rib.method_select_widget,

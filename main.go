@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"image"
+	"os"
 
 	gui "github.com/guigui-gui/guigui"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	WelcomePage "API-Client/widgets/welcome-page"
+	RequestPage "API-Client/widgets/request-pages"
+//	WelcomePage "API-Client/widgets/welcome-page"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 			ApplePressAndHoldEnabled: true,
 		},
 	}
-	if err := gui.Run(&WelcomePage.WelcomePage{}, op); err != nil {
+	if err := gui.Run(&RequestPage.RequestInputBar{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
