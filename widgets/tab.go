@@ -1,3 +1,4 @@
+// Custom widgets
 package CWidget
 
 import (
@@ -9,6 +10,7 @@ import (
 type TabItem struct {
 	gui.DefaultWidget
 	text widget.Text
+	body *gui.Widget
 }
 
 type TabBar struct {
@@ -18,7 +20,7 @@ type TabBar struct {
 
 func (tb *TabBar) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	for _, item := range tb.tab_items {
-		adder.AddChild(item)
+		adder.AddChild(&item.text)
 	}
 
 	return nil
@@ -32,7 +34,7 @@ func (tb *TabBar) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layou
 	
 	for _, item := range tb.tab_items {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
-			Widget: item,
+			Widget: &item.text,
 		})
 	}
 
