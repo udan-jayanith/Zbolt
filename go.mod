@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/guigui-gui/guigui v0.0.0-20260107182056-b8c07e50576b
-	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.8
+	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.9
 )
 
 require (

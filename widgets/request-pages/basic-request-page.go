@@ -1,8 +1,9 @@
 package RequestPage
 
 import (
-//	"API-Client/basic"
 	"image"
+
+	CWidget "API-Client/widgets"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -65,7 +66,7 @@ func (rib *RequestInputBar) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBou
 			},
 		},
 	}
-	
+
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
@@ -82,6 +83,7 @@ func (rib *RequestInputBar) Measure(ctx *gui.Context, constraints gui.Constraint
 type RequestWidget struct {
 	gui.DefaultWidget
 	input_bar_widget RequestInputBar
+	tab CWidget.Tab
 }
 
 func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -95,7 +97,9 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.input_bar_widget,
-				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &rw.tab,
 			},
 		},
 	}
