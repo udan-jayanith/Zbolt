@@ -118,13 +118,13 @@ type ResponseWidget struct {
 	gui.DefaultWidget
 }
 
-type BasicRequestPage struct {
+type BasicPage struct {
 	gui.DefaultWidget
 	background     widget.Background
 	request_widget RequestWidget
 }
 
-func (brp *BasicRequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (brp *BasicPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
 	adder.AddChild(&brp.background)
 
@@ -132,7 +132,7 @@ func (brp *BasicRequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) erro
 	return nil
 }
 
-func (brp *BasicRequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (brp *BasicPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&brp.background, widgetBounds.Bounds())
 
 	layout := gui.LinearLayout{

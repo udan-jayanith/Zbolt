@@ -20,7 +20,7 @@ func main() {
 			ApplePressAndHoldEnabled: true,
 		},
 	}
-	if err := gui.Run(&RequestPage.BasicRequestPage{}, op); err != nil {
+	if err := gui.Run(&RequestPage.BasicPage{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
