@@ -81,12 +81,12 @@ func (rib *RequestInputBar) Measure(ctx *gui.Context, constraints gui.Constraint
 type RequestWidget struct {
 	gui.DefaultWidget
 	input_bar_widget RequestInputBar
-	url_preview widget.TextInput
+	url_preview      widget.TextInput
 }
 
 func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rw.input_bar_widget)
-	
+
 	rw.url_preview.SetEditable(false)
 	rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
 	rw.url_preview.SetMultiline(true)
@@ -99,15 +99,15 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap: u/4,
+		Gap:       u / 4,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.input_bar_widget,
-				Size: gui.FixedSize(u),
+				Size:   gui.FixedSize(u),
 			},
 			{
 				Widget: &rw.url_preview,
-				Size: gui.FixedSize(u*2),
+				Size:   gui.FixedSize(u * 2),
 			},
 		},
 	}
@@ -120,27 +120,51 @@ type ResponseWidget struct {
 
 type BasicPage struct {
 	gui.DefaultWidget
-	background     widget.Background
-	request_widget RequestWidget
+	background widget.Background
+	panel     struct {
+		request struct {
+			panel widget.Panel
+			content gui.WidgetWithSize[*RequestWidget]	 
+		}
+		response struct {
+			panel widget.Panel
+			content gui.WidgetWithSize[*ResponseWidget]
+		}
+	}
 }
 
 func (brp *BasicPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
 	adder.AddChild(&brp.background)
 
-	adder.AddChild(&brp.request_widget)
+	brp.panel.request.panel.SetContent(&brp.panel.request.content)
+	brp.panel.request.panel.SetBorders(widget.PanelBorders{
+		End: true,
+	})
+	adder.AddChild(&brp.panel.request.panel)
+	
+	brp.panel.response.panel.SetContent(&brp.panel.response.content)
+	adder.AddChild(&brp.panel.response.panel)
 	return nil
 }
 
 func (brp *BasicPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&brp.background, widgetBounds.Bounds())
+	b := widgetBounds.Bounds() 
+	panel_content_width := b.Max.X/2
+	brp.panel.request.content.SetFixedWidth(panel_content_width)
+	brp.panel.response.content.SetFixedWidth(panel_content_width)
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Items: []gui.LinearLayoutItem{
 			{
-				Widget: &brp.request_widget,
-				Size:   gui.FlexibleSize(1),
+				Widget: &brp.panel.request.panel,
+				Size: gui.FlexibleSize(1),
+			},
+			{
+				Widget: &brp.panel.response.panel,
+				Size: gui.FlexibleSize(1),
 			},
 		},
 	}
