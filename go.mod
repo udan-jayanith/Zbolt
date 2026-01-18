@@ -3,7 +3,7 @@ module API-Client
 go 1.25.0
 
 require (
-	github.com/guigui-gui/guigui v0.0.0-20260107182056-b8c07e50576b
+	github.com/guigui-gui/guigui v0.0.0-20260116150005-2725a9b41e5e
 	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.9
 )
 
@@ -17,11 +17,11 @@ require (
 	github.com/jezek/xgb v1.2.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.design/x/clipboard v0.7.1 // indirect
-	golang.org/x/exp/shiny v0.0.0-20251219203646-944ab1f22d93 // indirect
-	golang.org/x/image v0.34.0 // indirect
-	golang.org/x/mobile v0.0.0-20251209145715-2553ed8ce294 // indirect
+	golang.org/x/exp/shiny v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/image v0.35.0 // indirect
+	golang.org/x/mobile v0.0.0-20260112195712-5b9ecdfb8721 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	howett.net/plist v1.0.1 // indirect
 )
