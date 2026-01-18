@@ -3,8 +3,6 @@ package RequestPage
 import (
 	"image"
 
-	CWidget "API-Client/widgets"
-
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -83,23 +81,33 @@ func (rib *RequestInputBar) Measure(ctx *gui.Context, constraints gui.Constraint
 type RequestWidget struct {
 	gui.DefaultWidget
 	input_bar_widget RequestInputBar
-	tab CWidget.Tab
+	url_preview widget.TextInput
 }
 
 func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rw.input_bar_widget)
+	
+	rw.url_preview.SetEditable(false)
+	rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
+	rw.url_preview.SetMultiline(true)
+	rw.url_preview.SetAutoWrap(true)
+	adder.AddChild(&rw.url_preview)
 	return nil
 }
 
 func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
+		Gap: u/4,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.input_bar_widget,
+				Size: gui.FixedSize(u),
 			},
 			{
-				Widget: &rw.tab,
+				Widget: &rw.url_preview,
+				Size: gui.FixedSize(u*2),
 			},
 		},
 	}
