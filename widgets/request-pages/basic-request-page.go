@@ -83,6 +83,13 @@ type RequestWidget struct {
 	gui.DefaultWidget
 	input_bar_widget RequestInputBar
 	url_preview      widget.TextInput
+	tab_bar          struct {
+		tabs widget.SegmentedControl[gui.Widget]
+		selected_content gui.Widget
+		content struct {
+			params, header, body gui.Widget
+		}
+	}
 }
 
 func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -93,6 +100,23 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rw.url_preview.SetMultiline(true)
 	rw.url_preview.SetAutoWrap(true)
 	adder.AddChild(&rw.url_preview)
+
+	rw.tab_bar.tabs.SetItems([]widget.SegmentedControlItem[gui.Widget]{
+		{
+			Text: "Params",
+		},
+		{
+			Text: "Header",
+		},
+		{
+			Text: "Body",
+		},
+	})
+	if _, ok := rw.tab_bar.tabs.SelectedItem(); !ok {
+		rw.tab_bar.tabs.SelectItemByIndex(0)
+	}
+
+	adder.AddChild(&rw.tab_bar.tabs)
 	return nil
 }
 
@@ -101,7 +125,7 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Gap:       u / 4,
-		Padding: basic.NewPadding(u/4),
+		Padding:   basic.NewPadding(u / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.input_bar_widget,
@@ -110,6 +134,10 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 			{
 				Widget: &rw.url_preview,
 				Size:   gui.FixedSize(u * 2),
+			},
+			{
+				Widget: &rw.tab_bar.tabs,
+				Size:   gui.FixedSize(u),
 			},
 		},
 	}
@@ -153,8 +181,8 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 	u := widget.UnitSize(ctx)
 	header_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap: u / 4,
-		Padding: basic.NewPadding(u/4),
+		Gap:       u / 4,
+		Padding:   basic.NewPadding(u / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.header.status,
@@ -167,21 +195,21 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 		},
 	}
-	
+
 	main_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap: u / 4,
-			Padding: basic.NewPadding(u/4),
+		Gap:       u / 4,
+		Padding:   basic.NewPadding(u / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Layout: header_layout,
-			},{
+			}, {
 				Widget: &rw.preview,
-				Size: gui.FlexibleSize(1),
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
-	
+
 	main_layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
@@ -189,7 +217,7 @@ type BasicPage struct {
 	gui.DefaultWidget
 	background widget.Background
 	// TODO: use WidgetWithPaddingAndSize
-	panel      struct {
+	panel struct {
 		request struct {
 			panel   widget.Panel
 			content gui.WidgetWithSize[*RequestWidget]
