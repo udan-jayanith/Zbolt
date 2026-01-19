@@ -154,7 +154,7 @@ type ResponseWidget struct {
 		content struct {
 			header gui.Widget
 			body   struct {
-				preview   gui.WidgetWithSize[*widget.TextInput]
+				preview   widget.TextInput
 				open_with gui.Widget
 			}
 		}
@@ -187,7 +187,7 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 	adder.AddChild(&rw.tab.tabs)
 
-	text_preview := rw.tab.content.body.preview.Widget()
+	text_preview := &rw.tab.content.body.preview
 	text_preview.SetAutoWrap(true)
 	text_preview.SetMultiline(true)
 	text_preview.SetEditable(false)
@@ -202,8 +202,8 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		Hello world
 		`)
-	rw.tab.content.body.preview.SetFixedSize(image.Pt(10, 200)) // This doesn't work. Dk why 
 	adder.AddChild(&rw.tab.content.body.preview)
+	
 	return nil
 }
 
@@ -239,6 +239,7 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: &rw.tab.content.body.preview,
+				Size: gui.FlexibleSize(1),
 			},
 		},
 	}
@@ -280,9 +281,11 @@ func (brp *BasicPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (brp *BasicPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&brp.background, widgetBounds.Bounds())
 	b := widgetBounds.Bounds()
-	panel_content_width := b.Max.X / 2
-	brp.panel.request.content.SetFixedWidth(panel_content_width)
-	brp.panel.response.content.SetFixedWidth(panel_content_width)
+	
+	panel_size := b.Max
+	panel_size.X = panel_size.X/2
+	brp.panel.request.content.SetFixedSize(panel_size)
+	brp.panel.response.content.SetFixedSize(panel_size)
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
