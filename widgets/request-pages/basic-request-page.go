@@ -84,9 +84,9 @@ type RequestWidget struct {
 	input_bar_widget RequestInputBar
 	url_preview      widget.TextInput
 	tab_bar          struct {
-		tabs widget.SegmentedControl[gui.Widget]
+		tabs             widget.SegmentedControl[gui.Widget]
 		selected_content gui.Widget
-		content struct {
+		content          struct {
 			params, header, body gui.Widget
 		}
 	}
@@ -149,7 +149,16 @@ type ResponseWidget struct {
 	header struct {
 		status, response_time, size widget.Text
 	}
-	preview widget.TextInput
+	tab struct {
+		tabs    widget.SegmentedControl[string]
+		content struct {
+			header gui.Widget
+			body   struct {
+				preview   gui.WidgetWithSize[*widget.TextInput]
+				open_with gui.Widget
+			}
+		}
+	}
 }
 
 func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -165,15 +174,36 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rw.header.size.SetValue("131 B")
 	adder.AddChild(&rw.header.size)
 
-	rw.preview.SetAutoWrap(true)
-	rw.preview.SetEditable(false)
-	rw.preview.SetMultiline(true)
-	rw.preview.SetValue(`
+	rw.tab.tabs.SetItems([]widget.SegmentedControlItem[string]{
+		{
+			Text: "Header",
+		},
+		{
+			Text: "Body",
+		},
+	})
+	if _, ok := rw.tab.tabs.SelectedItem(); !ok {
+		rw.tab.tabs.SelectItemByIndex(1)
+	}
+	adder.AddChild(&rw.tab.tabs)
+
+	text_preview := rw.tab.content.body.preview.Widget()
+	text_preview.SetAutoWrap(true)
+	text_preview.SetMultiline(true)
+	text_preview.SetEditable(false)
+	text_preview.SetValue(`
 		git clone https://github.com/guigui-gui/guigui.git
 		cd guigui
 		go run ./example/gallery
+
+
+		hi
+
+
+		Hello world
 		`)
-	adder.AddChild(&rw.preview)
+	rw.tab.content.body.preview.SetFixedSize(image.Pt(10, 200)) // This doesn't work. Dk why 
+	adder.AddChild(&rw.tab.content.body.preview)
 	return nil
 }
 
@@ -203,9 +233,12 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 		Items: []gui.LinearLayoutItem{
 			{
 				Layout: header_layout,
-			}, {
-				Widget: &rw.preview,
-				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &rw.tab.tabs,
+			},
+			{
+				Widget: &rw.tab.content.body.preview,
 			},
 		},
 	}
