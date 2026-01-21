@@ -31,23 +31,16 @@ func (tab *Tab[T]) OnSelect(fn func(ctx *gui.Context, tab_item TabItem[T])) {
 }
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	type segmented_control_item_value[T comparable] struct {
-		widget gui.Widget
-		value T
-	}
-	segmented_control_items := make([]widget.SegmentedControlItem[segmented_control_item_value[T]], len(tab.Tab_Items))
+	segmented_control_items := make([]widget.SegmentedControlItem[string], len(tab.Tab_Items))
 	for i := range tab.Tab_Items {
 		tab_item := &tab.Tab_Items[i]
-		segment_item := widget.SegmentedControlItem[segmented_control_item_value[T]]{
+		segment_item := widget.SegmentedControlItem[string]{
 			Text: tab_item.Name,
-			Value: segmented_control_item_value[T]{
-				widget: tab_item.Widget,
-				value: tab_item.Value,
-			},
 		}
 		
 		segmented_control_items[i] = segment_item
 	}
+	tab.tabs.SetItems(segmented_control_items)
 	
 	selected_item_index := tab.tabs.SelectedItemIndex() 
 	if selected_item_index == -1 {
