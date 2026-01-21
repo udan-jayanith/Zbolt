@@ -1,6 +1,8 @@
 package CommonWidgets
 
-import(
+import (
+	"API-Client/basic"
+
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -50,8 +52,7 @@ func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&tab.tabs)
 	
 	selected_widget := tab.Tab_Items[selected_item_index].Widget
-	tab.panel.SetContentConstraints(widget.PanelContentConstraintsNone)
-	tab.panel.SetContent(selected_widget)
+	tab.panel.SetContent(basic.NewFullSizeWidget(selected_widget))
 	adder.AddChild(&tab.panel)
 	return nil
 }

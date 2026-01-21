@@ -230,6 +230,7 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: &rw.tab,
+				Size: gui.FlexibleSize(1),
 			},
 		},
 	}
