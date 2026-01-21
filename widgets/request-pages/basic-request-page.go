@@ -2,6 +2,7 @@ package RequestPage
 
 import (
 	"API-Client/basic"
+	CommonWidgets "API-Client/common-widgets"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -149,15 +150,9 @@ type ResponseWidget struct {
 	header struct {
 		status, response_time, size widget.Text
 	}
-	tab struct {
-		tabs    widget.SegmentedControl[string]
-		content struct {
-			header gui.Widget
-			body   struct {
-				preview   widget.TextInput
-				open_with gui.Widget
-			}
-		}
+	tab         CommonWidgets.Tab[uint8]
+	tab_content struct {
+		response_header, response_body widget.TextInput
 	}
 }
 
@@ -174,20 +169,7 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rw.header.size.SetValue("131 B")
 	adder.AddChild(&rw.header.size)
 
-	rw.tab.tabs.SetItems([]widget.SegmentedControlItem[string]{
-		{
-			Text: "Header",
-		},
-		{
-			Text: "Body",
-		},
-	})
-	if _, ok := rw.tab.tabs.SelectedItem(); !ok {
-		rw.tab.tabs.SelectItemByIndex(1)
-	}
-	adder.AddChild(&rw.tab.tabs)
-
-	text_preview := &rw.tab.content.body.preview
+	text_preview := &rw.tab_content.response_body
 	text_preview.SetAutoWrap(true)
 	text_preview.SetMultiline(true)
 	text_preview.SetEditable(false)
@@ -202,8 +184,20 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		Hello world
 		`)
-	adder.AddChild(&rw.tab.content.body.preview)
-	
+
+	rw.tab.Tab_Items = []CommonWidgets.TabItem[uint8]{
+		{
+			Widget: &rw.tab_content.response_body,
+			Name:   "Body",
+		},
+		{
+			Widget: &rw.tab_content.response_header,
+			Name:   "Header",
+		},
+	}
+
+	adder.AddChild(&rw.tab)
+
 	return nil
 }
 
@@ -235,11 +229,7 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 				Layout: header_layout,
 			},
 			{
-				Widget: &rw.tab.tabs,
-			},
-			{
-				Widget: &rw.tab.content.body.preview,
-				Size: gui.FlexibleSize(1),
+				Widget: &rw.tab,
 			},
 		},
 	}
@@ -281,9 +271,9 @@ func (brp *BasicPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (brp *BasicPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&brp.background, widgetBounds.Bounds())
 	b := widgetBounds.Bounds()
-	
+
 	panel_size := b.Max
-	panel_size.X = panel_size.X/2
+	panel_size.X = panel_size.X / 2
 	brp.panel.request.content.SetFixedSize(panel_size)
 	brp.panel.response.content.SetFixedSize(panel_size)
 
