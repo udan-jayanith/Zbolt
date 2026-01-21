@@ -169,11 +169,10 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rw.header.size.SetValue("131 B")
 	adder.AddChild(&rw.header.size)
 
-	text_preview := &rw.tab_content.response_body
-	text_preview.SetAutoWrap(true)
-	text_preview.SetMultiline(true)
-	text_preview.SetEditable(false)
-	text_preview.SetValue(`
+	rw.tab_content.response_body.SetAutoWrap(true)
+	rw.tab_content.response_body.SetMultiline(true)
+	rw.tab_content.response_body.SetEditable(false)
+	rw.tab_content.response_body.SetValue(`
 		git clone https://github.com/guigui-gui/guigui.git
 		cd guigui
 		go run ./example/gallery

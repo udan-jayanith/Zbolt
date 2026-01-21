@@ -34,7 +34,7 @@ func (tab *Tab[T]) OnSelect(fn func(ctx *gui.Context, tab_item TabItem[T])) {
 func (tab *Tab[T]) GetSelectedWidget() gui.Widget{
 	selected_item_index := tab.tabs.SelectedItemIndex()
 	if selected_item_index == -1 {
-		selected_item_index = 1
+		selected_item_index = 0
 		tab.tabs.SelectItemByIndex(selected_item_index)
 	}
 
