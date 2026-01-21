@@ -19,6 +19,17 @@ type Tab[T comparable] struct {
 	panel widget.Panel
 }
 
+func (tab *Tab[T]) OnSelect(fn func(ctx *gui.Context, tab_item TabItem[T])) {
+	tab.tabs.SetOnItemSelected(func(context *gui.Context, i int) {
+		if i < 0 {
+			return
+		}
+		
+		tab_item := tab.Tab_Items[i]
+		fn(context, tab_item)
+	})
+}
+
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	type segmented_control_item_value[T comparable] struct {
 		widget gui.Widget
@@ -53,6 +64,17 @@ func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 }
 
 func (tab *Tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &tab.tabs,
+			},
+			{
+				Widget: &tab.panel,
+				Size: gui.FlexibleSize(1),
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
-
-
