@@ -5,7 +5,7 @@ import (
 
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	
+
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -85,40 +85,83 @@ type RequestWidget struct {
 	gui.DefaultWidget
 	input_bar_widget RequestInputBar
 	url_preview      widget.TextInput
-	tab_bar          struct {
-		tabs             widget.SegmentedControl[gui.Widget]
-		selected_content gui.Widget
-		content          struct {
-			params, header, body gui.Widget
-		}
+
+	tab         CommonWidgets.Tab[string]
+	tab_content struct {
+		params, header widget.Table[string]
+		body           widget.TextInput
 	}
 }
 
 func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rw.input_bar_widget)
 
-	rw.url_preview.SetEditable(false)
-	rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
-	rw.url_preview.SetMultiline(true)
-	rw.url_preview.SetAutoWrap(true)
-	adder.AddChild(&rw.url_preview)
-
-	rw.tab_bar.tabs.SetItems([]widget.SegmentedControlItem[gui.Widget]{
-		{
-			Text: "Params",
-		},
-		{
-			Text: "Header",
-		},
-		{
-			Text: "Body",
-		},
-	})
-	if _, ok := rw.tab_bar.tabs.SelectedItem(); !ok {
-		rw.tab_bar.tabs.SelectItemByIndex(0)
+	{
+		rw.url_preview.SetEditable(false)
+		rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
+		rw.url_preview.SetMultiline(true)
+		rw.url_preview.SetAutoWrap(true)
+		adder.AddChild(&rw.url_preview)
 	}
 
-	adder.AddChild(&rw.tab_bar.tabs)
+	u := widget.UnitSize(ctx)
+	{
+		{
+			rw.tab_content.header.SetColumns([]widget.TableColumn{
+				{
+					HeaderText:                "Name",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
+				},
+				{
+					HeaderText:                "Value",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
+				},
+			})
+		}
+
+		{
+			rw.tab_content.params.SetColumns([]widget.TableColumn{
+				{
+					HeaderText:                "Attribute name",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
+				},
+				{
+					HeaderText:                "Value",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
+				},
+			})
+		}
+
+		{
+			rw.tab_content.body.SetAutoWrap(true)
+			rw.tab_content.body.SetMultiline(true)
+			rw.tab_content.body.SetEditable(true)
+		}
+
+		rw.tab.Tab_Items = []CommonWidgets.TabItem[string]{
+			{
+				Name: "Parameters",
+				Widget: &rw.tab_content.params,
+			},
+			{
+				Name: "Headers",
+				Widget: &rw.tab_content.header,
+			},			{
+				Name: "Body",
+				Widget: &rw.tab_content.body,
+			},
+		}
+		
+		adder.AddChild(&rw.tab)
+	}
 	return nil
 }
 
@@ -138,8 +181,8 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 				Size:   gui.FixedSize(u * 2),
 			},
 			{
-				Widget: &rw.tab_bar.tabs,
-				Size:   gui.FixedSize(u),
+				Widget: &rw.tab,
+				Size: gui.FlexibleSize(1),
 			},
 		},
 	}
@@ -171,7 +214,7 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.header.size.SetTabular(true)
 		rw.header.size.SetValue("131 B")
 		adder.AddChild(&rw.header.size)
-		
+
 		rw.header.proto.SetTabular(true)
 		rw.header.proto.SetValue("HTTP v1.1")
 		adder.AddChild(&rw.header.proto)
@@ -199,16 +242,16 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		{
 			rw.tab_content.response_header.SetColumns([]widget.TableColumn{
 				{
-					HeaderText: "Name",
+					HeaderText:                "Name",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth: u*4,
-					Width: gui.FlexibleSize(1),
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
 				},
 				{
-					HeaderText: "Value",
+					HeaderText:                "Value",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth: u*4,
-					Width: gui.FlexibleSize(1),
+					MinWidth:                  u * 4,
+					Width:                     gui.FlexibleSize(1),
 				},
 			})
 			rw.tab_content.response_header.SetItems([]widget.TableRow[string]{
@@ -290,8 +333,7 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 type BasicPage struct {
 	gui.DefaultWidget
 	background widget.Background
-	// TODO: use WidgetWithPaddingAndSize
-	panel struct {
+	panel      struct {
 		request struct {
 			panel   widget.Panel
 			content gui.WidgetWithSize[*RequestWidget]
