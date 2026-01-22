@@ -10,7 +10,8 @@ import (
 
 type response_body_widgets struct {
 	gui.DefaultWidget
-	file_type widget.Text
+	not_first_build bool
+	file_type       widget.Text
 
 	options struct {
 		auto_wrap struct {
@@ -37,7 +38,9 @@ func (rbw *response_body_widgets) Build(ctx *gui.Context, adder *gui.ChildAdder)
 		rbw.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
 		adder.AddChild(&rbw.options.auto_wrap.text)
 
-		rbw.options.auto_wrap.toggle.SetValue(true)
+		if !rbw.not_first_build {
+			rbw.options.auto_wrap.toggle.SetValue(true)
+		}
 		adder.AddChild(&rbw.options.auto_wrap.toggle)
 	}
 	{
@@ -45,7 +48,9 @@ func (rbw *response_body_widgets) Build(ctx *gui.Context, adder *gui.ChildAdder)
 		rbw.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
 		adder.AddChild(&rbw.options.format.text)
 
-		rbw.options.format.toggle.SetValue(true)
+		if !rbw.not_first_build {
+			rbw.options.format.toggle.SetValue(true)
+		}
 		adder.AddChild(&rbw.options.format.toggle)
 	}
 	{
@@ -70,6 +75,7 @@ func (rbw *response_body_widgets) Build(ctx *gui.Context, adder *gui.ChildAdder)
 		adder.AddChild(&rbw.view)
 	}
 
+	rbw.not_first_build = true
 	return nil
 }
 
