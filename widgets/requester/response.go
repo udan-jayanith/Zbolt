@@ -8,6 +8,126 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
+type response_body_widgets struct {
+	gui.DefaultWidget
+	file_type widget.Text
+
+	options struct {
+		auto_wrap struct {
+			text   widget.Text
+			toggle widget.Toggle
+		}
+		format struct {
+			text   widget.Text
+			toggle widget.Toggle
+		}
+		open_with widget.Button
+	}
+	view widget.TextInput
+}
+
+func (rbw *response_body_widgets) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	{
+		rbw.file_type.SetValue("Json")
+		rbw.file_type.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbw.file_type)
+	}
+	{
+		rbw.options.auto_wrap.text.SetValue("Auto wrap")
+		rbw.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbw.options.auto_wrap.text)
+
+		rbw.options.auto_wrap.toggle.SetValue(true)
+		adder.AddChild(&rbw.options.auto_wrap.toggle)
+	}
+	{
+		rbw.options.format.text.SetValue("Format")
+		rbw.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbw.options.format.text)
+
+		rbw.options.format.toggle.SetValue(true)
+		adder.AddChild(&rbw.options.format.toggle)
+	}
+	{
+		rbw.options.open_with.SetText("Open")
+		adder.AddChild(&rbw.options.open_with)
+	}
+	{
+		rbw.view.SetAutoWrap(true)
+		rbw.view.SetMultiline(true)
+		rbw.view.SetEditable(false)
+		rbw.view.SetValue(`
+		git clone https://github.com/guigui-gui/guigui.git
+		cd guigui
+		go run ./example/gallery
+
+
+		hi
+
+
+		Hello world
+		`)
+		adder.AddChild(&rbw.view)
+	}
+
+	return nil
+}
+
+func (rbw *response_body_widgets) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
+	toggle_size := gui.FixedSize(u*2 - u/3)
+	space := gui.LinearLayoutItem{
+		Size: gui.FixedSize(widget.UnitSize(ctx) / 4),
+	}
+
+	header_layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Gap:       u / 4,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &rbw.options.auto_wrap.text,
+			},
+			{
+				Widget: &rbw.options.auto_wrap.toggle,
+				Size:   toggle_size,
+			},
+			space,
+			{
+				Widget: &rbw.options.format.text,
+			},
+			{
+				Widget: &rbw.options.format.toggle,
+				Size:   toggle_size,
+			},
+			{
+				Size: gui.FlexibleSize(1),
+			},
+			{
+				Widget: &rbw.file_type,
+			},
+			{
+				Widget: &rbw.options.open_with,
+			},
+		},
+	}
+
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Gap:       u / 4,
+		Items: []gui.LinearLayoutItem{
+			space,
+			{
+				Layout: header_layout,
+			},
+			{
+				Widget: &rbw.view,
+				Size:   gui.FlexibleSize(1),
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
 type ResponseWidget struct {
 	gui.DefaultWidget
 	header struct {
@@ -16,7 +136,7 @@ type ResponseWidget struct {
 	tab         CommonWidgets.Tab[uint8]
 	tab_content struct {
 		response_header widget.Table[string]
-		response_body   widget.TextInput
+		response_body   response_body_widgets
 	}
 }
 
@@ -40,23 +160,6 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 
 	{
-		{
-			rw.tab_content.response_body.SetAutoWrap(true)
-			rw.tab_content.response_body.SetMultiline(true)
-			rw.tab_content.response_body.SetEditable(false)
-			rw.tab_content.response_body.SetValue(`
-			git clone https://github.com/guigui-gui/guigui.git
-			cd guigui
-			go run ./example/gallery
-
-
-			hi
-
-
-			Hello world
-			`)
-		}
-
 		u := widget.UnitSize(ctx)
 		{
 			rw.tab_content.response_header.SetColumns([]widget.TableColumn{
