@@ -1,4 +1,4 @@
-package WelcomePage
+package Welcome
 
 import (
 	"API-Client/basic"
@@ -7,7 +7,7 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type WelcomePage struct {
+type Welcome struct {
 	gui.DefaultWidget
 
 	background      widget.Background
@@ -19,7 +19,7 @@ type WelcomePage struct {
 	recent_list RecentList
 }
 
-func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (wp *Welcome) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
 	adder.AddChild(&wp.background)
 
@@ -60,7 +60,7 @@ func (wp *WelcomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (wp *WelcomePage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (wp *Welcome) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	bounds := widgetBounds.Bounds()
 	layouter.LayoutWidget(&wp.background, bounds)
 

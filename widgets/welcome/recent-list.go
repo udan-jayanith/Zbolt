@@ -1,4 +1,4 @@
-package WelcomePage
+package Welcome
 
 import (
 	"image"
