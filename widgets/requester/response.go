@@ -3,6 +3,7 @@ package Requester
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	"github.com/sqweek/dialog"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -55,6 +56,14 @@ func (rbw *response_body_widgets) Build(ctx *gui.Context, adder *gui.ChildAdder)
 	}
 	{
 		rbw.options.open_with.SetText("Open")
+		rbw.options.open_with.SetOnUp(func(context *gui.Context) {
+			path, err := dialog.File().Load()
+			if err != nil {
+				println(err.Error())
+				return
+			}
+			println(path)
+		})
 		adder.AddChild(&rbw.options.open_with)
 	}
 	{
