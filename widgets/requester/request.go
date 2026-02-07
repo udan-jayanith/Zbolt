@@ -16,6 +16,7 @@ type RequestWidget struct {
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
 		params, header widget.Table[string]
+		params_rows, header_rows []widget.TableRow[string]
 		body           widget.TextInput
 	}
 }
@@ -53,6 +54,19 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					Width: gui.FixedSize(u),
 				},
 			})
+			
+			if len(rw.tab_content.header_rows) == 0 {
+				rw.tab_content.header_rows = append(rw.tab_content.header_rows, widget.TableRow[string]{
+					Cells: []widget.TableCell{
+						{},
+						{},
+						{
+							Text: " +",
+						},
+					},
+				})
+			}
+			rw.tab_content.header.SetItems(rw.tab_content.header_rows)
 		}
 
 		{
@@ -75,6 +89,19 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					Width: gui.FixedSize(u),
 				},
 			})
+			
+			if len(rw.tab_content.params_rows) == 0 {
+				rw.tab_content.params_rows = append(rw.tab_content.params_rows, widget.TableRow[string]{
+					Cells: []widget.TableCell{
+						{},
+						{},
+						{
+							Text: " +",
+						},
+					},
+				})
+			}
+			rw.tab_content.params.SetItems(rw.tab_content.params_rows)
 		}
 
 		{
