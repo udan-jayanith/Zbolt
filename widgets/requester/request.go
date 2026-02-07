@@ -47,6 +47,11 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					MinWidth:                  u * 4,
 					Width:                     gui.FlexibleSize(1),
 				},
+				{
+					HeaderText:                "",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					Width: gui.FixedSize(u),
+				},
 			})
 		}
 
@@ -64,6 +69,11 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					MinWidth:                  u * 4,
 					Width:                     gui.FlexibleSize(1),
 				},
+				{
+					HeaderText:                "",
+					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
+					Width: gui.FixedSize(u),
+				},
 			})
 		}
 
@@ -75,18 +85,18 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		rw.tab.Tab_Items = []CommonWidgets.TabItem[string]{
 			{
-				Name: "Parameters",
+				Name:   "Parameters",
 				Widget: &rw.tab_content.params,
 			},
 			{
-				Name: "Headers",
+				Name:   "Headers",
 				Widget: &rw.tab_content.header,
-			},			{
-				Name: "Body",
+			}, {
+				Name:   "Body",
 				Widget: &rw.tab_content.body,
 			},
 		}
-		
+
 		adder.AddChild(&rw.tab)
 	}
 	return nil
@@ -109,7 +119,7 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 			},
 			{
 				Widget: &rw.tab,
-				Size: gui.FlexibleSize(1),
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
