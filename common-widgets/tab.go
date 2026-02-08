@@ -18,7 +18,8 @@ type TabItem[T any] struct {
 	Size                     gui.Size
 	Value                    T
 	text_widget              widget.Text
-	is_selected, is_hovering bool
+	tab *tab[T]
+	index int
 }
 
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -26,7 +27,13 @@ func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	item.text_widget.SetTabular(true)
 	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	item.text_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-
+	if item.tab != nil && item.tab.selected_index == item.index {
+		item.text_widget.SetBold(true)
+		item.text_widget.SetOpacity(1)
+	}else{
+		item.text_widget.SetOpacity(0.50)
+	}
+	
 	adder.AddChild(&item.text_widget)
 	return nil
 }
@@ -47,7 +54,7 @@ func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 
 func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
-		tab_item.is_selected = true
+		tab_item.tab.selected_index = tab_item.index
 	}
 	return gui.HandleInputResult{}
 }
@@ -62,11 +69,14 @@ func (tab_item *TabItem[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBound
 type tab[T any] struct {
 	gui.DefaultWidget
 	tab_items []TabItem[T]
+	selected_index int
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	for i := range tab.tab_items {
 		tab_item := &tab.tab_items[i]
+		tab_item.tab = tab
+		tab_item.index = i
 		adder.AddChild(tab_item)
 	}
 	return nil
