@@ -207,16 +207,14 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			})
 		}
 
-		rw.tab.Tab_Items = []CommonWidgets.TabItem[uint8]{
+		rw.tab.SetTabItems([]CommonWidgets.TabItem[uint8]{
 			{
-				Widget: &rw.tab_content.response_body,
-				Name:   "Body",
+				Text:   "Body",
 			},
 			{
-				Widget: &rw.tab_content.response_header,
-				Name:   "Header",
+				Text:   "Header",
 			},
-		}
+		})
 
 		adder.AddChild(&rw.tab)
 	}
@@ -259,7 +257,6 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: &rw.tab,
-				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}

@@ -15,9 +15,9 @@ type RequestWidget struct {
 
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
-		params, header widget.Table[string]
+		params, header           widget.Table[string]
 		params_rows, header_rows []widget.TableRow[string]
-		body           widget.TextInput
+		body                     widget.TextInput
 	}
 }
 
@@ -51,10 +51,10 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 				{
 					HeaderText:                "",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					Width: gui.FixedSize(u),
+					Width:                     gui.FixedSize(u),
 				},
 			})
-			
+
 			if len(rw.tab_content.header_rows) == 0 {
 				rw.tab_content.header_rows = append(rw.tab_content.header_rows, widget.TableRow[string]{
 					Cells: []widget.TableCell{
@@ -86,10 +86,10 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 				{
 					HeaderText:                "",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					Width: gui.FixedSize(u),
+					Width:                     gui.FixedSize(u),
 				},
 			})
-			
+
 			if len(rw.tab_content.params_rows) == 0 {
 				rw.tab_content.params_rows = append(rw.tab_content.params_rows, widget.TableRow[string]{
 					Cells: []widget.TableCell{
@@ -110,20 +110,17 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			rw.tab_content.body.SetEditable(true)
 		}
 
-		rw.tab.Tab_Items = []CommonWidgets.TabItem[string]{
+		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{
-				Name:   "Parameters",
-				Widget: &rw.tab_content.params,
+				Text: "Parameters",
 			},
 			{
-				Name:   "Headers",
-				Widget: &rw.tab_content.header,
-			}, {
-				Name:   "Body",
-				Widget: &rw.tab_content.body,
+				Text: "Headers",
 			},
-		}
-
+			{
+				Text: "Body",
+			},
+		})
 		adder.AddChild(&rw.tab)
 	}
 	return nil
@@ -146,7 +143,6 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 			},
 			{
 				Widget: &rw.tab,
-				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}

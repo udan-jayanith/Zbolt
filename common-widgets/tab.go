@@ -1,80 +1,115 @@
 package CommonWidgets
 
 import (
-	"errors"
+	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type TabItem[T comparable] struct {
-	Name   string
-	Widget gui.Widget
-	Value  T
-}
-
-type Tab[T comparable] struct {
+type TabItem[T any] struct {
 	gui.DefaultWidget
 
-	tabs      widget.SegmentedControl[string]
-	Tab_Items []TabItem[T]
+	Text                     string
+	Value                    T
+	text_widget              widget.Text
+	is_selected, is_hovering bool
 }
 
-func (tab *Tab[T]) OnSelect(fn func(ctx *gui.Context, tab_item TabItem[T])) {
-	tab.tabs.SetOnItemSelected(func(context *gui.Context, i int) {
-		if i < 0 {
-			return
-		}
-
-		tab_item := tab.Tab_Items[i]
-		fn(context, tab_item)
-	})
+func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	item.text_widget.SetValue(item.Text)
+	item.text_widget.SetTabular(true)
+	adder.AddChild(&item.text_widget)
+	return nil
 }
 
-func (tab *Tab[T]) GetSelectedWidget() gui.Widget{
-	selected_item_index := tab.tabs.SelectedItemIndex()
-	if selected_item_index == -1 {
-		selected_item_index = 0
-		tab.tabs.SelectItemByIndex(selected_item_index)
+func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layouter.LayoutWidget(&item.text_widget, widgetBounds.Bounds())
+}
+
+func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		tab_item.is_selected = true
+	}
+	return gui.HandleInputResult{}
+}
+
+func (tab_item *TabItem[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	color_mod := ctx.ColorMode()
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), basicwidgetdraw.ControlColor(color_mod, false), 0)
+}
+
+type tab[T any] struct {
+	gui.DefaultWidget
+	tab_items []TabItem[T]
+}
+
+func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	for i := range tab.tab_items {
+		tab_item := &tab.tab_items[i]
+		adder.AddChild(tab_item)
+	}
+	return nil
+}
+
+func (tab *tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Items:     make([]gui.LinearLayoutItem, 0, len(tab.tab_items)),
 	}
 
-	return tab.Tab_Items[selected_item_index].Widget
+	for i := range tab.tab_items {
+		tab_item := &tab.tab_items[i]
+		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Widget: tab_item,
+		})
+	}
+
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (tab *tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	u := widget.UnitSize(ctx)
+	if w, ok := constraints.FixedWidth(); ok {
+		return image.Pt(w, u)
+	}
+	return image.Pt(10, u)
+}
+
+type Tab[T any] struct {
+	gui.DefaultWidget
+	panel widget.Panel
+	tab   tab[T]
+}
+
+func (tab *Tab[T]) OnSelect(fn func(text string, value T)) {
+
+}
+
+func (tab *Tab[T]) GetSelectedIndex() int {
+	return 0
+}
+
+func (tab *Tab[T]) GetTab(index int) (text string, value T) {
+	tab_item := &tab.tab.tab_items[index]
+	return tab_item.Text, tab_item.Value
+}
+
+func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
+	tab.tab.tab_items = tab_items
 }
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	if len(tab.Tab_Items) == 0 {
-		return errors.New("No selected items found")
-	}
-	
-	segmented_control_items := make([]widget.SegmentedControlItem[string], len(tab.Tab_Items))
-	for i := range tab.Tab_Items {
-		tab_item := &tab.Tab_Items[i]
-		segment_item := widget.SegmentedControlItem[string]{
-			Text: tab_item.Name,
-		}
-
-		segmented_control_items[i] = segment_item
-	}
-	tab.tabs.SetItems(segmented_control_items)
-	adder.AddChild(&tab.tabs)
-	
-	selected_widget :=	tab.GetSelectedWidget()
-	adder.AddChild(selected_widget)
+	tab.panel.SetContent(&tab.tab)
+	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedHeight)
+	tab.panel.SetStyle(widget.PanelStyleSide)
+	adder.AddChild(&tab.panel)
 	return nil
 }
 
 func (tab *Tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionVertical,
-		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &tab.tabs,
-			},
-			{
-				Widget: tab.GetSelectedWidget(),
-				Size:   gui.FlexibleSize(1),
-			},
-		},
-	}
-	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+	layouter.LayoutWidget(&tab.panel, widgetBounds.Bounds())
 }
