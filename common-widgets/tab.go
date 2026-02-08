@@ -1,6 +1,7 @@
 package CommonWidgets
 
 import (
+	"API-Client/basic"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -22,12 +23,24 @@ type TabItem[T any] struct {
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	item.text_widget.SetValue(item.Text)
 	item.text_widget.SetTabular(true)
+	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	item.text_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	adder.AddChild(&item.text_widget)
 	return nil
 }
 
 func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&item.text_widget, widgetBounds.Bounds())
+	padding := widget.UnitSize(ctx)/4
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Padding: basic.NewPadding(0, padding),
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &item.text_widget,
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
 func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
@@ -39,7 +52,9 @@ func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *
 
 func (tab_item *TabItem[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
 	color_mod := ctx.ColorMode()
-	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), basicwidgetdraw.ControlColor(color_mod, false), 0)
+	background_color := basicwidgetdraw.ControlColor(color_mod, ctx.IsEnabled(tab_item))
+	border_color := basicwidgetdraw.ControlSecondaryColor(color_mod, ctx.IsEnabled(tab_item))
+	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), background_color, border_color, 1, 1, basicwidgetdraw.RoundedRectBorderTypeRegular)
 }
 
 type tab[T any] struct {
