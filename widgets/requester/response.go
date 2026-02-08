@@ -210,9 +210,11 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[uint8]{
 			{
 				Text:   "Body",
+				Size: gui.FlexibleSize(1),
 			},
 			{
 				Text:   "Header",
+				Size: gui.FlexibleSize(1),
 			},
 		})
 

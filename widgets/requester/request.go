@@ -113,12 +113,15 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{
 				Text: "Parameters",
+				Size: gui.FlexibleSize(1),
 			},
 			{
 				Text: "Headers",
+				Size: gui.FlexibleSize(1),
 			},
 			{
 				Text: "Body",
+				Size: gui.FlexibleSize(1),
 			},
 		})
 		adder.AddChild(&rw.tab)

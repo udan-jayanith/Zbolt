@@ -15,6 +15,7 @@ type TabItem[T any] struct {
 	gui.DefaultWidget
 
 	Text                     string
+	Size                    gui.Size
 	Value                    T
 	text_widget              widget.Text
 	is_selected, is_hovering bool
@@ -25,15 +26,16 @@ func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	item.text_widget.SetTabular(true)
 	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	item.text_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
+	
 	adder.AddChild(&item.text_widget)
 	return nil
 }
 
 func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	padding := widget.UnitSize(ctx)/4
+	padding := widget.UnitSize(ctx) / 4
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding: basic.NewPadding(0, padding),
+		Padding:   basic.NewPadding(0, padding),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &item.text_widget,
@@ -79,6 +81,7 @@ func (tab *tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layo
 	for i := range tab.tab_items {
 		tab_item := &tab.tab_items[i]
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Size: tab_item.Size,
 			Widget: tab_item,
 		})
 	}
@@ -119,8 +122,9 @@ func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab)
-	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedHeight)
+	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
 	tab.panel.SetStyle(widget.PanelStyleSide)
+	tab.panel.SetScrollOffsetByDelta(100, 20)
 	adder.AddChild(&tab.panel)
 	return nil
 }
