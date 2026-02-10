@@ -18,10 +18,10 @@ type TabItem[T any] struct {
 	Size        gui.Size
 	Value       T
 	text_widget widget.Text
-	
-	index int
-	tab *tab[T]
-	is_hovering bool 
+
+	index       int
+	tab         *tab[T]
+	is_hovering bool
 }
 
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -29,10 +29,10 @@ func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	item.text_widget.SetTabular(true)
 	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	item.text_widget.SetBold(item.is_hovering)
-	
+
 	if item.tab.selected_index == item.index {
 		item.text_widget.SetOpacity(1)
-	}else{
+	} else {
 		item.text_widget.SetOpacity(0.6)
 	}
 
@@ -70,12 +70,9 @@ func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *
 		if tab_item.tab.on_select_fn != nil {
 			tab_item.tab.on_select_fn(tab_item, tab_item.index)
 		}
-	}else if widgetBounds.IsHitAtCursor() {
-		tab_item.is_hovering = true
-	}else{
-		tab_item.is_hovering = false
 	}
-	
+	tab_item.is_hovering = widgetBounds.IsHitAtCursor()
+
 	return gui.HandleInputResult{}
 }
 
@@ -90,7 +87,7 @@ type tab[T any] struct {
 	gui.DefaultWidget
 	tab_items      []TabItem[T]
 	selected_index int
-	on_select_fn func(tab_item *TabItem[T], index int)
+	on_select_fn   func(tab_item *TabItem[T], index int)
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -130,7 +127,7 @@ func (tab *tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.
 		point.X += mesurement.X
 	}
 	point.Y = widget.UnitSize(ctx)
-	
+
 	return point
 }
 
