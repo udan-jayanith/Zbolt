@@ -157,6 +157,11 @@ func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
 	return tab_item.Text, tab_item.Value
 }
 
+func (tab *Tab[T]) SelectTabItemByIndex(index int) {
+	tab.tab.selected_index = index
+	tab.tab.on_select_fn(&tab.tab.tab_items[index], index)
+}
+
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab)
 	tab.panel.SetStyle(widget.PanelStyleSide)
