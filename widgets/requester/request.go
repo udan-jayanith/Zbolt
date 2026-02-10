@@ -40,18 +40,15 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					HeaderText:                "Name",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
 					MinWidth:                  u * 4,
-					Width:                     gui.FlexibleSize(1),
 				},
 				{
 					HeaderText:                "Value",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
 					MinWidth:                  u * 4,
-					Width:                     gui.FlexibleSize(1),
 				},
 				{
 					HeaderText:                "",
 					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					Width:                     gui.FixedSize(u),
 				},
 			})
 
@@ -113,15 +110,21 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{
 				Text: "Parameters",
-				Size: gui.FlexibleSize(1),
 			},
 			{
 				Text: "Headers",
-				Size: gui.FlexibleSize(1),
 			},
 			{
 				Text: "Body",
-				Size: gui.FlexibleSize(1),
+			},
+			{
+				Text: "Parameters Hello world",
+			},
+			{
+				Text: "Headers",
+			},
+			{
+				Text: "Body",
 			},
 		})
 		adder.AddChild(&rw.tab)
