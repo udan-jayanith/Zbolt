@@ -117,6 +117,10 @@ type Tab[T any] struct {
 	tab   tab[T]
 }
 
+func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
+	tab.tab.tab_items = tab_items
+}
+
 func (tab *Tab[T]) OnSelect(fn func(text string, value T)) {
 
 }
@@ -125,13 +129,9 @@ func (tab *Tab[T]) GetSelectedIndex() int {
 	return 0
 }
 
-func (tab *Tab[T]) GetTab(index int) (text string, value T) {
+func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
 	tab_item := &tab.tab.tab_items[index]
 	return tab_item.Text, tab_item.Value
-}
-
-func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
-	tab.tab.tab_items = tab_items
 }
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
