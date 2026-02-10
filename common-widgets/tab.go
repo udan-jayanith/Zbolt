@@ -8,6 +8,7 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type TabItem[T any] struct {
@@ -17,12 +18,23 @@ type TabItem[T any] struct {
 	Size        gui.Size
 	Value       T
 	text_widget widget.Text
+	
+	index int
+	tab *tab[T]
+	is_hovering bool 
 }
 
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	item.text_widget.SetValue(item.Text)
 	item.text_widget.SetTabular(true)
 	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	item.text_widget.SetBold(item.is_hovering)
+	
+	if item.tab.selected_index == item.index {
+		item.text_widget.SetOpacity(1)
+	}else{
+		item.text_widget.SetOpacity(0.6)
+	}
 
 	adder.AddChild(&item.text_widget)
 	return nil
@@ -52,14 +64,20 @@ func (item *TabItem[T]) Measure(ctx *gui.Context, constraints gui.Constraints) i
 	return point
 }
 
-/*
 func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) && widgetBounds.IsHitAtCursor() {
 		tab_item.tab.selected_index = tab_item.index
+		if tab_item.tab.on_select_fn != nil {
+			tab_item.tab.on_select_fn(tab_item, tab_item.index)
+		}
+	}else if widgetBounds.IsHitAtCursor() {
+		tab_item.is_hovering = true
+	}else{
+		tab_item.is_hovering = false
 	}
+	
 	return gui.HandleInputResult{}
 }
-*/
 
 func (tab_item *TabItem[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
 	color_mod := ctx.ColorMode()
@@ -72,11 +90,16 @@ type tab[T any] struct {
 	gui.DefaultWidget
 	tab_items      []TabItem[T]
 	selected_index int
+	on_select_fn func(tab_item *TabItem[T], index int)
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	for i := range tab.tab_items {
 		tab_item := &tab.tab_items[i]
+		if tab_item.tab == nil {
+			tab_item.tab = tab
+			tab_item.index = i
+		}
 		adder.AddChild(tab_item)
 	}
 	return nil
@@ -121,12 +144,12 @@ func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
 	tab.tab.tab_items = tab_items
 }
 
-func (tab *Tab[T]) OnSelect(fn func(text string, value T)) {
-
+func (tab *Tab[T]) OnSelect(fn func(tab_item *TabItem[T], index int)) {
+	tab.tab.on_select_fn = fn
 }
 
 func (tab *Tab[T]) GetSelectedIndex() int {
-	return 0
+	return tab.tab.selected_index
 }
 
 func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
