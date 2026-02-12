@@ -91,7 +91,6 @@ func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 
 func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-
 	for i := range at.rows {
 		attr_widget := &at.rows[i]
 		measurements := attr_widget.Measure(ctx, constraints)
