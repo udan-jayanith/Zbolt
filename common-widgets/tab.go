@@ -151,6 +151,10 @@ func (tab *Tab[T]) GetSelectedIndex() int {
 	return tab.tab.selected_index
 }
 
+func (tab *Tab[T]) GetSelectedTab() (index int, value T) {
+	return tab.tab.selected_index, tab.tab.tab_items[tab.tab.selected_index].Value
+}
+
 func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
 	tab_item := &tab.tab.tab_items[index]
 	return tab_item.Text, tab_item.Value
