@@ -3,6 +3,7 @@ package Requester
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+
 	"github.com/sqweek/dialog"
 
 	gui "github.com/guigui-gui/guigui"
@@ -209,10 +210,10 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[uint8]{
 			{
-				Text:   "Body",
+				Text: "Body",
 			},
 			{
-				Text:   "Header",
+				Text: "Header",
 			},
 		})
 

@@ -117,15 +117,6 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			{
 				Text: "Body",
 			},
-			{
-				Text: "Parameters Hello world",
-			},
-			{
-				Text: "Headers",
-			},
-			{
-				Text: "Body",
-			},
 		})
 		adder.AddChild(&rw.tab)
 	}

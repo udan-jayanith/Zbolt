@@ -126,7 +126,9 @@ func (tab *tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.
 		mesurement := tab_item.Measure(ctx, constraints)
 		point.X += mesurement.X
 	}
-	point.Y = widget.UnitSize(ctx)
+
+	u := widget.UnitSize(ctx)
+	point.Y = u + u/4
 
 	return point
 }
