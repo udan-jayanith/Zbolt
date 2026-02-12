@@ -149,10 +149,11 @@ type ResponseWidget struct {
 	header struct {
 		status, response_time, size, proto widget.Text
 	}
-	tab         CommonWidgets.Tab[uint8]
+	tab         CommonWidgets.Tab[struct{}]
 	tab_content struct {
-		response_header widget.Table[string]
-		response_body   response_body_widgets
+		response_header  widget.Table[string]
+		response_body    response_body_widgets
+		selected_content gui.Widget
 	}
 }
 
@@ -177,6 +178,15 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	{
 		u := widget.UnitSize(ctx)
+		rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
+			{
+				Text: "Body",
+			},
+			{
+				Text: "Header",
+			},
+		})
+
 		{
 			rw.tab_content.response_header.SetColumns([]widget.TableColumn{
 				{
@@ -208,16 +218,17 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			})
 		}
 
-		rw.tab.SetTabItems([]CommonWidgets.TabItem[uint8]{
-			{
-				Text: "Body",
-			},
-			{
-				Text: "Header",
-			},
-		})
-
+		switch rw.tab.GetSelectedIndex(){
+			case 0:
+				rw.tab_content.selected_content = &rw.tab_content.response_body
+			case 1:
+				rw.tab_content.selected_content = &rw.tab_content.response_header
+			default:
+				panic("Unknown tab selected")
+		}
+		
 		adder.AddChild(&rw.tab)
+		adder.AddChild(rw.tab_content.selected_content)
 	}
 
 	return nil
@@ -258,6 +269,10 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: &rw.tab,
+			},
+			{
+				Widget: rw.tab_content.selected_content,
+				Size: gui.FlexibleSize(1),
 			},
 		},
 	}
