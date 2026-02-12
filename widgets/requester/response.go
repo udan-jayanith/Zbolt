@@ -218,15 +218,15 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			})
 		}
 
-		switch rw.tab.GetSelectedIndex(){
-			case 0:
-				rw.tab_content.selected_content = &rw.tab_content.response_body
-			case 1:
-				rw.tab_content.selected_content = &rw.tab_content.response_header
-			default:
-				panic("Unknown tab selected")
+		switch rw.tab.GetSelectedIndex() {
+		case 0:
+			rw.tab_content.selected_content = &rw.tab_content.response_body
+		case 1:
+			rw.tab_content.selected_content = &rw.tab_content.response_header
+		default:
+			panic("Unknown tab selected")
 		}
-		
+
 		adder.AddChild(&rw.tab)
 		adder.AddChild(rw.tab_content.selected_content)
 	}
@@ -272,7 +272,7 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: rw.tab_content.selected_content,
-				Size: gui.FlexibleSize(1),
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}

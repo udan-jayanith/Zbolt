@@ -18,6 +18,7 @@ type RequestWidget struct {
 		params, header           widget.Table[string]
 		params_rows, header_rows []widget.TableRow[string]
 		body                     widget.TextInput
+		selected_widget          gui.Widget
 	}
 }
 
@@ -118,6 +119,19 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 				Text: "Body",
 			},
 		})
+
+		switch rw.tab.GetSelectedIndex() {
+		case 0:
+			rw.tab_content.selected_widget = &rw.tab_content.params
+		case 1:
+			rw.tab_content.selected_widget = &rw.tab_content.header
+		case 2:
+			rw.tab_content.selected_widget = &rw.tab_content.body
+		default:
+			panic("Unknown tab was selected")
+		}
+
+		adder.AddChild(rw.tab_content.selected_widget)
 		adder.AddChild(&rw.tab)
 	}
 	return nil
@@ -140,6 +154,10 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 			},
 			{
 				Widget: &rw.tab,
+			},
+			{
+				Widget: rw.tab_content.selected_widget,
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
