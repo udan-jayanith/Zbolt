@@ -11,38 +11,49 @@ import (
 type Attribute struct {
 	gui.DefaultWidget
 
-	Key, Value               string
-	key_widget, value_widget widget.Text
-	delete_widget            widget.Image
-	is_bold                  bool
-	Editable bool
+	Key, Value                             string
+	key_widget, value_widget               gui.WidgetWithPadding[*widget.Text]
+	key_widget_border, value_widget_border WidgetWithBorder[*gui.WidgetWithPadding[*widget.Text]]
+	delete_widget                          widget.Image
+	is_bold                                bool
+	Editable                               bool
 }
 
 func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	attr.key_widget.SetTabular(true)
-	attr.key_widget.SetEditable(attr.Editable)
-	attr.key_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	attr.key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-	attr.key_widget.SetValue(attr.Key)
-	attr.key_widget.SetSelectable(true)
-	attr.key_widget.SetBold(attr.is_bold)
-	attr.key_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
+	padding := basic.NewPadding(0, widget.UnitSize(ctx)/3)
+
+	attr.key_widget.SetPadding(padding)
+	key_widget := attr.key_widget.Widget()
+	key_widget.SetTabular(true)
+	key_widget.SetEditable(attr.Editable)
+	key_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
+	key_widget.SetValue(attr.Key)
+	key_widget.SetSelectable(true)
+	key_widget.SetBold(attr.is_bold)
+	key_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
 		attr.Key = text
 	})
-	adder.AddChild(&attr.key_widget)
 
-	attr.value_widget.SetTabular(true)
-	attr.value_widget.SetEditable(attr.Editable)
-	attr.value_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	attr.value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-	attr.value_widget.SetSelectable(true)
-	attr.value_widget.SetValue(attr.Value)
-	attr.value_widget.SetBold(attr.is_bold)
-	attr.value_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
+	attr.key_widget_border.SetWidget(&attr.key_widget)
+	adder.AddChild(&attr.key_widget_border)
+
+	attr.value_widget.SetPadding(padding)
+	value_widget := attr.value_widget.Widget()
+	value_widget.SetTabular(true)
+	value_widget.SetEditable(attr.Editable)
+	value_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
+	value_widget.SetSelectable(true)
+	value_widget.SetValue(attr.Value)
+	value_widget.SetBold(attr.is_bold)
+	value_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
 		attr.Value = text
 	})
-	adder.AddChild(&attr.value_widget)
-	
+
+	attr.value_widget_border.SetWidget(&attr.value_widget)
+	adder.AddChild(&attr.value_widget_border)
+
 	return nil
 }
 
@@ -51,11 +62,11 @@ func (attr *Attribute) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 		Direction: gui.LayoutDirectionHorizontal,
 		Items: []gui.LinearLayoutItem{
 			{
-				Widget: &attr.key_widget,
+				Widget: &attr.key_widget_border,
 				Size:   gui.FlexibleSize(1),
 			},
 			{
-				Widget: &attr.value_widget,
+				Widget: &attr.value_widget_border,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
@@ -127,14 +138,11 @@ func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints
 type AttributeTable struct {
 	gui.DefaultWidget
 
-	attribute_table gui.WidgetWithPadding[*attribute_table]
+	attribute_table attribute_table
 	panel           widget.Panel
 }
 
 func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	padding := widget.UnitSize(ctx)/3
-	at.attribute_table.SetPadding(basic.NewPadding(0, padding))
-	
 	at.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
 	at.panel.SetContent(&at.attribute_table)
 	at.panel.SetStyle(widget.PanelStyleSide)
@@ -156,13 +164,13 @@ func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 }
 
 func (at *AttributeTable) SetHeader(column1, column2 string) {
-	attribute_table := at.attribute_table.Widget()
+	attribute_table := &at.attribute_table
 	attribute_table.header.Key = column1
 	attribute_table.header.Value = column1
 	attribute_table.header.is_bold = true
 }
 
 func (at *AttributeTable) AppendRows(rows []*Attribute) {
-	attribute_table := at.attribute_table.Widget()
+	attribute_table := &at.attribute_table
 	attribute_table.rows = append(attribute_table.rows, rows...)
 }
