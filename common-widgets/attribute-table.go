@@ -15,11 +15,12 @@ type Attribute struct {
 	key_widget, value_widget widget.Text
 	delete_widget            widget.Image
 	is_bold                  bool
+	Editable bool
 }
 
 func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	attr.key_widget.SetTabular(true)
-	attr.key_widget.SetEditable(true)
+	attr.key_widget.SetEditable(attr.Editable)
 	attr.key_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	attr.key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	attr.key_widget.SetValue(attr.Key)
@@ -31,7 +32,7 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&attr.key_widget)
 
 	attr.value_widget.SetTabular(true)
-	attr.value_widget.SetEditable(true)
+	attr.value_widget.SetEditable(attr.Editable)
 	attr.value_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	attr.value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	attr.value_widget.SetSelectable(true)
@@ -41,6 +42,7 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		attr.Value = text
 	})
 	adder.AddChild(&attr.value_widget)
+	
 	return nil
 }
 
@@ -72,7 +74,9 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 	i := len(at.rows) - 1
 	if i == -1 || at.rows[i].Key != "" {
-		at.rows = append(at.rows, &Attribute{})
+		at.rows = append(at.rows, &Attribute{
+			Editable: true,
+		})
 	}
 
 	for _, attr_widget := range at.rows {
