@@ -6,7 +6,6 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
-	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -14,10 +13,11 @@ import (
 type TabItem[T any] struct {
 	gui.DefaultWidget
 
-	Text        string
-	Size        gui.Size
-	Value       T
-	text_widget widget.Text
+	Text          string
+	Size          gui.Size
+	Value         T
+	text_widget  gui.WidgetWithPadding[*widget.Text]
+	border_widget WidgetWithBorder[*gui.WidgetWithPadding[*widget.Text]]
 
 	index       int
 	tab         *tab[T]
@@ -25,29 +25,32 @@ type TabItem[T any] struct {
 }
 
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	item.text_widget.SetValue(item.Text)
-	item.text_widget.SetTabular(true)
-	item.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	item.text_widget.SetBold(item.is_hovering)
+	text_widget := item.text_widget.Widget()
+	text_widget.SetValue(item.Text)
+	text_widget.SetTabular(true)
+	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	text_widget.SetBold(item.is_hovering)
 
 	if item.tab.selected_index == item.index {
-		item.text_widget.SetOpacity(1)
+		text_widget.SetOpacity(1)
 	} else {
-		item.text_widget.SetOpacity(0.6)
+		text_widget.SetOpacity(0.6)
 	}
 
-	adder.AddChild(&item.text_widget)
+	u := widget.UnitSize(ctx)
+	item.text_widget.SetPadding(basic.NewPadding(u/4, u/2))
+	
+	item.border_widget.SetWidget(&item.text_widget)
+	adder.AddChild(&item.border_widget)
 	return nil
 }
 
 func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding:   basic.NewPadding(u/4, u/2),
 		Items: []gui.LinearLayoutItem{
 			{
-				Widget: &item.text_widget,
+				Widget: &item.border_widget,
 				Size:   item.Size,
 			},
 		},
@@ -56,12 +59,7 @@ func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 }
 
 func (item *TabItem[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	point := item.text_widget.Measure(ctx, constraints)
-
-	u := widget.UnitSize(ctx)
-	point.X += u
-	point.Y = u / 2
-	return point
+	return item.text_widget.Measure(ctx, constraints)
 }
 
 func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
@@ -74,13 +72,6 @@ func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *
 	tab_item.is_hovering = widgetBounds.IsHitAtCursor()
 
 	return gui.HandleInputResult{}
-}
-
-func (tab_item *TabItem[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	color_mod := ctx.ColorMode()
-	background_color := basicwidgetdraw.ControlColor(color_mod, ctx.IsEnabled(tab_item))
-	border_color := basicwidgetdraw.ControlSecondaryColor(color_mod, ctx.IsEnabled(tab_item))
-	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), background_color, border_color, 1, 1, basicwidgetdraw.RoundedRectBorderTypeRegular)
 }
 
 type tab[T any] struct {
