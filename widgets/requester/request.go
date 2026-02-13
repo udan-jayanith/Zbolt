@@ -15,10 +15,9 @@ type RequestWidget struct {
 
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
-		params, header           widget.Table[string]
-		params_rows, header_rows []widget.TableRow[string]
-		body                     widget.TextInput
-		selected_widget          gui.Widget
+		params, header  CommonWidgets.AttributeTable
+		body            widget.TextInput
+		selected_widget gui.Widget
 	}
 }
 
@@ -33,80 +32,13 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		adder.AddChild(&rw.url_preview)
 	}
 
-	u := widget.UnitSize(ctx)
 	{
-		{
-			rw.tab_content.header.SetColumns([]widget.TableColumn{
-				{
-					HeaderText:                "Name",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth:                  u * 4,
-				},
-				{
-					HeaderText:                "Value",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth:                  u * 4,
-				},
-				{
-					HeaderText:                "",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-				},
-			})
+		rw.tab_content.header.SetHeader("Name", "Value")
+		rw.tab_content.params.SetHeader("Name", "Value")
 
-			if len(rw.tab_content.header_rows) == 0 {
-				rw.tab_content.header_rows = append(rw.tab_content.header_rows, widget.TableRow[string]{
-					Cells: []widget.TableCell{
-						{},
-						{},
-						{
-							Text: " +",
-						},
-					},
-				})
-			}
-			rw.tab_content.header.SetItems(rw.tab_content.header_rows)
-		}
-
-		{
-			rw.tab_content.params.SetColumns([]widget.TableColumn{
-				{
-					HeaderText:                "Attribute name",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth:                  u * 4,
-					Width:                     gui.FlexibleSize(1),
-				},
-				{
-					HeaderText:                "Value",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					MinWidth:                  u * 4,
-					Width:                     gui.FlexibleSize(1),
-				},
-				{
-					HeaderText:                "",
-					HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
-					Width:                     gui.FixedSize(u),
-				},
-			})
-
-			if len(rw.tab_content.params_rows) == 0 {
-				rw.tab_content.params_rows = append(rw.tab_content.params_rows, widget.TableRow[string]{
-					Cells: []widget.TableCell{
-						{},
-						{},
-						{
-							Text: " +",
-						},
-					},
-				})
-			}
-			rw.tab_content.params.SetItems(rw.tab_content.params_rows)
-		}
-
-		{
-			rw.tab_content.body.SetAutoWrap(true)
-			rw.tab_content.body.SetMultiline(true)
-			rw.tab_content.body.SetEditable(true)
-		}
+		rw.tab_content.body.SetAutoWrap(true)
+		rw.tab_content.body.SetMultiline(true)
+		rw.tab_content.body.SetEditable(true)
 
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{

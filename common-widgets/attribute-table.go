@@ -13,6 +13,7 @@ type Attribute struct {
 	Key, Value               string
 	key_widget, value_widget widget.Text
 	delete_widget            widget.Image
+	is_bold                  bool
 }
 
 func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -22,6 +23,7 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	attr.key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	attr.key_widget.SetValue(attr.Key)
 	attr.key_widget.SetSelectable(true)
+	attr.key_widget.SetBold(attr.is_bold)
 	adder.AddChild(&attr.key_widget)
 
 	attr.value_widget.SetTabular(true)
@@ -30,6 +32,7 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	attr.value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	attr.value_widget.SetSelectable(true)
 	attr.value_widget.SetValue(attr.Value)
+	attr.value_widget.SetBold(attr.is_bold)
 	adder.AddChild(&attr.value_widget)
 	return nil
 }
@@ -53,17 +56,19 @@ func (attr *Attribute) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 type attribute_table struct {
 	gui.DefaultWidget
-	rows []Attribute
+	header Attribute
+	rows   []*Attribute
 }
 
 func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	adder.AddChild(&at.header)
+	
 	i := len(at.rows) - 1
-	if i == -1 || at.rows[i].Key == "" && at.rows[i].Value == "" {
-		at.rows = append(at.rows, Attribute{})
+	if i == -1 || at.rows[i].Key != "" && at.rows[i].Value != "" {
+		at.rows = append(at.rows, &Attribute{})
 	}
 
-	for i := range at.rows {
-		attr_widget := &at.rows[i]
+	for _, attr_widget := range at.rows {
 		adder.AddChild(attr_widget)
 	}
 	return nil
@@ -72,14 +77,18 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Items:     make([]gui.LinearLayoutItem, 0, len(at.rows)),
+		Items:     make([]gui.LinearLayoutItem, 0, len(at.rows)+1),
 	}
 
 	u := widget.UnitSize(ctx)
 	row_height := u + u/4
+	
+	layout.Items = append(layout.Items, gui.LinearLayoutItem{
+		Widget: &at.header,
+		Size:   gui.FixedSize(row_height),
+	})
 
-	for i := range at.rows {
-		attr_widget := &at.rows[i]
+	for _, attr_widget := range at.rows {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
 			Widget: attr_widget,
 			Size:   gui.FixedSize(row_height),
@@ -91,12 +100,16 @@ func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 
 func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	for i := range at.rows {
-		attr_widget := &at.rows[i]
+
+	measurements := at.header.Measure(ctx, constraints)
+	point.Y += measurements.Y
+	point.X = measurements.X
+	
+	for _, attr_widget := range at.rows {
 		measurements := attr_widget.Measure(ctx, constraints)
 		point.Y += measurements.Y
-		point.X = measurements.X
 	}
+
 	return point
 }
 
@@ -117,4 +130,14 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&at.panel, widgetBounds.Bounds())
+}
+
+func (at *AttributeTable) SetHeader(column1, column2 string){
+	at.attribute_table.header.Key = column1
+	at.attribute_table.header.Value = column1
+	at.attribute_table.header.is_bold = true
+}
+
+func (at *AttributeTable) AppendRows(rows []*Attribute){
+	at.attribute_table.rows = append(at.attribute_table.rows, rows...) 
 }
