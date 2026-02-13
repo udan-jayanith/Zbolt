@@ -15,8 +15,7 @@ type Attribute struct {
 	key_widget, value_widget               gui.WidgetWithPadding[*widget.Text]
 	key_widget_border, value_widget_border WidgetWithBorder[*gui.WidgetWithPadding[*widget.Text]]
 	delete_widget                          widget.Image
-	is_bold                                bool
-	Editable                               bool
+	is_header                              bool
 }
 
 func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -25,12 +24,12 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	attr.key_widget.SetPadding(padding)
 	key_widget := attr.key_widget.Widget()
 	key_widget.SetTabular(true)
-	key_widget.SetEditable(attr.Editable)
 	key_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	key_widget.SetValue(attr.Key)
 	key_widget.SetSelectable(true)
-	key_widget.SetBold(attr.is_bold)
+	key_widget.SetBold(attr.is_header)
+	key_widget.SetEditable(!attr.is_header)
 	key_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
 		attr.Key = text
 	})
@@ -41,12 +40,12 @@ func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	attr.value_widget.SetPadding(padding)
 	value_widget := attr.value_widget.Widget()
 	value_widget.SetTabular(true)
-	value_widget.SetEditable(attr.Editable)
 	value_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	value_widget.SetSelectable(true)
 	value_widget.SetValue(attr.Value)
-	value_widget.SetBold(attr.is_bold)
+	value_widget.SetEditable(!attr.is_header)
+	value_widget.SetBold(attr.is_header)
 	value_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
 		attr.Value = text
 	})
@@ -85,9 +84,7 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 	i := len(at.rows) - 1
 	if i == -1 || at.rows[i].Key != "" {
-		at.rows = append(at.rows, &Attribute{
-			Editable: true,
-		})
+		at.rows = append(at.rows, &Attribute{})
 	}
 
 	for _, attr_widget := range at.rows {
@@ -152,7 +149,7 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionVertical,
+		Direction: gui.LayoutDirectionHorizontal,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &at.panel,
@@ -167,7 +164,7 @@ func (at *AttributeTable) SetHeader(column1, column2 string) {
 	attribute_table := &at.attribute_table
 	attribute_table.header.Key = column1
 	attribute_table.header.Value = column1
-	attribute_table.header.is_bold = true
+	attribute_table.header.is_header = true
 }
 
 func (at *AttributeTable) AppendRows(rows []*Attribute) {
