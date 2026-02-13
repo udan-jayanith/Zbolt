@@ -33,9 +33,6 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 
 	{
-		rw.tab_content.header.SetHeader("Name", "Value")
-		rw.tab_content.params.SetHeader("Name", "Value")
-
 		rw.tab_content.body.SetAutoWrap(true)
 		rw.tab_content.body.SetMultiline(true)
 		rw.tab_content.body.SetEditable(true)

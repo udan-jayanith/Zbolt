@@ -8,142 +8,80 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type Attribute struct {
+type EditableText struct {
 	gui.DefaultWidget
-
-	Key, Value                             string
-	key_widget, value_widget               gui.WidgetWithPadding[*widget.Text]
-	key_widget_border, value_widget_border WidgetWithBorder[*gui.WidgetWithPadding[*widget.Text]]
-	delete_widget                          widget.Image
-	is_header                              bool
+	widget widget.Text
 }
 
-func (attr *Attribute) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	padding := basic.NewPadding(0, widget.UnitSize(ctx)/3)
-
-	attr.key_widget.SetPadding(padding)
-	key_widget := attr.key_widget.Widget()
-	key_widget.SetTabular(true)
-	key_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	key_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-	key_widget.SetValue(attr.Key)
-	key_widget.SetSelectable(true)
-	key_widget.SetBold(attr.is_header)
-	key_widget.SetEditable(!attr.is_header)
-	key_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
-		attr.Key = text
-	})
-
-	attr.key_widget_border.SetWidget(&attr.key_widget)
-	adder.AddChild(&attr.key_widget_border)
-
-	attr.value_widget.SetPadding(padding)
-	value_widget := attr.value_widget.Widget()
-	value_widget.SetTabular(true)
-	value_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	value_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-	value_widget.SetSelectable(true)
-	value_widget.SetValue(attr.Value)
-	value_widget.SetEditable(!attr.is_header)
-	value_widget.SetBold(attr.is_header)
-	value_widget.SetOnValueChanged(func(context *gui.Context, text string, committed bool) {
-		attr.Value = text
-	})
-
-	attr.value_widget_border.SetWidget(&attr.value_widget)
-	adder.AddChild(&attr.value_widget_border)
-
+func (et *EditableText) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	et.widget.SetTabular(true)
+	et.widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	et.widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
+	et.widget.SetSelectable(true)
+	et.widget.SetEditable(true)
+	adder.AddChild(&et.widget)
 	return nil
 }
 
-func (attr *Attribute) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionHorizontal,
-		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &attr.key_widget_border,
-				Size:   gui.FlexibleSize(1),
-			},
-			{
-				Widget: &attr.value_widget_border,
-				Size:   gui.FlexibleSize(1),
-			},
-		},
-	}
-	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+func (et *EditableText) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layouter.LayoutWidget(&et.widget, widgetBounds.Bounds())
 }
 
-type attribute_table struct {
-	gui.DefaultWidget
-	header Attribute
-	rows   []*Attribute
-}
-
-func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&at.header)
-
-	i := len(at.rows) - 1
-	if i == -1 || at.rows[i].Key != "" {
-		at.rows = append(at.rows, &Attribute{})
-	}
-
-	for _, attr_widget := range at.rows {
-		adder.AddChild(attr_widget)
-	}
-	return nil
-}
-
-func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionVertical,
-		Items:     make([]gui.LinearLayoutItem, 0, len(at.rows)+1),
-	}
-
-	u := widget.UnitSize(ctx)
-	row_height := u + u/4
-
-	layout.Items = append(layout.Items, gui.LinearLayoutItem{
-		Widget: &at.header,
-		Size:   gui.FixedSize(row_height),
-	})
-
-	for _, attr_widget := range at.rows {
-		layout.Items = append(layout.Items, gui.LinearLayoutItem{
-			Widget: attr_widget,
-			Size:   gui.FixedSize(widget.LineHeight(ctx)),
-		})
-	}
-
-	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
-}
-
-func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	var point image.Point
-
-	measurements := at.header.Measure(ctx, constraints)
-	point.Y += measurements.Y
-	point.X = measurements.X
-
-	for _, attr_widget := range at.rows {
-		measurements := attr_widget.Measure(ctx, constraints)
-		point.Y += measurements.Y
-	}
-
-	return point
+func (et *EditableText) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	return et.widget.Measure(ctx, constraints)
 }
 
 type AttributeTable struct {
 	gui.DefaultWidget
 
-	attribute_table attribute_table
-	panel           widget.Panel
+	table_rows []widget.TableRow[struct{}]
+	table      widget.Table[struct{}]
+
+	panel widget.Panel
 }
 
 func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	at.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	at.panel.SetContent(&at.attribute_table)
-	at.panel.SetStyle(widget.PanelStyleSide)
-	adder.AddChild(&at.panel)
+	at.table.SetColumns([]widget.TableColumn{
+		{
+			HeaderText: "Key",
+			Width:      gui.FlexibleSize(1),
+		},
+		{
+			HeaderText: "Value",
+			Width:      gui.FlexibleSize(1),
+		},
+	})
+
+	no_of_rows := len(at.table_rows)
+	var ok bool
+	if no_of_rows > 0 {
+		last_key_column := at.table_rows[no_of_rows-1].Cells[0].Content.(*gui.WidgetWithPadding[*EditableText])
+		if last_key_column.Widget().widget.Value() != "" {
+			ok = true
+		}
+	}
+
+	if ok || no_of_rows == 0 {
+		cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
+		padding := basic.NewPadding(0, widget.UnitSize(ctx)/3)
+		cell1.SetPadding(padding)
+		cell2.SetPadding(padding)
+		
+		at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
+			Movable: true,
+			Cells: []widget.TableCell{
+				{
+					Content: cell1,
+				},
+				{
+					Content: cell2,
+				},
+			},
+		})
+	}
+
+	at.table.SetItems(at.table_rows)
+	adder.AddChild(&at.table)
 	return nil
 }
 
@@ -152,22 +90,10 @@ func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 		Direction: gui.LayoutDirectionHorizontal,
 		Items: []gui.LinearLayoutItem{
 			{
-				Widget: &at.panel,
+				Widget: &at.table,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
-}
-
-func (at *AttributeTable) SetHeader(column1, column2 string) {
-	attribute_table := &at.attribute_table
-	attribute_table.header.Key = column1
-	attribute_table.header.Value = column1
-	attribute_table.header.is_header = true
-}
-
-func (at *AttributeTable) AppendRows(rows []*Attribute) {
-	attribute_table := &at.attribute_table
-	attribute_table.rows = append(attribute_table.rows, rows...)
 }
