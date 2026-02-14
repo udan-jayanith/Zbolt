@@ -82,7 +82,7 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					Content: cell2,
 				},
 				{
-					Content: icons.NewIcon("delete", u-u/4),
+					Content: icons.NewIcon("delete", widget.LineHeight(ctx)),
 				},
 			},
 		})
