@@ -6,7 +6,6 @@ import (
 	_ "image/png"
 	"log"
 	"sync"
-	"time"
 	"weak"
 
 	gui "github.com/guigui-gui/guigui"
@@ -17,23 +16,17 @@ import (
 //go:embed icons/*.png
 var store embed.FS
 
-type image_container struct {
-	image *ebiten.Image
-	t     time.Time
-	count int
-}
-
 type cache_store struct {
 	mutex  sync.Mutex
-	images map[string]*weak.Pointer[image_container]
+	images map[string]*weak.Pointer[ebiten.Image]
 }
 
 func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 	cs.mutex.Lock()
 	defer cs.mutex.Unlock()
 	icon_name = icon_name + ".png"
-	image_container_ := cs.images[icon_name]
-	if image_container_ == nil || image_container_.Value() == nil {
+	ebiten_image := cs.images[icon_name]
+	if ebiten_image == nil || ebiten_image.Value() == nil {
 		file, err := store.Open("icons" + "/" + icon_name)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -45,23 +38,17 @@ func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 			log.Fatal(err.Error())
 		}
 
-		ic := weak.Make(&image_container{
-			image: ebiten.NewImageFromImage(img),
-			t:     time.Now(),
-		})
-		image_container_ = &ic
-
-		cs.images[icon_name] = image_container_
+		eg := weak.Make(ebiten.NewImageFromImage(img))
+		ebiten_image = &eg
+		cs.images[icon_name] = ebiten_image
 	}
 
-	ic := image_container_.Value()
-	ic.t = time.Now()
-	return ic.image
+	return ebiten_image.Value()
 }
 
 func new() *cache_store {
 	cs := cache_store{
-		images: make(map[string]*weak.Pointer[image_container], 10),
+		images: make(map[string]*weak.Pointer[ebiten.Image], 10),
 	}
 
 	return &cs
