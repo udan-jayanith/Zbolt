@@ -1,8 +1,10 @@
 package CommonWidgets
 
 import (
-	"API-Client/basic"
 	"image"
+
+	"API-Client/basic"
+	"API-Client/icons"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -10,14 +12,95 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+type tab_item[T any] struct {
+	gui.DefaultWidget
+	text_widget  widget.Text
+	close_widget *icons.Icon
+	tab_item     *TabItem[T]
+}
+
+func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	if item.tab_item.Icon != nil {
+		adder.AddChild(item.tab_item.Icon)
+	}
+
+	text_widget := &item.text_widget
+	text_widget.SetValue(item.tab_item.Text)
+	text_widget.SetTabular(true)
+	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	text_widget.SetBold(item.tab_item.is_hovering)
+
+	if item.tab_item.tab.selected_index == item.tab_item.index {
+		text_widget.SetOpacity(1)
+	} else {
+		text_widget.SetOpacity(0.6)
+	}
+	adder.AddChild(&item.text_widget)
+
+	if item.tab_item.Closable {
+		if item.close_widget == nil {
+			line_height :=  widget.LineHeight(ctx)
+			item.close_widget = icons.NewIcon("close", line_height-line_height/4)
+		}
+		adder.AddChild(item.close_widget)
+	}
+	return nil
+}
+
+func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layout := gui.LinearLayout{
+		Gap:       widget.UnitSize(ctx) / 4,
+		Direction: gui.LayoutDirectionHorizontal,
+		Items:     make([]gui.LinearLayoutItem, 0, 3),
+	}
+
+	if item.tab_item.Icon != nil {
+		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Widget: item.tab_item.Icon,
+		})
+	}
+
+	layout.Items = append(layout.Items, gui.LinearLayoutItem{
+		Widget: &item.text_widget,
+		Size:   gui.FlexibleSize(1),
+	})
+
+	if item.tab_item.Closable {
+		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Widget: item.close_widget,
+		})
+	}
+
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	point := item.text_widget.Measure(ctx, constraints)
+
+	gap := widget.UnitSize(ctx) / 4
+	if item.tab_item.Icon != nil {
+		icon_measurement := item.tab_item.Icon.Measure(ctx, constraints)
+		point.X += icon_measurement.X + gap
+	}
+
+	if item.tab_item.Closable {
+		icon_measurement := item.close_widget.Measure(ctx, constraints)
+		point.X += icon_measurement.X + gap
+	}
+
+	return point
+}
+
 type TabItem[T any] struct {
 	gui.DefaultWidget
 
-	Text          string
-	Size          gui.Size
-	Value         T
-	text_widget  gui.WidgetWithPadding[*widget.Text]
-	border_widget WidgetWithBorder[*gui.WidgetWithPadding[*widget.Text]]
+	Text     string
+	Size     gui.Size
+	Value    T
+	Closable bool
+	Icon     *icons.Icon
+
+	border_widget WidgetWithBorder[*gui.WidgetWithPadding[*tab_item[T]]]
 
 	index       int
 	tab         *tab[T]
@@ -25,22 +108,14 @@ type TabItem[T any] struct {
 }
 
 func (item *TabItem[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	text_widget := item.text_widget.Widget()
-	text_widget.SetValue(item.Text)
-	text_widget.SetTabular(true)
-	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	text_widget.SetBold(item.is_hovering)
-
-	if item.tab.selected_index == item.index {
-		text_widget.SetOpacity(1)
-	} else {
-		text_widget.SetOpacity(0.6)
-	}
-
 	u := widget.UnitSize(ctx)
-	item.text_widget.SetPadding(basic.NewPadding(u/4, u/2))
-	
-	item.border_widget.SetWidget(&item.text_widget)
+
+	padding := gui.WidgetWithPadding[*tab_item[T]]{}
+	padding.SetPadding(basic.NewPadding(u/4, u/2))
+
+	padding.Widget().tab_item = item
+
+	item.border_widget.SetWidget(&padding)
 	adder.AddChild(&item.border_widget)
 	return nil
 }
@@ -59,7 +134,7 @@ func (item *TabItem[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 }
 
 func (item *TabItem[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return item.text_widget.Measure(ctx, constraints)
+	return item.border_widget.Measure(ctx, constraints)
 }
 
 func (tab_item *TabItem[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
