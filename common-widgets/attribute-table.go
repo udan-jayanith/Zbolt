@@ -67,12 +67,10 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	if ok || no_of_rows == 0 {
 		cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
-		padding := basic.NewPadding(0, widget.UnitSize(ctx)/3)
+		u := widget.UnitSize(ctx)
+		padding := basic.NewPadding(0, u/3)
 		cell1.SetPadding(padding)
 		cell2.SetPadding(padding)
-
-		delete_btn := widget.Button{}
-		delete_btn.SetIcon(icons.Store.Open("delete"))
 
 		at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
 			Movable: true,
@@ -84,7 +82,7 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 					Content: cell2,
 				},
 				{
-					Content: &delete_btn,
+					Content: icons.NewIcon("delete", u-u/4),
 				},
 			},
 		})

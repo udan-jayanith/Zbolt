@@ -81,6 +81,7 @@ type Icon struct {
 
 func (icon *Icon) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	icon.image_widget.SetImage(Store.Open(icon.IconName))
+	adder.AddChild(&icon.image_widget)
 	return nil
 }
 
@@ -97,10 +98,20 @@ func (icon *Icon) Measure(ctx *gui.Context, constraints gui.Constraints) image.P
 	return *icon.Point
 }
 
-func NewIcon(icon_name string, size int) *Icon {
-	pt := image.Pt(size, size)
+func NewIcon(icon_name string, size ...int) *Icon {
+	var pt *image.Point
+	if len(size) == 1 {
+		point := image.Pt(size[0], size[0])
+		pt = &point
+	} else if len(size) == 2 {
+		point := image.Pt(size[0], size[1])
+		pt = &point
+	} else if len(size) > 2 {
+		log.Fatal("Extra arguments to NewIcon")
+	}
+
 	return &Icon{
 		IconName: icon_name,
-		Point:    &pt,
+		Point:    pt,
 	}
 }
