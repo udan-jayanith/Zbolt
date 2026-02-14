@@ -5,6 +5,7 @@ import (
 	"image"
 	_ "image/png"
 	"log"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -19,6 +20,7 @@ var store embed.FS
 type image_container struct {
 	image *ebiten.Image
 	t     time.Time
+	count int
 }
 
 type cache_store struct {
@@ -51,7 +53,24 @@ func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 	}
 
 	image_container_.t = time.Now()
+	image_container_.count++
 	return image_container_.image
+}
+
+func (cs *cache_store) Close(icon_name string) {
+	if filepath.Ext(icon_name) != ".png" {
+		icon_name = icon_name + ".png"
+	}
+	image_container_ := cs.images[icon_name]
+
+	if image_container_ == nil {
+		return
+	}
+
+	image_container_.count--
+	if image_container_.count == 0 {
+		delete(cs.images, icon_name)
+	}
 }
 
 func new() *cache_store {
@@ -60,30 +79,30 @@ func new() *cache_store {
 	}
 
 	/*
-	go func() {
-		tick := time.Tick(time.Second)
-		for {
-			current_time := <-tick
-			cs.mutex.Lock()
+		go func() {
+			tick := time.Tick(time.Second)
+			for {
+				current_time := <-tick
+				cs.mutex.Lock()
 
-			to_be_deleted := make([]string, 0, 2)
-			for icon_name, ic := range cs.images {
-				dur := current_time.Sub(ic.t)
-				if dur.Seconds() > 1 {
-					ic.image.Clear()
-					to_be_deleted = append(to_be_deleted, icon_name)
+				to_be_deleted := make([]string, 0, 2)
+				for icon_name, ic := range cs.images {
+					dur := current_time.Sub(ic.t)
+					if dur.Seconds() > 1 {
+						ic.image.Clear()
+						to_be_deleted = append(to_be_deleted, icon_name)
+					}
 				}
-			}
 
-			for _, icon_name := range to_be_deleted {
-				fmt.Println("deleting", icon_name)
-				delete(cs.images, icon_name)
+				for _, icon_name := range to_be_deleted {
+					fmt.Println("deleting", icon_name)
+					delete(cs.images, icon_name)
+				}
+				fmt.Println(	len(cs.images))
+				cs.mutex.Unlock()
 			}
-			fmt.Println(	len(cs.images))
-			cs.mutex.Unlock()
-		}
-	}()
-	 */
+		}()
+	*/
 
 	return &cs
 }
@@ -122,6 +141,6 @@ func NewIcon(icon_name string, size int) *Icon {
 	pt := image.Pt(size, size)
 	return &Icon{
 		IconName: icon_name,
-		Point: &pt,
+		Point:    &pt,
 	}
 }
