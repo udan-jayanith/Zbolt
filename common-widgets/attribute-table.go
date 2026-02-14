@@ -2,6 +2,7 @@ package CommonWidgets
 
 import (
 	"API-Client/basic"
+	"API-Client/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -50,6 +51,9 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			HeaderText: "Value",
 			Width:      gui.FlexibleSize(1),
 		},
+		{
+			Width: gui.FixedSize(widget.UnitSize(ctx)),
+		},
 	})
 
 	no_of_rows := len(at.table_rows)
@@ -66,7 +70,10 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		padding := basic.NewPadding(0, widget.UnitSize(ctx)/3)
 		cell1.SetPadding(padding)
 		cell2.SetPadding(padding)
-		
+
+		delete_btn := widget.Button{}
+		delete_btn.SetIcon(icons.Store.Open("delete"))
+
 		at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
 			Movable: true,
 			Cells: []widget.TableCell{
@@ -75,6 +82,9 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 				},
 				{
 					Content: cell2,
+				},
+				{
+					Content: &delete_btn,
 				},
 			},
 		})
