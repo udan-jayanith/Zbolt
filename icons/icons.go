@@ -5,9 +5,9 @@ import (
 	"image"
 	_ "image/png"
 	"log"
-	"path/filepath"
 	"sync"
 	"time"
+	"weak"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -25,7 +25,7 @@ type image_container struct {
 
 type cache_store struct {
 	mutex  sync.Mutex
-	images map[string]*image_container
+	images map[string]*weak.Pointer[image_container]
 }
 
 func (cs *cache_store) Open(icon_name string) *ebiten.Image {
@@ -33,7 +33,7 @@ func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 	defer cs.mutex.Unlock()
 	icon_name = icon_name + ".png"
 	image_container_ := cs.images[icon_name]
-	if image_container_ == nil {
+	if image_container_ == nil || image_container_.Value() == nil {
 		file, err := store.Open("icons" + "/" + icon_name)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -45,64 +45,24 @@ func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 			log.Fatal(err.Error())
 		}
 
-		image_container_ = &image_container{
+		ic := weak.Make(&image_container{
 			image: ebiten.NewImageFromImage(img),
 			t:     time.Now(),
-		}
+		})
+		image_container_ = &ic
+
 		cs.images[icon_name] = image_container_
 	}
 
-	image_container_.t = time.Now()
-	image_container_.count++
-	return image_container_.image
-}
-
-func (cs *cache_store) Close(icon_name string) {
-	if filepath.Ext(icon_name) != ".png" {
-		icon_name = icon_name + ".png"
-	}
-	image_container_ := cs.images[icon_name]
-
-	if image_container_ == nil {
-		return
-	}
-
-	image_container_.count--
-	if image_container_.count == 0 {
-		delete(cs.images, icon_name)
-	}
+	ic := image_container_.Value()
+	ic.t = time.Now()
+	return ic.image
 }
 
 func new() *cache_store {
 	cs := cache_store{
-		images: make(map[string]*image_container, 10),
+		images: make(map[string]*weak.Pointer[image_container], 10),
 	}
-
-	/*
-		go func() {
-			tick := time.Tick(time.Second)
-			for {
-				current_time := <-tick
-				cs.mutex.Lock()
-
-				to_be_deleted := make([]string, 0, 2)
-				for icon_name, ic := range cs.images {
-					dur := current_time.Sub(ic.t)
-					if dur.Seconds() > 1 {
-						ic.image.Clear()
-						to_be_deleted = append(to_be_deleted, icon_name)
-					}
-				}
-
-				for _, icon_name := range to_be_deleted {
-					fmt.Println("deleting", icon_name)
-					delete(cs.images, icon_name)
-				}
-				fmt.Println(	len(cs.images))
-				cs.mutex.Unlock()
-			}
-		}()
-	*/
 
 	return &cs
 }
