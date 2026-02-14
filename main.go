@@ -8,7 +8,7 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	 "API-Client/widgets/requester"
+	 "API-Client/widgets/request-page"
 )
 
 func main() {
