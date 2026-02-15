@@ -1,15 +1,15 @@
 package Requester
 
 import (
-	"github.com/sqweek/dialog"
+	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type response_body_widget struct {
+type response_body_header struct {
 	gui.DefaultWidget
-	not_first_build bool
+
 	file_type       widget.Text
 
 	options struct {
@@ -23,52 +23,110 @@ type response_body_widget struct {
 		}
 		open_with widget.Button
 	}
+}
+
+func (rbh *response_body_header) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	{
+		rbh.file_type.SetValue("Json")
+		rbh.file_type.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbh.file_type)
+	}
+	{
+		rbh.options.auto_wrap.text.SetValue("Auto wrap")
+		rbh.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbh.options.auto_wrap.text)
+
+		adder.AddChild(&rbh.options.auto_wrap.toggle)
+	}
+	{
+		rbh.options.format.text.SetValue("Format")
+		rbh.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddChild(&rbh.options.format.text)
+
+		adder.AddChild(&rbh.options.format.toggle)
+	}
+	{
+		rbh.options.open_with.SetText("Open")
+		rbh.options.open_with.SetOnUp(func(context *gui.Context) {
+		})
+		adder.AddChild(&rbh.options.open_with)
+	}
+	return nil
+}
+
+func (rbh *response_body_header) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
+	toggle_size := gui.FixedSize(u*2 - u/3)
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Gap:       u / 4,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &rbh.options.auto_wrap.text,
+			},
+			{
+				Widget: &rbh.options.auto_wrap.toggle,
+				Size:   toggle_size,
+			},
+			{
+				Widget: &rbh.options.format.text,
+			},
+			{
+				Widget: &rbh.options.format.toggle,
+				Size:   toggle_size,
+			},
+			{
+				Size: gui.FlexibleSize(1),
+			},
+			{
+				Widget: &rbh.file_type,
+			},
+			{
+				Widget: &rbh.options.open_with,
+			},
+		},
+	}
+
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (rbh *response_body_header) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	u := widget.UnitSize(ctx)
+	gap := u/4
+	var point image.Point
+	
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	}else{
+		point.X += rbh.options.auto_wrap.text.Measure(ctx, constraints).X+gap
+		point.X += rbh.options.auto_wrap.toggle.Measure(ctx, constraints).X+gap
+		point.X += rbh.options.format.text.Measure(ctx, constraints).X+gap
+		point.X += rbh.options.format.toggle.Measure(ctx, constraints).X+gap
+		point.X += rbh.file_type.Measure(ctx, constraints).X+gap
+		point.X += rbh.options.open_with.Measure(ctx, constraints).X
+	}
+	
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	}else{
+		point.Y = u
+	}
+	return point
+}
+
+type response_body_widget struct {
+	gui.DefaultWidget
+	header response_body_header
 	view widget.TextInput
 }
 
 func (rbw *response_body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	{
-		rbw.file_type.SetValue("Json")
-		rbw.file_type.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbw.file_type)
-	}
-	{
-		rbw.options.auto_wrap.text.SetValue("Auto wrap")
-		rbw.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbw.options.auto_wrap.text)
-
-		if !rbw.not_first_build {
-			rbw.options.auto_wrap.toggle.SetValue(true)
-		}
-		adder.AddChild(&rbw.options.auto_wrap.toggle)
-	}
-	{
-		rbw.options.format.text.SetValue("Format")
-		rbw.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbw.options.format.text)
-
-		if !rbw.not_first_build {
-			rbw.options.format.toggle.SetValue(true)
-		}
-		adder.AddChild(&rbw.options.format.toggle)
-	}
-	{
-		rbw.options.open_with.SetText("Open")
-		rbw.options.open_with.SetOnUp(func(context *gui.Context) {
-			path, err := dialog.File().Load()
-			if err != nil {
-				println(err.Error())
-				return
-			}
-			println(path)
-		})
-		adder.AddChild(&rbw.options.open_with)
-	}
-	{
-		rbw.view.SetAutoWrap(true)
-		rbw.view.SetMultiline(true)
-		rbw.view.SetEditable(false)
-		rbw.view.SetValue(`
+	adder.AddChild(&rbw.header)
+	
+	rbw.view.SetAutoWrap(true)
+	rbw.view.SetMultiline(true)
+	rbw.view.SetEditable(false)
+	rbw.view.SetValue(`
 		git clone https://github.com/guigui-gui/guigui.git
 		cd guigui
 		go run ./example/gallery
@@ -79,58 +137,20 @@ func (rbw *response_body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) 
 
 		Hello world
 		`)
-		adder.AddChild(&rbw.view)
-	}
+	adder.AddChild(&rbw.view)
 
-	rbw.not_first_build = true
 	return nil
 }
 
 func (rbw *response_body_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
-	toggle_size := gui.FixedSize(u*2 - u/3)
-	space := gui.LinearLayoutItem{
-		Size: gui.FixedSize(widget.UnitSize(ctx) / 4),
-	}
-
-	header_layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionHorizontal,
-		Gap:       u / 4,
-		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &rbw.options.auto_wrap.text,
-			},
-			{
-				Widget: &rbw.options.auto_wrap.toggle,
-				Size:   toggle_size,
-			},
-			space,
-			{
-				Widget: &rbw.options.format.text,
-			},
-			{
-				Widget: &rbw.options.format.toggle,
-				Size:   toggle_size,
-			},
-			{
-				Size: gui.FlexibleSize(1),
-			},
-			{
-				Widget: &rbw.file_type,
-			},
-			{
-				Widget: &rbw.options.open_with,
-			},
-		},
-	}
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Gap:       u / 4,
 		Items: []gui.LinearLayoutItem{
-			space,
 			{
-				Layout: header_layout,
+				Widget: &rbw.header,
 			},
 			{
 				Widget: &rbw.view,
@@ -139,4 +159,27 @@ func (rbw *response_body_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widg
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+
+func (rbw *response_body_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	u := widget.UnitSize(ctx)
+	gap := u/4
+	var point image.Point
+	point.Y = gap
+	
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	}else{
+		point.X = rbw.header.Measure(ctx, constraints).X
+	}
+	
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	}else{
+		point.Y += rbw.header.Measure(ctx, constraints).Y
+		point.Y += rbw.view.Measure(ctx, constraints).Y
+	}
+	
+	return point
 }

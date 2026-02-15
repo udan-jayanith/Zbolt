@@ -14,7 +14,7 @@ import (
 func main() {
 	op := &gui.RunOptions{
 		Title: "API Client",
-		WindowMinSize: image.Pt(700, 444),
+		WindowMinSize: image.Pt(800, 444),
 		RunGameOptions: &ebiten.RunGameOptions{
 			ApplePressAndHoldEnabled: true,
 		},
