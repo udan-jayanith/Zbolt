@@ -15,7 +15,27 @@ type RequestPage struct{
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rp.background)
+	
+	rp.sidebar.SetItems([]SidebarItem[struct{}]{
+		{
+			IconName: "http",
+			Text: "product-data",
+		},
+		{
+			IconName: "delete",
+			Text: "update-product-data",
+		},
+		{
+			IconName: "copy",
+			Text: "search",
+		},
+		{
+			IconName: "key",
+			Text: "discover",
+		},
+	})
 	adder.AddChild(&rp.sidebar)
+	
 	adder.AddChild(&rp.requester_widget)
 	return nil
 }

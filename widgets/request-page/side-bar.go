@@ -1,7 +1,6 @@
 package Requester
 
 import (
-	"API-Client/basic"
 	"API-Client/icons"
 	"image"
 
@@ -26,9 +25,9 @@ func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder)
 	line_height := widget.LineHeight(ctx)
 
 	if sd.icon_widget == nil && sd.sidebar_item.IconName == "" {
-		sd.icon_widget = icons.NewIcon("circle", line_height-line_height/3)
+		sd.icon_widget = icons.NewIcon("circle", line_height)
 	} else if sd.icon_widget == nil {
-		sd.icon_widget = icons.NewIcon(sd.sidebar_item.IconName, line_height-line_height/3)
+		sd.icon_widget = icons.NewIcon(sd.sidebar_item.IconName, line_height)
 	}
 	adder.AddChild(sd.icon_widget)
 
@@ -72,6 +71,10 @@ type Sidebar[T comparable] struct {
 	measurement       image.Point
 }
 
+func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]){
+	sd.list_widget_items = items
+}
+
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&sd.options.search_widget)
 
@@ -100,10 +103,12 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Direction: gui.LayoutDirectionVertical,
 		Items: []gui.LinearLayoutItem{
 			{
+				Size: gui.FixedSize(u / 4),
+			},
+			{
 				Layout: gui.LinearLayout{
-					Direction: gui.LayoutDirectionVertical,
+					Direction: gui.LayoutDirectionHorizontal,
 					Gap:       u / 4,
-					Padding:   basic.NewPadding(u / 4),
 					Items: []gui.LinearLayoutItem{
 						{
 							Widget: &sd.options.search_widget,
@@ -114,14 +119,13 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 						},
 					},
 				},
-				Size: gui.FixedSize(u),
 			},
 			{
 				Size: gui.FixedSize(u / 4),
 			},
 			{
 				Widget: &sd.list_widget,
-				Size:   gui.FixedSize(1),
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
