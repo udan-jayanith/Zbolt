@@ -5,11 +5,9 @@ go 1.25.0
 require (
 	github.com/guigui-gui/guigui v0.0.0-20260207145443-a7a9eff05ed0
 	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.10
-	github.com/sqweek/dialog v0.0.0-20260123140253-64c163d53aac
 )
 
 require (
-	github.com/TheTitanrain/w32 v0.0.0-20200114052255-2654d97dbd3d // indirect
 	github.com/ebitengine/gomobile v0.0.0-20250923094054-ea854a63cce1 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.10.0-alpha.4 // indirect

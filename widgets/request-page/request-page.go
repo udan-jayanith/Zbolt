@@ -22,15 +22,12 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			Text: "product-data",
 		},
 		{
-			IconName: "delete",
 			Text: "update-product-data",
 		},
 		{
-			IconName: "copy",
 			Text: "search",
 		},
 		{
-			IconName: "key",
 			Text: "discover",
 		},
 	})

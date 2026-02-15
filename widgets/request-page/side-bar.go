@@ -25,7 +25,7 @@ func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder)
 	line_height := widget.LineHeight(ctx)
 
 	if sd.icon_widget == nil && sd.sidebar_item.IconName == "" {
-		sd.icon_widget = icons.NewIcon("circle", line_height)
+		sd.icon_widget = icons.NewIcon("request-page", line_height)
 	} else if sd.icon_widget == nil {
 		sd.icon_widget = icons.NewIcon(sd.sidebar_item.IconName, line_height)
 	}
@@ -37,10 +37,13 @@ func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder)
 }
 
 func (sd *sidebar_item_widget[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap:       widget.UnitSize(ctx) / 4,
+		Gap:       u / 6,
 		Items: []gui.LinearLayoutItem{
+			{
+			},
 			{
 				Widget: sd.icon_widget,
 			},
@@ -101,9 +104,9 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
+		Gap: u / 4,
 		Items: []gui.LinearLayoutItem{
 			{
-				Size: gui.FixedSize(u / 4),
 			},
 			{
 				Layout: gui.LinearLayout{
@@ -119,9 +122,6 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 						},
 					},
 				},
-			},
-			{
-				Size: gui.FixedSize(u / 4),
 			},
 			{
 				Widget: &sd.list_widget,
