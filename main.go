@@ -14,12 +14,12 @@ import (
 func main() {
 	op := &gui.RunOptions{
 		Title: "API Client",
-		WindowMinSize: image.Pt(700, 444),
+		WindowMinSize: image.Pt(800, 444),
 		RunGameOptions: &ebiten.RunGameOptions{
 			ApplePressAndHoldEnabled: true,
 		},
 	}
-	if err := gui.Run(&Requester.Requester{}, op); err != nil {
+	if err := gui.Run(&Requester.RequestPage{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

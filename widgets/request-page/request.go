@@ -3,6 +3,7 @@ package Requester
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -91,4 +92,22 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (rw *RequestWidget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	point := rw.input_bar_widget.Measure(ctx, constraints)
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y += rw.url_preview.Measure(ctx, constraints).Y
+		point.Y += rw.tab.Measure(ctx, constraints).Y
+		point.Y += rw.tab_content.selected_widget.Measure(ctx, constraints).Y
+	}
+	
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	}
+
+	return point
 }
