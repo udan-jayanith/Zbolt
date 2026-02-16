@@ -2,10 +2,13 @@ package Requester
 
 import (
 	"API-Client/icons"
+	"fmt"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type SidebarItem[T comparable] struct {
@@ -71,6 +74,9 @@ type Sidebar[T comparable] struct {
 	list_widget       widget.List[T]
 	list_widget_items []SidebarItem[T]
 	measurement       image.Point
+
+	context_menu     widget.PopupMenu[struct{}]
+	context_menu_pos image.Point
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
@@ -96,10 +102,18 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.list_widget.SetItems(items)
 	adder.AddChild(&sd.list_widget)
 
+	sd.context_menu.SetItemsByStrings([]string{"Rename", "Delete"})
+	adder.AddChild(&sd.context_menu)
 	return nil
 }
 
 func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layouter.LayoutWidget(&sd.context_menu, image.Rectangle{
+		Min: sd.context_menu_pos,
+		Max: image.Pt(0, 0),
+	})
+	fmt.Println(sd.context_menu_pos)
+
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
@@ -131,4 +145,13 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 
 func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	return sd.list_widget.Measure(ctx, constraints)
+}
+
+func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton2) {
+		sd.context_menu_pos = image.Pt(ebiten.CursorPosition())
+		sd.context_menu.SetOpen(true)
+	}
+
+	return gui.HandleInputResult{}
 }
