@@ -1,7 +1,6 @@
 package Requester
 
 import (
-	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 
 	gui "github.com/guigui-gui/guigui"
@@ -83,7 +82,6 @@ func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 	main_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Gap:       u / 4,
-		Padding:   basic.NewPadding(u / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.header_widget,

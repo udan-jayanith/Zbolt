@@ -2,8 +2,8 @@ package Requester
 
 import (
 	gui "github.com/guigui-gui/guigui"
-//	widget "github.com/guigui-gui/guigui/basicwidget"
-//	"image"
+	widget "github.com/guigui-gui/guigui/basicwidget"
+	// "image"
 )
 
 type Requester struct {
@@ -14,7 +14,7 @@ type Requester struct {
 
 func (brp *Requester) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
-
+	
 	adder.AddChild(&brp.request_widget)
 	adder.AddChild(&brp.response_widget)
 	return nil
@@ -23,6 +23,7 @@ func (brp *Requester) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (brp *Requester) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
+		Gap: widget.UnitSize(ctx)/4,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &brp.request_widget,
@@ -32,6 +33,7 @@ func (brp *Requester) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 				Widget: &brp.response_widget,
 				Size:   gui.FlexibleSize(1),
 			},
+			{},
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)

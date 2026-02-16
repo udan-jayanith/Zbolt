@@ -1,7 +1,6 @@
 package Requester
 
 import (
-	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 	"image"
 
@@ -72,7 +71,6 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Gap:       u / 4,
-		Padding:   basic.NewPadding(u / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &rw.input_bar_widget,

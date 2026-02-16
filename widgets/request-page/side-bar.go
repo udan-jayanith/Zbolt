@@ -42,8 +42,7 @@ func (sd *sidebar_item_widget[T]) Layout(ctx *gui.Context, widgetBounds *gui.Wid
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       u / 6,
 		Items: []gui.LinearLayoutItem{
-			{
-			},
+			{},
 			{
 				Widget: sd.icon_widget,
 			},
@@ -74,7 +73,7 @@ type Sidebar[T comparable] struct {
 	measurement       image.Point
 }
 
-func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]){
+func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	sd.list_widget_items = items
 }
 
@@ -104,10 +103,8 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap: u / 4,
+		Gap:       u / 4,
 		Items: []gui.LinearLayoutItem{
-			{
-			},
 			{
 				Layout: gui.LinearLayout{
 					Direction: gui.LayoutDirectionHorizontal,
