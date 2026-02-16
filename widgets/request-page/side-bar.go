@@ -2,7 +2,6 @@ package Requester
 
 import (
 	"API-Client/icons"
-	"fmt"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -110,9 +109,7 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&sd.context_menu, image.Rectangle{
 		Min: sd.context_menu_pos,
-		Max: image.Pt(0, 0),
 	})
-	fmt.Println(sd.context_menu_pos)
 
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
