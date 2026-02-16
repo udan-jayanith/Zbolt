@@ -33,7 +33,6 @@ func (brp *Requester) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 				Widget: &brp.response_widget,
 				Size:   gui.FlexibleSize(1),
 			},
-			{},
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)

@@ -60,6 +60,7 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 				Widget: &rp.requester_widget,
 				Size:   gui.FlexibleSize(4),
 			},
+			{},
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
