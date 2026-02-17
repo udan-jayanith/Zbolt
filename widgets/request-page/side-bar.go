@@ -2,6 +2,7 @@ package Requester
 
 import (
 	"API-Client/icons"
+	"fmt"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -18,9 +19,10 @@ type SidebarItem[T comparable] struct {
 type sidebar_item_widget[T comparable] struct {
 	gui.DefaultWidget
 
-	icon_widget  *icons.Icon
-	text_widget  widget.Text
-	sidebar_item SidebarItem[T]
+	icon_widget    *icons.Icon
+	text_widget    widget.Text
+	sidebar_item   SidebarItem[T]
+	sidebar_widget *Sidebar[T]
 }
 
 func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -62,6 +64,13 @@ func (sd *sidebar_item_widget[T]) Measure(ctx *gui.Context, constraints gui.Cons
 	point.X += sd.icon_widget.Measure(ctx, constraints).X
 	return point
 }
+func (sd *sidebar_item_widget[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton2) {
+		sd.sidebar_widget.right_clicked_item = sd
+	}
+
+	return gui.HandleInputResult{}
+}
 
 type Sidebar[T comparable] struct {
 	gui.DefaultWidget
@@ -74,15 +83,17 @@ type Sidebar[T comparable] struct {
 	list_widget_items []widget.ListItem[T]
 	measurement       image.Point
 
-	context_menu     widget.PopupMenu[struct{}]
-	context_menu_pos image.Point
+	context_menu       widget.PopupMenu[struct{}]
+	context_menu_pos   image.Point
+	right_clicked_item *sidebar_item_widget[T]
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	sd.list_widget_items = make([]widget.ListItem[T], 0, len(items))
 	for _, item := range items {
 		content_widget := sidebar_item_widget[T]{
-			sidebar_item: item,
+			sidebar_widget: sd,
+			sidebar_item:   item,
 		}
 		sd.list_widget_items = append(sd.list_widget_items, widget.ListItem[T]{
 			Content: &content_widget,
@@ -144,9 +155,13 @@ func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 }
 
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton2) {
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.right_clicked_item != nil {
 		sd.context_menu_pos = image.Pt(ebiten.CursorPosition())
 		sd.context_menu.SetOpen(true)
+
+		fmt.Println("right clicked", sd.right_clicked_item.text_widget.Value())
+
+		sd.right_clicked_item = nil
 	}
 
 	return gui.HandleInputResult{}
