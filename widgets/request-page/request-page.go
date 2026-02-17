@@ -12,7 +12,7 @@ type RequestPage struct {
 
 	background       widget.Background
 	sidebar          gui.WidgetWithPadding[*Sidebar[struct{}]]
-	requester_widget gui.WidgetWithPadding[*Requester]
+	requester_widget gui.WidgetWithPadding[*HTTP_request]
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

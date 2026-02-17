@@ -6,13 +6,13 @@ import (
 	// "image"
 )
 
-type Requester struct {
+type HTTP_request struct {
 	gui.DefaultWidget
 	request_widget RequestWidget
 	response_widget ResponseWidget
 }
 
-func (brp *Requester) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (brp *HTTP_request) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
 	
 	adder.AddChild(&brp.request_widget)
@@ -20,7 +20,7 @@ func (brp *Requester) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (brp *Requester) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (brp *HTTP_request) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap: widget.UnitSize(ctx)/4,
