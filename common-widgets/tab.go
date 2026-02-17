@@ -15,8 +15,13 @@ import (
 type tab_item[T any] struct {
 	gui.DefaultWidget
 	text_widget  widget.Text
-	close_widget *icons.Icon
-	tab_item     *TabItem[T]
+	close_widget struct {
+		icon *icons.Icon
+		normal  *icons.Icon
+		selected *icons.Icon
+	}
+
+	tab_item *TabItem[T]
 }
 
 func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -38,11 +43,19 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&item.text_widget)
 
 	if item.tab_item.Closable {
-		if item.close_widget == nil {
-			line_height :=  widget.LineHeight(ctx)
-			item.close_widget = icons.NewIcon("close", line_height-line_height/4)
+		if item.close_widget.icon == nil {
+			line_height := widget.LineHeight(ctx)
+			size :=  line_height-line_height/4
+			item.close_widget.normal = icons.NewIcon("close", size)
+			item.close_widget.selected = icons.NewIcon("close-grey", size)
 		}
-		adder.AddChild(item.close_widget)
+	
+		if item.tab_item.tab.selected_index == item.tab_item.index {
+			item.close_widget.icon = item.close_widget.normal 
+		} else {
+			item.close_widget.icon = item.close_widget.selected
+		}
+		adder.AddChild(item.close_widget.icon)
 	}
 	return nil
 }
@@ -67,7 +80,7 @@ func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 
 	if item.tab_item.Closable {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
-			Widget: item.close_widget,
+			Widget: item.close_widget.icon,
 		})
 	}
 
@@ -84,7 +97,7 @@ func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) 
 	}
 
 	if item.tab_item.Closable {
-		icon_measurement := item.close_widget.Measure(ctx, constraints)
+		icon_measurement := item.close_widget.icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
 	}
 
