@@ -2,6 +2,7 @@ package Requester
 
 import (
 	"API-Client/basic"
+	CommonWidgets "API-Client/common-widgets"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -12,6 +13,7 @@ type RequestPage struct {
 
 	background       widget.Background
 	sidebar          gui.WidgetWithPadding[*Sidebar[struct{}]]
+	tab_widget       CommonWidgets.Tab[struct{}]
 	requester_widget gui.WidgetWithPadding[*HTTP_request]
 }
 
@@ -39,6 +41,18 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.sidebar.SetPadding(padding)
 	adder.AddChild(&rp.sidebar)
 
+	rp.tab_widget.SetTabItems([]CommonWidgets.TabItem[struct{}]{
+		{
+			Text: "product-data",
+			Closable: true,
+		},
+		{
+			Text: "discover",
+			Closable: true,
+		},
+	})
+	adder.AddChild(&rp.tab_widget)
+
 	rp.requester_widget.SetPadding(padding)
 	adder.AddChild(&rp.requester_widget)
 	return nil
@@ -49,7 +63,7 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap: widget.UnitSize(ctx)/4,
+		Gap:       widget.UnitSize(ctx) / 4,
 		Items: []gui.LinearLayoutItem{
 			{},
 			{
@@ -57,8 +71,19 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 				Size:   gui.FlexibleSize(1),
 			},
 			{
-				Widget: &rp.requester_widget,
-				Size:   gui.FlexibleSize(4),
+				Layout: gui.LinearLayout{
+					Direction: gui.LayoutDirectionVertical,
+					Items: []gui.LinearLayoutItem{
+						{
+							Widget: &rp.tab_widget,
+						},
+						{
+							Widget: &rp.requester_widget,
+							Size:   gui.FlexibleSize(1),
+						},
+					},
+				},
+				Size: gui.FlexibleSize(4),
 			},
 			{},
 		},
