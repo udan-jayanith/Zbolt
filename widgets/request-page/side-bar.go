@@ -71,7 +71,7 @@ type Sidebar[T comparable] struct {
 		add_widget    widget.Button
 	}
 	list_widget       widget.List[T]
-	list_widget_items []SidebarItem[T]
+	list_widget_items []widget.ListItem[T]
 	measurement       image.Point
 
 	context_menu     widget.PopupMenu[struct{}]
@@ -79,7 +79,16 @@ type Sidebar[T comparable] struct {
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
-	sd.list_widget_items = items
+	sd.list_widget_items = make([]widget.ListItem[T], 0, len(items))
+	for _, item := range items {
+		content_widget := sidebar_item_widget[T]{
+			sidebar_item: item,
+		}
+		sd.list_widget_items = append(sd.list_widget_items, widget.ListItem[T]{
+			Content: &content_widget,
+			Value:   item.Value,
+		})
+	}
 }
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -88,17 +97,7 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add_widget.SetIcon(icons.Store.Open("add"))
 	adder.AddChild(&sd.options.add_widget)
 
-	items := make([]widget.ListItem[T], 0, len(sd.list_widget_items))
-	for _, item := range sd.list_widget_items {
-		content_widget := sidebar_item_widget[T]{
-			sidebar_item: item,
-		}
-		items = append(items, widget.ListItem[T]{
-			Content: &content_widget,
-			Value:   item.Value,
-		})
-	}
-	sd.list_widget.SetItems(items)
+	sd.list_widget.SetItems(sd.list_widget_items)
 	adder.AddChild(&sd.list_widget)
 
 	sd.context_menu.SetItemsByStrings([]string{"Rename", "Delete"})
