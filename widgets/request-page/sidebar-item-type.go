@@ -77,9 +77,16 @@ type sidebar_item_types_panel struct {
 	gui.DefaultWidget
 
 	http, websocket, graphql, grpc gui.WidgetWithSize[*sidebar_item_type_card]
+	select_type_text_widget        widget.Text
 }
 
 func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	sitp.select_type_text_widget.SetValue("Select request type")
+	sitp.select_type_text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	sitp.select_type_text_widget.SetHorizontalAlign(widget.HorizontalAlignCenter)
+	sitp.select_type_text_widget.SetScale(1.2)
+	adder.AddChild(&sitp.select_type_text_widget)
+
 	u := widget.UnitSize(ctx)
 	item_size := image.Pt(u*4, u*4)
 
@@ -115,20 +122,34 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 	layout := gui.LinearLayout{
 		Gap:       size,
 		Padding:   basic.NewPadding(size),
-		Direction: gui.LayoutDirectionHorizontal,
+		Direction: gui.LayoutDirectionVertical,
 
 		Items: []gui.LinearLayoutItem{
+			{},
 			{
-				Widget: &sitp.http,
+				Widget: &sitp.select_type_text_widget,
+				Size: gui.FlexibleSize(1),
 			},
 			{
-				Widget: &sitp.websocket,
-			},
-			{
-				Widget: &sitp.graphql,
-			},
-			{
-				Widget: &sitp.grpc,
+				Layout: gui.LinearLayout{
+					Gap:       size,
+					Direction: gui.LayoutDirectionHorizontal,
+
+					Items: []gui.LinearLayoutItem{
+						{
+							Widget: &sitp.http,
+						},
+						{
+							Widget: &sitp.websocket,
+						},
+						{
+							Widget: &sitp.graphql,
+						},
+						{
+							Widget: &sitp.grpc,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -137,8 +158,11 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 
 func (sitp *sidebar_item_types_panel) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	u := widget.UnitSize(ctx)
-	width := u*4*4+(u/2)+u/4*3
-	point := image.Pt(width , (u*4)+(u/2))
+	
+	gap, padding := u/4, u/4
+	width := sitp.http.Measure(ctx, gui.Constraints{}).X*4+gap*3+padding*2
+	height := (u*4)+(u/2)+gap*2+padding*2+sitp.select_type_text_widget.Measure(ctx, gui.Constraints{}).Y
+	point := image.Pt(width, height)
 
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h
