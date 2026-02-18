@@ -10,6 +10,15 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
+type RequestType uint8
+
+const (
+	HTTP RequestType = iota + 0
+	Websocket
+	GraphQL
+	Grpc
+)
+
 type RequestPage struct {
 	gui.DefaultWidget
 
@@ -67,7 +76,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.popup_widget.SetBackgroundDark(true)
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
-	
+
 	if !rp.is_popup_open {
 		rp.popup_widget.SetOpen(true)
 		rp.is_popup_open = true
@@ -82,12 +91,12 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	b := widgetBounds.Bounds()
 	popup_content_bounds := rp.popup_content.Measure(ctx, gui.Constraints{})
-	
+
 	popup_size := image.Rectangle{
 		Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
 	}
 	popup_size.Max = image.Pt(popup_size.Min.X+popup_content_bounds.X, popup_size.Min.Y+popup_content_bounds.Y)
-	
+
 	layouter.LayoutWidget(&rp.popup_widget, popup_size)
 
 	layout := gui.LinearLayout{
