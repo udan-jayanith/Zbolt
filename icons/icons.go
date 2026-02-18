@@ -11,6 +11,7 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 //go:embed icons/*.png
@@ -64,6 +65,7 @@ type Icon struct {
 	image_widget widget.Image
 	IconName     string
 	Point        *image.Point
+	on_click func()
 }
 
 func (icon *Icon) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -83,6 +85,17 @@ func (icon *Icon) Measure(ctx *gui.Context, constraints gui.Constraints) image.P
 		icon.Point = &pt
 	}
 	return *icon.Point
+}
+
+func (icon *Icon) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) && icon.on_click != nil {
+		icon.on_click()
+	}
+	return gui.HandleInputResult{}
+}
+
+func (icon *Icon) OnClick(fn func()){
+	icon.on_click = fn
 }
 
 func NewIcon(icon_name string, size ...int) *Icon {
