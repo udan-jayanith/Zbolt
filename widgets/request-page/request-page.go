@@ -4,6 +4,8 @@ import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 
+	"image"
+
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -15,6 +17,10 @@ type RequestPage struct {
 	sidebar          gui.WidgetWithPadding[*Sidebar[struct{}]]
 	tab_widget       CommonWidgets.Tab[struct{}]
 	requester_widget gui.WidgetWithPadding[*HTTP_request]
+
+	popup_widget  widget.Popup
+	popup_content sidebar_item_types_panel
+	is_popup_open bool
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -43,11 +49,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	rp.tab_widget.SetTabItems([]CommonWidgets.TabItem[struct{}]{
 		{
-			Text: "product-data",
+			Text:     "product-data",
 			Closable: true,
 		},
 		{
-			Text: "discover",
+			Text:     "discover",
 			Closable: true,
 		},
 	})
@@ -55,11 +61,34 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	rp.requester_widget.SetPadding(padding)
 	adder.AddChild(&rp.requester_widget)
+
+	rp.popup_widget.SetContent(&rp.popup_content)
+	rp.popup_widget.SetAnimated(true)
+	rp.popup_widget.SetBackgroundDark(true)
+	rp.popup_widget.SetCloseByClickingOutside(true)
+	rp.popup_widget.SetBackgroundBlurred(true)
+	
+	if !rp.is_popup_open {
+		rp.popup_widget.SetOpen(true)
+		rp.is_popup_open = true
+	}
+
+	adder.AddChild(&rp.popup_widget)
 	return nil
 }
 
 func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&rp.background, widgetBounds.Bounds())
+
+	b := widgetBounds.Bounds()
+	popup_content_bounds := rp.popup_content.Measure(ctx, gui.Constraints{})
+	
+	popup_size := image.Rectangle{
+		Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
+	}
+	popup_size.Max = image.Pt(popup_size.Min.X+popup_content_bounds.X, popup_size.Min.Y+popup_content_bounds.Y)
+	
+	layouter.LayoutWidget(&rp.popup_widget, popup_size)
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,

@@ -87,21 +87,25 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 	http := sitp.http.Widget()
 	http.Text = "HTTP"
 	http.Icon_name = "http"
+	adder.AddChild(&sitp.http)
 
 	sitp.websocket.SetFixedSize(item_size)
 	websocket := sitp.websocket.Widget()
 	websocket.Text = "Websocket"
 	websocket.Icon_name = "websocket"
+	adder.AddChild(&sitp.websocket)
 
 	sitp.graphql.SetFixedSize(item_size)
 	graphql := sitp.graphql.Widget()
 	graphql.Text = "GraphQL"
 	graphql.Icon_name = "graphql"
+	adder.AddChild(&sitp.graphql)
 
 	sitp.grpc.SetFixedSize(item_size)
 	grpc := sitp.grpc.Widget()
 	grpc.Text = "gRPC"
 	grpc.Icon_name = "grpc"
+	adder.AddChild(&sitp.grpc)
 
 	return nil
 }
@@ -133,7 +137,8 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 
 func (sitp *sidebar_item_types_panel) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	u := widget.UnitSize(ctx)
-	point := image.Pt(u*4, u*4)
+	width := u*4*4+(u/2)+u/4*3
+	point := image.Pt(width , (u*4)+(u/2))
 
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h

@@ -14,7 +14,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-//go:embed icons/*.png
+//go:embed icons/*
 var store embed.FS
 
 type cache_store struct {

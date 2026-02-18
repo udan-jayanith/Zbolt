@@ -19,7 +19,8 @@ type SidebarItem[T comparable] struct {
 type sidebar_item_widget[T comparable] struct {
 	gui.DefaultWidget
 
-	icon_widget    *icons.Icon
+	icon_widget *icons.Icon
+
 	text_widget    widget.Text
 	sidebar_item   SidebarItem[T]
 	sidebar_widget *Sidebar[T]
@@ -37,11 +38,13 @@ func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder)
 
 	sd.text_widget.SetValue(sd.sidebar_item.Text)
 	adder.AddChild(&sd.text_widget)
+
 	return nil
 }
 
 func (sd *sidebar_item_widget[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       u / 6,
