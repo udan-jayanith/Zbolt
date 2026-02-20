@@ -74,6 +74,76 @@ func (sitc *sidebar_item_type_card) Measure(ctx *gui.Context, constraints gui.Co
 	return point
 }
 
+type request_name_inputs_widget struct {
+	gui.DefaultWidget
+
+	text_widget          widget.Text
+	input_widget         widget.TextInput
+	create_button_widget widget.Button
+}
+
+func (rniw *request_name_inputs_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	rniw.text_widget.SetValue("Select request type")
+	rniw.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	rniw.text_widget.SetHorizontalAlign(widget.HorizontalAlignStart)
+	rniw.text_widget.SetScale(1)
+	adder.AddChild(&rniw.text_widget)
+
+	adder.AddChild(&rniw.input_widget)
+
+	rniw.create_button_widget.SetText("Create")
+	rniw.create_button_widget.SetType(widget.ButtonTypePrimary)
+	adder.AddChild(&rniw.create_button_widget)
+	return nil
+}
+
+func (rniw *request_name_inputs_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &rniw.text_widget,
+				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Layout: gui.LinearLayout{
+					Direction: gui.LayoutDirectionHorizontal,
+					Gap:       widget.UnitSize(ctx) / 4,
+					Items: []gui.LinearLayoutItem{
+						{
+							Widget: &rniw.input_widget,
+							Size:   gui.FlexibleSize(1),
+						},
+						{
+							Widget: &rniw.create_button_widget,
+						},
+					},
+				},
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (rniw *request_name_inputs_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	var point image.Point
+	u := widget.UnitSize(ctx)
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y = rniw.text_widget.Measure(ctx, constraints).Y + u
+	}
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = rniw.input_widget.Measure(ctx, constraints).X + rniw.create_button_widget.Measure(ctx, constraints).X
+	}
+
+	return point
+}
+
 type sidebar_item_types_panel struct {
 	gui.DefaultWidget
 
@@ -81,13 +151,14 @@ type sidebar_item_types_panel struct {
 	selected_request_type          RequestType
 
 	select_type_text_widget widget.Text
+	request_name_input      request_name_inputs_widget
 }
 
 func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sitp.select_type_text_widget.SetValue("Select request type")
 	sitp.select_type_text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	sitp.select_type_text_widget.SetHorizontalAlign(widget.HorizontalAlignCenter)
-	sitp.select_type_text_widget.SetScale(1.2)
+	sitp.select_type_text_widget.SetHorizontalAlign(widget.HorizontalAlignStart)
+	sitp.select_type_text_widget.SetScale(1)
 	adder.AddChild(&sitp.select_type_text_widget)
 
 	u := widget.UnitSize(ctx)
@@ -155,13 +226,14 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 	default:
 		log.Fatal("Unknown request type selected")
 	}
+
+	adder.AddChild(&sitp.request_name_input)
 	return nil
 }
 
 func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	size := widget.UnitSize(ctx) / 4
 	layout := gui.LinearLayout{
-		Gap:       size,
 		Padding:   basic.NewPadding(size * 2),
 		Direction: gui.LayoutDirectionVertical,
 
@@ -191,6 +263,12 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 					},
 				},
 			},
+			{
+				Size: gui.FixedSize(size),
+			},
+			{
+				Widget: &sitp.request_name_input,
+			},
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
@@ -198,18 +276,21 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 
 func (sitp *sidebar_item_types_panel) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	u := widget.UnitSize(ctx)
-
+	var point image.Point
 	gap, padding := u/4, u/2
-	width := sitp.http.Measure(ctx, gui.Constraints{}).X*4 + gap*3 + padding*2
-	height := (u * 4) + (u / 2) + gap + padding*2 + sitp.select_type_text_widget.Measure(ctx, gui.Constraints{}).Y
-	point := image.Pt(width, height)
 
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h
+	} else {
+		point.Y = sitp.select_type_text_widget.Measure(ctx, constraints).Y
+		point.Y += sitp.request_name_input.Measure(ctx, constraints).Y
+		point.Y += (u * 4) + gap + padding*3
 	}
 
 	if w, ok := constraints.FixedWidth(); ok {
 		point.X = w
+	} else {
+		point.X = (u*4)*4 + gap*3 + padding*2
 	}
 
 	return point
