@@ -83,7 +83,7 @@ type request_name_inputs_widget struct {
 }
 
 func (rniw *request_name_inputs_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	rniw.text_widget.SetValue("Select request type")
+	rniw.text_widget.SetValue("Enter request name")
 	rniw.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	rniw.text_widget.SetHorizontalAlign(widget.HorizontalAlignStart)
 	rniw.text_widget.SetScale(1)
