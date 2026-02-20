@@ -16,8 +16,8 @@ type tab_item[T any] struct {
 	gui.DefaultWidget
 	text_widget  widget.Text
 	close_widget struct {
-		icon *icons.Icon
-		normal  *icons.Icon
+		icon     *icons.Icon
+		normal   *icons.Icon
 		selected *icons.Icon
 	}
 
@@ -45,13 +45,13 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if item.tab_item.Closable {
 		if item.close_widget.icon == nil {
 			line_height := widget.LineHeight(ctx)
-			size :=  line_height-line_height/4
+			size := line_height - line_height/4
 			item.close_widget.normal = icons.NewIcon("close", size)
 			item.close_widget.selected = icons.NewIcon("close-grey", size)
 		}
-	
+
 		if item.tab_item.tab.selected_index == item.tab_item.index {
-			item.close_widget.icon = item.close_widget.normal 
+			item.close_widget.icon = item.close_widget.normal
 		} else {
 			item.close_widget.icon = item.close_widget.selected
 		}
@@ -266,5 +266,19 @@ func (tab *Tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layo
 }
 
 func (tab *Tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return tab.tab.Measure(ctx, constraints)
+	var point image.Point
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = widget.UnitSize(ctx) * 4
+	}
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y = tab.tab.Measure(ctx, constraints).Y
+	}
+
+	return point
 }

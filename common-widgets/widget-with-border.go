@@ -14,12 +14,12 @@ type WidgetWithBorder[T gui.Widget] struct {
 	widget T
 }
 
-func (item *WidgetWithBorder[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error{
+func (item *WidgetWithBorder[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(item.widget)
 	return nil
 }
 
-func (item *WidgetWithBorder[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter){
+func (item *WidgetWithBorder[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(item.widget, widgetBounds.Bounds())
 }
 
@@ -38,6 +38,6 @@ func (wwb *WidgetWithBorder[T]) SetWidget(widget T) {
 	wwb.widget = widget
 }
 
-func (wwb *WidgetWithBorder[T]) GetWidget () T{
+func (wwb *WidgetWithBorder[T]) GetWidget() T {
 	return wwb.widget
 }
