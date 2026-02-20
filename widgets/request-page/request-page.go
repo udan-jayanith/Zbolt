@@ -72,17 +72,15 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rp.requester_widget)
 
 	rp.popup_widget.SetContent(&rp.popup_content)
-	rp.popup_widget.SetAnimated(true)
 	rp.popup_widget.SetBackgroundDark(true)
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
-
-	if !rp.is_popup_open {
-		rp.popup_widget.SetOpen(true)
-		rp.is_popup_open = true
-	}
-
 	adder.AddChild(&rp.popup_widget)
+	
+	rp.sidebar.Widget().OnAddButtonClicked(func(ctx *gui.Context) {
+		rp.popup_widget.SetOpen(true)
+	})
+	
 	return nil
 }
 

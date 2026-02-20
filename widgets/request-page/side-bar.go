@@ -89,6 +89,7 @@ type Sidebar[T comparable] struct {
 	context_menu       widget.PopupMenu[struct{}]
 	context_menu_pos   image.Point
 	right_clicked_item *sidebar_item_widget[T]
+	on_add_btn_clicked func(ctx *gui.Context)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
@@ -105,10 +106,19 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	}
 }
 
+func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)){
+	sd.on_add_btn_clicked = callback
+}
+
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&sd.options.search_widget)
 
 	sd.options.add_widget.SetIcon(icons.Store.Open("add"))
+	if sd.on_add_btn_clicked != nil {
+		sd.options.add_widget.SetOnDown(func(ctx *gui.Context) {
+			sd.on_add_btn_clicked(ctx)
+		})
+	}
 	adder.AddChild(&sd.options.add_widget)
 
 	sd.list_widget.SetItems(sd.list_widget_items)
