@@ -80,11 +80,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.sidebar.Widget().OnAddButtonClicked(func(ctx *gui.Context) {
 		rp.popup_widget.SetOpen(true)
 	})
-	
+
 	rp.popup_content.OnCreateButtonClicked(func(request Request) {
 		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[Request]{
 			Value: request,
-			Text: request.Name,
+			Text:  request.Name,
 		})
 		rp.popup_widget.SetOpen(false)
 	})
