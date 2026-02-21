@@ -3,6 +3,7 @@ package Requester
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	"weak"
 
 	"image"
 
@@ -19,12 +20,25 @@ const (
 	Grpc
 )
 
+type Request struct {
+	Type RequestType
+	Name string
+	data weak.Pointer[any]
+}
+
+func (r *Request) Data() any {
+	return nil
+}
+
 type RequestPage struct {
 	gui.DefaultWidget
 
-	background       widget.Background
-	sidebar          gui.WidgetWithPadding[*Sidebar[struct{}]]
-	tab_widget       CommonWidgets.Tab[struct{}]
+	background widget.Background
+
+	sidebar       gui.WidgetWithPadding[*Sidebar[Request]]
+	sidebar_items []SidebarItem[Request]
+
+	tab_widget       CommonWidgets.Tab[Request]
 	requester_widget gui.WidgetWithPadding[*HTTP_request]
 
 	popup_widget  widget.Popup
@@ -37,26 +51,12 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	padding := basic.NewPadding(widget.UnitSize(ctx)/4, 0)
 
 	sidebar := rp.sidebar.Widget()
-	sidebar.SetItems([]SidebarItem[struct{}]{
-		{
-			IconName: "http",
-			Text:     "product-data",
-		},
-		{
-			Text: "update-product-data",
-		},
-		{
-			Text: "search",
-		},
-		{
-			Text: "discover",
-		},
-	})
+	sidebar.SetItems(rp.sidebar_items)
 
 	rp.sidebar.SetPadding(padding)
 	adder.AddChild(&rp.sidebar)
 
-	rp.tab_widget.SetTabItems([]CommonWidgets.TabItem[struct{}]{
+	rp.tab_widget.SetTabItems([]CommonWidgets.TabItem[Request]{
 		{
 			Text:     "product-data",
 			Closable: true,
@@ -76,11 +76,19 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
 	adder.AddChild(&rp.popup_widget)
-	
+
 	rp.sidebar.Widget().OnAddButtonClicked(func(ctx *gui.Context) {
 		rp.popup_widget.SetOpen(true)
 	})
 	
+	rp.popup_content.OnCreateButtonClicked(func(request Request) {
+		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[Request]{
+			Value: request,
+			Text: request.Name,
+		})
+		rp.popup_widget.SetOpen(false)
+	})
+
 	return nil
 }
 

@@ -77,9 +77,14 @@ func (sitc *sidebar_item_type_card) Measure(ctx *gui.Context, constraints gui.Co
 type request_name_inputs_widget struct {
 	gui.DefaultWidget
 
-	text_widget          widget.Text
-	input_widget         widget.TextInput
-	create_button_widget widget.Button
+	text_widget              widget.Text
+	input_widget             widget.TextInput
+	create_button_widget     widget.Button
+	on_create_button_clicked func(name string)
+}
+
+func (rniw *request_name_inputs_widget) OnCreateButtonClicked(fn func(name string)) {
+	rniw.on_create_button_clicked = fn
 }
 
 func (rniw *request_name_inputs_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -93,6 +98,11 @@ func (rniw *request_name_inputs_widget) Build(ctx *gui.Context, adder *gui.Child
 
 	rniw.create_button_widget.SetText("Create")
 	rniw.create_button_widget.SetType(widget.ButtonTypePrimary)
+	if rniw.on_create_button_clicked != nil {
+		rniw.create_button_widget.SetOnDown(func(context *gui.Context) {
+			rniw.on_create_button_clicked(rniw.input_widget.Value())
+		})
+	}
 	adder.AddChild(&rniw.create_button_widget)
 	return nil
 }
@@ -152,6 +162,16 @@ type sidebar_item_types_panel struct {
 
 	select_type_text_widget widget.Text
 	request_name_input      request_name_inputs_widget
+	on_create_clicked       func(request Request)
+}
+
+func (sitp *sidebar_item_types_panel) Clear() {
+	sitp.selected_request_type = HTTP
+	sitp.request_name_input.input_widget.SetValue("")
+}
+
+func (sitp *sidebar_item_types_panel) OnCreateButtonClicked(fn func(request Request)) {
+	sitp.on_create_clicked = fn
 }
 
 func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -227,6 +247,12 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		log.Fatal("Unknown request type selected")
 	}
 
+	sitp.request_name_input.OnCreateButtonClicked(func(name string) {
+		sitp.on_create_clicked(Request{
+			Type: sitp.selected_request_type,
+			Name: name,
+		})
+	})
 	adder.AddChild(&sitp.request_name_input)
 	return nil
 }
