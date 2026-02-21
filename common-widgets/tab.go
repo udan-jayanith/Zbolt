@@ -8,6 +8,7 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -45,13 +46,6 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	text_widget.SetValue(item.tab_item.Text)
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	text_widget.SetBold(item.tab_widget.selected_item_index == item.index)
-
-	if item.tab_widget.selected_item_index == item.index {
-		text_widget.SetOpacity(1)
-	} else {
-		text_widget.SetOpacity(0.6)
-	}
 	adder.AddChild(&item.text_widget)
 
 	if item.tab_item.Closable {
@@ -68,6 +62,12 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			item.close_widget.icon = item.close_widget.selected
 		}
 		adder.AddChild(item.close_widget.icon)
+	}
+
+	if item.tab_widget.selected_item_index == item.index {
+		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeInset)
+	} else {
+		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeRegular)
 	}
 	return nil
 }
