@@ -9,6 +9,7 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type TabItem[T any] struct {
@@ -30,6 +31,9 @@ type tab_item[T any] struct {
 
 	tab_item   *TabItem[T]
 	tab_widget *tab[T]
+
+	is_hovering bool
+	index       int
 }
 
 func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -41,9 +45,9 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	text_widget.SetValue(item.tab_item.Text)
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	//text_widget.SetBold(item.tab_item)
+	text_widget.SetBold(item.tab_widget.selected_item_index == item.index)
 
-	if true {
+	if item.tab_widget.selected_item_index == item.index {
 		text_widget.SetOpacity(1)
 	} else {
 		text_widget.SetOpacity(0.6)
@@ -58,7 +62,7 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			item.close_widget.selected = icons.NewIcon("close-grey", size)
 		}
 
-		if true {
+		if item.tab_widget.selected_item_index == item.index {
 			item.close_widget.icon = item.close_widget.normal
 		} else {
 			item.close_widget.icon = item.close_widget.selected
@@ -122,6 +126,16 @@ func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	item.border_widget.Draw(ctx, widgetBounds, dst)
 }
 
+func (item *tab_item[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	item.is_hovering = widgetBounds.IsHitAtCursor()
+
+	if item.is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		item.tab_widget.selected_item_index = item.index
+	}
+
+	return gui.HandleInputResult{}
+}
+
 type tab[T any] struct {
 	gui.DefaultWidget
 	tab_items []*tab_item[T]
@@ -173,10 +187,11 @@ type Tab[T any] struct {
 
 func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
 	tab.tab.tab_items = make([]*tab_item[T], 0, len(tab_items))
-	for _, item := range tab_items {
+	for i, item := range tab_items {
 		tab.tab.tab_items = append(tab.tab.tab_items, &tab_item[T]{
 			tab_item:   &item,
 			tab_widget: &tab.tab,
+			index:      i,
 		})
 	}
 }
