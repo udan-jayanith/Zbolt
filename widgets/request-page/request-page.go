@@ -20,6 +20,21 @@ const (
 	Grpc
 )
 
+func (t RequestType) IconName() string {
+	switch t {
+	case HTTP:
+		return "large-icons/http"
+	case Websocket:
+		return "large-icons/websocket"
+	case GraphQL:
+		return "large-icons/graphql"
+	case Grpc:
+		return "large-icons/grpc"
+	default:
+		panic("Unknown request type")
+	}
+}
+
 type Request struct {
 	Type RequestType
 	Name string
@@ -83,10 +98,12 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	rp.popup_content.OnCreateButtonClicked(func(request Request) {
 		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[Request]{
-			Value: request,
-			Text:  request.Name,
+			Value:    request,
+			Text:     request.Name,
+			IconName: request.Type.IconName(),
 		})
 		rp.popup_widget.SetOpen(false)
+		rp.popup_content.Clear()
 	})
 
 	return nil
