@@ -1,4 +1,4 @@
-package Requester
+package http
 
 import (
 	"image"

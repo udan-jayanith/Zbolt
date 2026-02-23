@@ -1,4 +1,4 @@
-package Requester
+package http
 
 import (
 	CommonWidgets "API-Client/common-widgets"
@@ -8,9 +8,9 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type RequestWidget struct {
+type request_widget struct {
 	gui.DefaultWidget
-	input_bar_widget RequestInputBar
+	input_bar_widget request_input_bar_widget
 	url_preview      widget.TextInput
 
 	tab         CommonWidgets.Tab[string]
@@ -21,7 +21,7 @@ type RequestWidget struct {
 	}
 }
 
-func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rw.input_bar_widget)
 
 	{
@@ -66,7 +66,7 @@ func (rw *RequestWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (rw *request_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
@@ -92,7 +92,7 @@ func (rw *RequestWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (rw *RequestWidget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (rw *request_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := rw.input_bar_widget.Measure(ctx, constraints)
 
 	if h, ok := constraints.FixedHeight(); ok {

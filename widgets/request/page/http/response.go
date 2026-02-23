@@ -1,4 +1,4 @@
-package Requester
+package http
 
 import (
 	CommonWidgets "API-Client/common-widgets"
@@ -7,7 +7,7 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type ResponseWidget struct {
+type response_widget struct {
 	gui.DefaultWidget
 	header_widget response_header_widget
 	tab         CommonWidgets.Tab[struct{}]
@@ -18,7 +18,7 @@ type ResponseWidget struct {
 	}
 }
 
-func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&rw.header_widget)
 	
 	u := widget.UnitSize(ctx)
@@ -77,7 +77,7 @@ func (rw *ResponseWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (rw *ResponseWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (rw *response_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
 	main_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,

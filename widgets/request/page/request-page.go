@@ -1,9 +1,11 @@
-package Requester
+package request_page
 
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	"weak"
+	"API-Client/icons"
+	"API-Client/widgets/request/def"
+	"API-Client/widgets/request/page/http"
 
 	"image"
 
@@ -11,50 +13,17 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type RequestType uint8
-
-const (
-	HTTP RequestType = iota + 0
-	Websocket
-	GraphQL
-	Grpc
-)
-
-func (t RequestType) IconName() string {
-	switch t {
-	case HTTP:
-		return "large-icons/http"
-	case Websocket:
-		return "large-icons/websocket"
-	case GraphQL:
-		return "large-icons/graphql"
-	case Grpc:
-		return "large-icons/grpc"
-	default:
-		panic("Unknown request type")
-	}
-}
-
-type Request struct {
-	Type RequestType
-	Name string
-	data weak.Pointer[any]
-}
-
-func (r *Request) Data() any {
-	return nil
-}
-
 type RequestPage struct {
 	gui.DefaultWidget
 
 	background widget.Background
 
-	sidebar       gui.WidgetWithPadding[*Sidebar[Request]]
-	sidebar_items []SidebarItem[Request]
+	sidebar       gui.WidgetWithPadding[*Sidebar[*def.Request]]
+	sidebar_items []SidebarItem[*def.Request]
 
-	tab_widget       CommonWidgets.Tab[Request]
-	requester_widget gui.WidgetWithPadding[*HTTP_request]
+	tab_widget     CommonWidgets.Tab[*def.Request]
+	tab_items      []CommonWidgets.TabItem[*def.Request]
+	request_widget CommonWidgets.WidgetWithPadding[def.RequestWidget]
 
 	popup_widget  widget.Popup
 	popup_content sidebar_item_types_panel
@@ -62,6 +31,8 @@ type RequestPage struct {
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	ctx.SetColorMode(gui.ColorModeDark)
+
 	adder.AddChild(&rp.background)
 	padding := basic.NewPadding(widget.UnitSize(ctx)/4, 0)
 
@@ -69,22 +40,28 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sidebar.SetItems(rp.sidebar_items)
 
 	rp.sidebar.SetPadding(padding)
+	rp.sidebar.Widget().OnItemClicked(func(value *def.Request) {
+		line_height := widget.LineHeight(ctx)
+		size := line_height - line_height/4
+
+		rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
+			Value:    value,
+			Text:     value.Name,
+			Closable: true,
+			Icon:     icons.NewIcon(value.Type.IconName(), size),
+		})
+	})
 	adder.AddChild(&rp.sidebar)
 
-	rp.tab_widget.SetTabItems([]CommonWidgets.TabItem[Request]{
-		{
-			Text:     "product-data",
-			Closable: true,
-		},
-		{
-			Text:     "discover",
-			Closable: true,
-		},
-	})
+	rp.tab_widget.SetTabItems(rp.tab_items)
 	adder.AddChild(&rp.tab_widget)
 
-	rp.requester_widget.SetPadding(padding)
-	adder.AddChild(&rp.requester_widget)
+	if len(rp.tab_items) > 0 {
+		//_, req := rp.tab_widget.GetSelectedTab()
+		rp.request_widget.SetWidget(&http.HTTP_Widget{})
+		rp.request_widget.SetPadding(padding)
+		adder.AddChild(&rp.request_widget)
+	}
 
 	rp.popup_widget.SetContent(&rp.popup_content)
 	rp.popup_widget.SetBackgroundDark(true)
@@ -96,8 +73,8 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.popup_widget.SetOpen(true)
 	})
 
-	rp.popup_content.OnCreateButtonClicked(func(request Request) {
-		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[Request]{
+	rp.popup_content.OnCreateButtonClicked(func(request *def.Request) {
+		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[*def.Request]{
 			Value:    request,
 			Text:     request.Name,
 			IconName: request.Type.IconName(),
@@ -122,6 +99,26 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	layouter.LayoutWidget(&rp.popup_widget, popup_size)
 
+	tab_container_layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &rp.tab_widget,
+			},
+		},
+	}
+
+	if len(rp.tab_items) > 0 {
+		tab_container_layout.Items = append(tab_container_layout.Items, gui.LinearLayoutItem{
+			Widget: &rp.request_widget,
+			Size:   gui.FlexibleSize(1),
+		})
+	} else {
+		tab_container_layout.Items = append(tab_container_layout.Items, gui.LinearLayoutItem{
+			Size: gui.FlexibleSize(1),
+		})
+	}
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       widget.UnitSize(ctx) / 4,
@@ -132,19 +129,8 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 				Size:   gui.FlexibleSize(1),
 			},
 			{
-				Layout: gui.LinearLayout{
-					Direction: gui.LayoutDirectionVertical,
-					Items: []gui.LinearLayoutItem{
-						{
-							Widget: &rp.tab_widget,
-						},
-						{
-							Widget: &rp.requester_widget,
-							Size:   gui.FlexibleSize(1),
-						},
-					},
-				},
-				Size: gui.FlexibleSize(4),
+				Layout: tab_container_layout,
+				Size:   gui.FlexibleSize(4),
 			},
 			{},
 		},

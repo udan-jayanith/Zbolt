@@ -8,7 +8,7 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	 "API-Client/widgets/request-page"
+	"API-Client/widgets/request/page"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 			ApplePressAndHoldEnabled: true,
 		},
 	}
-	if err := gui.Run(&Requester.RequestPage{}, op); err != nil {
+	if err := gui.Run(&request_page.RequestPage{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

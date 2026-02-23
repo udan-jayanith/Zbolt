@@ -1,4 +1,4 @@
-package Requester
+package http
 
 import (
 	"image"
@@ -7,14 +7,14 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type RequestInputBar struct {
+type request_input_bar_widget struct {
 	gui.DefaultWidget
 	method_select_widget widget.Select[string]
 	input_widget         widget.TextInput
 	request_btn_widget   widget.Button
 }
 
-func (rib *RequestInputBar) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rib.method_select_widget.SetItemsByStrings([]string{
 		"Get",
 		"Post",
@@ -38,7 +38,7 @@ func (rib *RequestInputBar) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 	return nil
 }
 
-func (rib *RequestInputBar) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (rib *request_input_bar_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
@@ -68,7 +68,7 @@ func (rib *RequestInputBar) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBou
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (rib *RequestInputBar) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (rib *request_input_bar_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	u := widget.UnitSize(ctx)
 	if w, ok := constraints.FixedWidth(); ok {
 		return image.Pt(w, u*2)

@@ -1,4 +1,4 @@
-package Requester
+package request_page
 
 import (
 	"API-Client/icons"
@@ -90,6 +90,7 @@ type Sidebar[T comparable] struct {
 	context_menu_pos   image.Point
 	right_clicked_item *sidebar_item_widget[T]
 	on_add_btn_clicked func(ctx *gui.Context)
+	on_item_clicked    func(value T)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
@@ -106,8 +107,12 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	}
 }
 
-func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)){
+func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
 	sd.on_add_btn_clicked = callback
+}
+
+func (sd *Sidebar[T]) OnItemClicked(callback func(value T)) {
+	sd.on_item_clicked = callback
 }
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -122,6 +127,11 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&sd.options.add_widget)
 
 	sd.list_widget.SetItems(sd.list_widget_items)
+	sd.list_widget.SetOnItemSelected(func(context *gui.Context, index int) {
+		if sd.on_item_clicked != nil {
+			sd.on_item_clicked(sd.list_widget_items[index].Value)
+		}
+	})
 	adder.AddChild(&sd.list_widget)
 
 	sd.context_menu.SetItemsByStrings([]string{"Rename", "Delete"})
