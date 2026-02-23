@@ -91,6 +91,7 @@ type Sidebar[T comparable] struct {
 	right_clicked_item *sidebar_item_widget[T]
 	on_add_btn_clicked func(ctx *gui.Context)
 	on_item_clicked    func(value T)
+	on_items_moved     func(context *gui.Context, from int, count int, to int)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
@@ -108,6 +109,10 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	}
 }
 
+func (sd *Sidebar[T]) OneItemsMoved(f func(context *gui.Context, from int, count int, to int)) {
+	sd.on_items_moved = f
+}
+
 func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
 	sd.on_add_btn_clicked = callback
 }
@@ -118,6 +123,10 @@ func (sd *Sidebar[T]) OnItemClicked(callback func(value T)) {
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&sd.options.search_widget)
+
+	if sd.on_items_moved != nil {
+		sd.list_widget.SetOnItemsMoved(sd.on_items_moved)
+	}
 
 	sd.options.add_widget.SetIcon(icons.Store.Open("add"))
 	if sd.on_add_btn_clicked != nil {

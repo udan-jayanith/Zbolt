@@ -41,6 +41,15 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sidebar := rp.sidebar.Widget()
 	sidebar.SetItems(rp.sidebar_items)
+	sidebar.OneItemsMoved(func(context *gui.Context, from, count, to int) {
+		if to == len(rp.sidebar_items) {
+			to--
+		}
+
+		f := rp.sidebar_items[from]
+		rp.sidebar_items[from] = rp.sidebar_items[to]
+		rp.sidebar_items[to] = f
+	})
 
 	rp.sidebar.SetPadding(padding)
 	rp.sidebar.Widget().OnItemClicked(func(value *def.Request) {
