@@ -21,9 +21,12 @@ type RequestPage struct {
 	sidebar       gui.WidgetWithPadding[*Sidebar[*def.Request]]
 	sidebar_items []SidebarItem[*def.Request]
 
-	tab_widget     CommonWidgets.Tab[*def.Request]
-	tab_items      []CommonWidgets.TabItem[*def.Request]
+	tab_widget CommonWidgets.Tab[*def.Request]
+	tab_items  []CommonWidgets.TabItem[*def.Request]
+
 	request_widget CommonWidgets.WidgetWithPadding[def.RequestWidget]
+	nothing_widget NothingWidget
+	http_widget    http.HTTP_Widget
 
 	popup_widget  widget.Popup
 	popup_content sidebar_item_types_panel
@@ -53,14 +56,16 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddChild(&rp.sidebar)
 
-	rp.tab_widget.SetTabItems(rp.tab_items)
-	adder.AddChild(&rp.tab_widget)
-
 	if len(rp.tab_items) > 0 {
+		rp.tab_widget.SetTabItems(rp.tab_items)
+		adder.AddChild(&rp.tab_widget)
+
 		//_, req := rp.tab_widget.GetSelectedTab()
-		rp.request_widget.SetWidget(&http.HTTP_Widget{})
+		rp.request_widget.SetWidget(&rp.http_widget)
 		rp.request_widget.SetPadding(padding)
 		adder.AddChild(&rp.request_widget)
+	} else {
+		adder.AddChild(&rp.nothing_widget)
 	}
 
 	rp.popup_widget.SetContent(&rp.popup_content)
@@ -101,21 +106,22 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	tab_container_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &rp.tab_widget,
-			},
-		},
 	}
 
 	if len(rp.tab_items) > 0 {
-		tab_container_layout.Items = append(tab_container_layout.Items, gui.LinearLayoutItem{
-			Widget: &rp.request_widget,
-			Size:   gui.FlexibleSize(1),
-		})
+		tab_container_layout.Items = []gui.LinearLayoutItem{
+			{
+				Widget: &rp.tab_widget,
+			},
+			{
+				Widget: &rp.request_widget,
+				Size:   gui.FlexibleSize(1),
+			},
+		}
 	} else {
 		tab_container_layout.Items = append(tab_container_layout.Items, gui.LinearLayoutItem{
-			Size: gui.FlexibleSize(1),
+			Size:   gui.FlexibleSize(1),
+			Widget: &rp.nothing_widget,
 		})
 	}
 
