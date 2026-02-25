@@ -70,7 +70,7 @@ func (sd *sidebar_item_widget[T]) Measure(ctx *gui.Context, constraints gui.Cons
 }
 func (sd *sidebar_item_widget[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton2) {
-		sd.sidebar_widget.contextmenu.right_clicked_item = sd
+		sd.sidebar_widget.list.contextmenu.right_clicked_item = sd
 	}
 
 	return gui.HandleInputResult{}
@@ -82,25 +82,26 @@ type Sidebar[T comparable] struct {
 	options struct {
 		search_widget widget.TextInput
 		add           struct {
-			widget        widget.Button
-			menu          widget.PopupMenu[struct{}]
-			menu_position image.Point
+			widget         widget.Button
+			add_button_pos image.Point
+			menu           widget.PopupMenu[struct{}]
 
-			clicked_menu_item_pos image.Point
-			on_request_clicked    func(ctx *gui.Context)
-			folder_popup          CommonWidgets.SimpleFormPopup
+			on_request_clicked func(ctx *gui.Context)
+			folder_popup       CommonWidgets.SimpleFormPopup
 		}
 	}
 
 	list struct {
 		widget widget.List[T]
 		items  []widget.ListItem[T]
-	}
 
-	contextmenu struct {
-		menu               widget.PopupMenu[struct{}]
-		position           image.Point
-		right_clicked_item *sidebar_item_widget[T]
+		contextmenu struct {
+			menu     widget.PopupMenu[struct{}]
+			position image.Point
+
+			rename_popup_widget CommonWidgets.SimpleFormPopup
+			right_clicked_item  *sidebar_item_widget[T]
+		}
 	}
 
 	on_item_clicked func(value T)
@@ -144,7 +145,7 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
 	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
 	sd.options.add.widget.SetOnDown(func(ctx *gui.Context) {
-		sd.options.add.menu_position = image.Pt(ebiten.CursorPosition())
+		sd.options.add.add_button_pos = image.Pt(ebiten.CursorPosition())
 		sd.options.add.menu.SetOpen(true)
 	})
 
@@ -152,7 +153,6 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
 
 	sd.options.add.menu.SetOnItemSelected(func(context *gui.Context, index int) {
-		sd.options.add.clicked_menu_item_pos = image.Pt(ebiten.CursorPosition())
 		if sd.options.add.on_request_clicked != nil && index == 0 {
 			sd.options.add.on_request_clicked(ctx)
 		} else if index == 1 {
@@ -169,30 +169,42 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddChild(&sd.list.widget)
 
-	sd.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
+	sd.list.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
+	sd.list.contextmenu.menu.SetOnItemSelected(func(context *gui.Context, index int) {
+		if index == 0 {
+			sd.list.contextmenu.rename_popup_widget.SetOpen(true)
+		}
+	})
 
-	adder.AddChild(&sd.contextmenu.menu)
+	sd.list.contextmenu.rename_popup_widget.SetButtonText("Rename")
+	sd.list.contextmenu.rename_popup_widget.SetFieldValue("Set new name")
+
+	adder.AddChild(&sd.list.contextmenu.rename_popup_widget)
+	adder.AddChild(&sd.list.contextmenu.menu)
 	adder.AddChild(&sd.options.add.menu)
 	adder.AddChild(&sd.options.add.folder_popup)
 	return nil
 }
 
 func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&sd.contextmenu.menu, image.Rectangle{
-		Min: sd.contextmenu.position,
+	layouter.LayoutWidget(&sd.list.contextmenu.menu, image.Rectangle{
+		Min: sd.list.contextmenu.position,
 	})
 
 	layouter.LayoutWidget(&sd.options.add.menu, image.Rectangle{
-		Min: sd.options.add.menu_position,
+		Min: sd.options.add.add_button_pos,
 	})
 
 	form_measurements := sd.options.add.folder_popup.Measure(ctx, gui.Constraints{})
 	layouter.LayoutWidget(&sd.options.add.folder_popup, image.Rectangle{
-		Min: sd.options.add.clicked_menu_item_pos,
-		Max: image.Point{
-			X: sd.options.add.clicked_menu_item_pos.X + form_measurements.X,
-			Y: sd.options.add.clicked_menu_item_pos.Y + form_measurements.Y,
-		},
+		Min: sd.options.add.add_button_pos,
+		Max: sd.options.add.add_button_pos.Add(form_measurements),
+	})
+
+	rename_measurements := sd.list.contextmenu.rename_popup_widget.Measure(ctx, gui.Constraints{})
+	layouter.LayoutWidget(&sd.list.contextmenu.rename_popup_widget, image.Rectangle{
+		Min: sd.list.contextmenu.position,
+		Max: sd.list.contextmenu.position.Add(rename_measurements),
 	})
 
 	u := widget.UnitSize(ctx)
@@ -225,17 +237,17 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 }
 
 func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return sd.contextmenu.menu.Measure(ctx, constraints)
+	return sd.list.contextmenu.menu.Measure(ctx, constraints)
 }
 
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.contextmenu.right_clicked_item != nil {
-		sd.contextmenu.position = image.Pt(ebiten.CursorPosition())
-		sd.contextmenu.menu.SetOpen(true)
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.list.contextmenu.right_clicked_item != nil {
+		sd.list.contextmenu.position = image.Pt(ebiten.CursorPosition())
+		sd.list.contextmenu.menu.SetOpen(true)
 
-		fmt.Println("right clicked", sd.contextmenu.right_clicked_item.text_widget.Value())
+		fmt.Println("right clicked", sd.list.contextmenu.right_clicked_item.text_widget.Value())
 
-		sd.contextmenu.right_clicked_item = nil
+		sd.list.contextmenu.right_clicked_item = nil
 	}
 
 	return gui.HandleInputResult{}
