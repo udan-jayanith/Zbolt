@@ -251,7 +251,7 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 	sitp.request_name_input.OnCreateButtonClicked(func(name string) {
 		sitp.on_create_clicked(&def.Request{
 			Type: sitp.selected_request_type,
-			Name: name,
+			Path: name,
 		})
 	})
 	adder.AddChild(&sitp.request_name_input)

@@ -13,13 +13,32 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
+type sidebar_item struct {
+	IsFolder bool
+	Data     any
+}
+
+func (si *sidebar_item) GetPath() string{
+	request, ok := si.Data.(*def.Request)
+	if ok {
+		return request.Path
+	}
+	
+	folder, ok := si.Data.(*def.Folder)
+	if ok {
+		return folder.Path
+	}
+	
+	panic("unknown sidebar item")
+}
+
 type RequestPage struct {
 	gui.DefaultWidget
 
 	background widget.Background
 
-	sidebar       gui.WidgetWithPadding[*Sidebar[*def.Request]]
-	sidebar_items []SidebarItem[*def.Request]
+	sidebar       gui.WidgetWithPadding[*Sidebar[sidebar_item]]
+	sidebar_items []SidebarItem[sidebar_item]
 
 	tab_widget CommonWidgets.Tab[*def.Request]
 	tab_items  []CommonWidgets.TabItem[*def.Request]
@@ -52,15 +71,20 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 
 	rp.sidebar.SetPadding(padding)
-	rp.sidebar.Widget().OnItemClicked(func(value *def.Request) {
+	rp.sidebar.Widget().OnItemClicked(func(item sidebar_item) {
+		if item.IsFolder {
+			return
+		}
+		
 		line_height := widget.LineHeight(ctx)
 		size := line_height - line_height/4
 
+		request := item.Data.(*def.Request)
 		rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
-			Value:    value,
-			Text:     value.Name,
+			Value:    request,
+			Text:     request.Path,
 			Closable: true,
-			Icon:     icons.NewIcon(value.Type.IconName(), size),
+			Icon:     icons.NewIcon(request.Type.IconName(), size),
 		})
 	})
 	adder.AddChild(&rp.sidebar)
@@ -91,10 +115,13 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 
 	rp.popup_content.OnCreateButtonClicked(func(request *def.Request) {
-		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[*def.Request]{
-			Value:    request,
-			Text:     request.Name,
+		request_container := sidebar_item{
+			Data: request,
+		}
+		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
 			IconName: request.Type.IconName(),
+			Text:     request.Path,
+			Value: request_container,
 		})
 		rp.popup_widget.SetOpen(false)
 		rp.popup_content.Clear()

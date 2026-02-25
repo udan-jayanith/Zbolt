@@ -32,7 +32,7 @@ func (t RequestType) IconName() string {
 
 type Request struct {
 	Type RequestType
-	Name string
+	Path string
 	data weak.Pointer[any]
 }
 
@@ -43,4 +43,8 @@ func (r *Request) Data() any {
 type RequestWidget interface {
 	gui.Widget
 	RequestType() RequestType
+}
+
+type Folder struct {
+	Path string
 }
