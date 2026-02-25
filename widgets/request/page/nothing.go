@@ -12,7 +12,8 @@ import (
 type NothingWidget struct {
 	gui.DefaultWidget
 
-	image  icons.Icon
+	image    icons.Icon
+	on_click func()
 }
 
 func (nw *NothingWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -24,6 +25,10 @@ func (nw *NothingWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	nw.image.OnClick(func() {})
 
 	adder.AddChild(&nw.image)
+
+	if nw.on_click != nil {
+		nw.image.OnClick(nw.on_click)
+	}
 	return nil
 }
 
@@ -31,7 +36,7 @@ func (nw *NothingWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	flex1_item := gui.LinearLayoutItem{
 		Size: gui.FlexibleSize(1),
 	}
-	
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Items: []gui.LinearLayoutItem{
@@ -51,6 +56,10 @@ func (nw *NothingWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 			flex1_item,
 		},
 	}
-	
+
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (nw *NothingWidget) OnClick(fn func()) {
+	nw.on_click = fn
 }

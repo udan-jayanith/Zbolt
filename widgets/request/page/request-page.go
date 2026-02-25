@@ -74,6 +74,9 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.request_widget.SetPadding(padding)
 		adder.AddChild(&rp.request_widget)
 	} else {
+		rp.nothing_widget.OnClick(func() {
+			rp.popup_widget.SetOpen(true)
+		})
 		adder.AddChild(&rp.nothing_widget)
 	}
 
