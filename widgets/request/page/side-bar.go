@@ -69,7 +69,7 @@ func (sd *sidebar_item_widget[T]) Measure(ctx *gui.Context, constraints gui.Cons
 }
 func (sd *sidebar_item_widget[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton2) {
-		sd.sidebar_widget.right_clicked_item = sd
+		sd.sidebar_widget.contextmenu.right_clicked_item = sd
 	}
 
 	return gui.HandleInputResult{}
@@ -80,28 +80,37 @@ type Sidebar[T comparable] struct {
 
 	options struct {
 		search_widget widget.TextInput
-		add_widget    widget.Button
+		add           struct {
+			widget             widget.Button
+			menu               widget.PopupMenu[struct{}]
+			position           image.Point
+			on_request_clicked func(ctx *gui.Context)
+		}
 	}
-	list_widget       widget.List[T]
-	list_widget_items []widget.ListItem[T]
-	measurement       image.Point
 
-	context_menu       widget.PopupMenu[struct{}]
-	context_menu_pos   image.Point
-	right_clicked_item *sidebar_item_widget[T]
-	on_add_btn_clicked func(ctx *gui.Context)
-	on_item_clicked    func(value T)
-	on_items_moved     func(context *gui.Context, from int, count int, to int)
+	list struct {
+		widget widget.List[T]
+		items  []widget.ListItem[T]
+	}
+
+	contextmenu struct {
+		menu               widget.PopupMenu[struct{}]
+		position           image.Point
+		right_clicked_item *sidebar_item_widget[T]
+	}
+
+	on_item_clicked func(value T)
+	on_items_moved  func(context *gui.Context, from int, count int, to int)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
-	sd.list_widget_items = make([]widget.ListItem[T], 0, len(items))
+	sd.list.items = make([]widget.ListItem[T], 0, len(items))
 	for _, item := range items {
 		content_widget := sidebar_item_widget[T]{
 			sidebar_widget: sd,
 			sidebar_item:   item,
 		}
-		sd.list_widget_items = append(sd.list_widget_items, widget.ListItem[T]{
+		sd.list.items = append(sd.list.items, widget.ListItem[T]{
 			Content: &content_widget,
 			Value:   item.Value,
 			Movable: true,
@@ -114,7 +123,7 @@ func (sd *Sidebar[T]) OneItemsMoved(f func(context *gui.Context, from int, count
 }
 
 func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
-	sd.on_add_btn_clicked = callback
+	sd.options.add.on_request_clicked = callback
 }
 
 func (sd *Sidebar[T]) OnItemClicked(callback func(value T)) {
@@ -125,33 +134,45 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddChild(&sd.options.search_widget)
 
 	if sd.on_items_moved != nil {
-		sd.list_widget.SetOnItemsMoved(sd.on_items_moved)
+		sd.list.widget.SetOnItemsMoved(sd.on_items_moved)
 	}
 
-	sd.options.add_widget.SetIcon(icons.Store.Open("add"))
-	if sd.on_add_btn_clicked != nil {
-		sd.options.add_widget.SetOnDown(func(ctx *gui.Context) {
-			sd.on_add_btn_clicked(ctx)
-		})
-	}
-	adder.AddChild(&sd.options.add_widget)
+	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
+	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
+	sd.options.add.widget.SetOnDown(func(ctx *gui.Context) {
+		sd.options.add.position = image.Pt(ebiten.CursorPosition())
+		sd.options.add.menu.SetOpen(true)
+	})
 
-	sd.list_widget.SetItems(sd.list_widget_items)
-	sd.list_widget.SetOnItemSelected(func(context *gui.Context, index int) {
-		if sd.on_item_clicked != nil {
-			sd.on_item_clicked(sd.list_widget_items[index].Value)
+	sd.options.add.menu.SetOnItemSelected(func(context *gui.Context, index int) {
+		if sd.options.add.on_request_clicked != nil && index == 0{
+			sd.options.add.on_request_clicked(ctx)
 		}
 	})
-	adder.AddChild(&sd.list_widget)
+	adder.AddChild(&sd.options.add.widget)
 
-	sd.context_menu.SetItemsByStrings([]string{"Rename", "Delete"})
-	adder.AddChild(&sd.context_menu)
+	sd.list.widget.SetItems(sd.list.items)
+	sd.list.widget.SetOnItemSelected(func(context *gui.Context, index int) {
+		if sd.on_item_clicked != nil {
+			sd.on_item_clicked(sd.list.items[index].Value)
+		}
+	})
+	adder.AddChild(&sd.list.widget)
+
+	sd.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
+
+	adder.AddChild(&sd.contextmenu.menu)
+	adder.AddChild(&sd.options.add.menu)
 	return nil
 }
 
 func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&sd.context_menu, image.Rectangle{
-		Min: sd.context_menu_pos,
+	layouter.LayoutWidget(&sd.contextmenu.menu, image.Rectangle{
+		Min: sd.contextmenu.position,
+	})
+
+	layouter.LayoutWidget(&sd.options.add.menu, image.Rectangle{
+		Min: sd.options.add.position,
 	})
 
 	u := widget.UnitSize(ctx)
@@ -169,13 +190,13 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 							Size:   gui.FlexibleSize(1),
 						},
 						{
-							Widget: &sd.options.add_widget,
+							Widget: &sd.options.add.widget,
 						},
 					},
 				},
 			},
 			{
-				Widget: &sd.list_widget,
+				Widget: &sd.list.widget,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
@@ -184,17 +205,17 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 }
 
 func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return sd.list_widget.Measure(ctx, constraints)
+	return sd.contextmenu.menu.Measure(ctx, constraints)
 }
 
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.right_clicked_item != nil {
-		sd.context_menu_pos = image.Pt(ebiten.CursorPosition())
-		sd.context_menu.SetOpen(true)
+	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.contextmenu.right_clicked_item != nil {
+		sd.contextmenu.position = image.Pt(ebiten.CursorPosition())
+		sd.contextmenu.menu.SetOpen(true)
 
-		fmt.Println("right clicked", sd.right_clicked_item.text_widget.Value())
+		fmt.Println("right clicked", sd.contextmenu.right_clicked_item.text_widget.Value())
 
-		sd.right_clicked_item = nil
+		sd.contextmenu.right_clicked_item = nil
 	}
 
 	return gui.HandleInputResult{}
