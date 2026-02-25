@@ -1,6 +1,7 @@
 package request_page
 
 import (
+	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
 	"fmt"
 	"image"
@@ -81,10 +82,13 @@ type Sidebar[T comparable] struct {
 	options struct {
 		search_widget widget.TextInput
 		add           struct {
-			widget             widget.Button
-			menu               widget.PopupMenu[struct{}]
-			position           image.Point
-			on_request_clicked func(ctx *gui.Context)
+			widget        widget.Button
+			menu          widget.PopupMenu[struct{}]
+			menu_position image.Point
+
+			clicked_menu_item_pos image.Point
+			on_request_clicked    func(ctx *gui.Context)
+			folder_popup          CommonWidgets.SimpleFormPopup
 		}
 	}
 
@@ -140,13 +144,19 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
 	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
 	sd.options.add.widget.SetOnDown(func(ctx *gui.Context) {
-		sd.options.add.position = image.Pt(ebiten.CursorPosition())
+		sd.options.add.menu_position = image.Pt(ebiten.CursorPosition())
 		sd.options.add.menu.SetOpen(true)
 	})
 
+	sd.options.add.folder_popup.SetButtonText("Create")
+	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
+
 	sd.options.add.menu.SetOnItemSelected(func(context *gui.Context, index int) {
-		if sd.options.add.on_request_clicked != nil && index == 0{
+		sd.options.add.clicked_menu_item_pos = image.Pt(ebiten.CursorPosition())
+		if sd.options.add.on_request_clicked != nil && index == 0 {
 			sd.options.add.on_request_clicked(ctx)
+		} else if index == 1 {
+			sd.options.add.folder_popup.SetOpen(true)
 		}
 	})
 	adder.AddChild(&sd.options.add.widget)
@@ -163,6 +173,7 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	adder.AddChild(&sd.contextmenu.menu)
 	adder.AddChild(&sd.options.add.menu)
+	adder.AddChild(&sd.options.add.folder_popup)
 	return nil
 }
 
@@ -172,7 +183,16 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	})
 
 	layouter.LayoutWidget(&sd.options.add.menu, image.Rectangle{
-		Min: sd.options.add.position,
+		Min: sd.options.add.menu_position,
+	})
+
+	form_measurements := sd.options.add.folder_popup.Measure(ctx, gui.Constraints{})
+	layouter.LayoutWidget(&sd.options.add.folder_popup, image.Rectangle{
+		Min: sd.options.add.clicked_menu_item_pos,
+		Max: image.Point{
+			X: sd.options.add.clicked_menu_item_pos.X + form_measurements.X,
+			Y: sd.options.add.clicked_menu_item_pos.Y + form_measurements.Y,
+		},
 	})
 
 	u := widget.UnitSize(ctx)
