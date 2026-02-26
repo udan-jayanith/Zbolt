@@ -20,7 +20,7 @@ func (content *popup_form_content) Build(ctx *gui.Context, adder *gui.ChildAdder
 	if content.field_widget.Value() != "" {
 		content.field_widget.SetVerticalAlign(widget.VerticalAlignBottom)
 		content.field_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-		content.field_widget.SetOpacity(0.8)
+		content.field_widget.SetOpacity(0.82)
 		adder.AddChild(&content.field_widget)
 	}
 
