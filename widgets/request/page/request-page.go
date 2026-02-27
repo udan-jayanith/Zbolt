@@ -6,6 +6,7 @@ import (
 	"API-Client/icons"
 	"API-Client/widgets/request/def"
 	"API-Client/widgets/request/page/http"
+	"errors"
 
 	"image"
 
@@ -18,17 +19,17 @@ type sidebar_item struct {
 	Data     any
 }
 
-func (si *sidebar_item) GetPath() string{
+func (si *sidebar_item) GetPath() string {
 	request, ok := si.Data.(*def.Request)
 	if ok {
 		return request.Path
 	}
-	
+
 	folder, ok := si.Data.(*def.Folder)
 	if ok {
 		return folder.Path
 	}
-	
+
 	panic("unknown sidebar item")
 }
 
@@ -52,6 +53,27 @@ type RequestPage struct {
 	is_popup_open bool
 }
 
+func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
+	for i, req := range rp.tab_items {
+		if req.Value.Path == request.Path {
+			rp.tab_widget.SelectTabItemByIndex(i)
+			return errors.New("Alredy opened")
+		}
+	}
+
+	line_height := widget.LineHeight(ctx)
+	size := line_height - line_height/4
+	rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
+		Value:    request,
+		Text:     request.Path,
+		Closable: true,
+		Icon:     icons.NewIcon(request.Type.IconName(), size),
+	})
+
+	rp.tab_widget.SelectTabItemByIndex(len(rp.tab_items) - 1)
+	return nil
+}
+
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(gui.ColorModeDark)
 
@@ -71,21 +93,13 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 
 	rp.sidebar.SetPadding(padding)
-	rp.sidebar.Widget().OnItemClicked(func(item sidebar_item) {
+	sidebar.OnItemClicked(func(item sidebar_item) {
 		if item.IsFolder {
 			return
 		}
-		
-		line_height := widget.LineHeight(ctx)
-		size := line_height - line_height/4
 
 		request := item.Data.(*def.Request)
-		rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
-			Value:    request,
-			Text:     request.Path,
-			Closable: true,
-			Icon:     icons.NewIcon(request.Type.IconName(), size),
-		})
+		rp.open_tab(request, ctx)
 	})
 	adder.AddChild(&rp.sidebar)
 
@@ -121,7 +135,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
 			IconName: request.Type.IconName(),
 			Text:     request.Path,
-			Value: request_container,
+			Value:    request_container,
 		})
 		rp.popup_widget.SetOpen(false)
 		rp.popup_content.Clear()

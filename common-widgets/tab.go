@@ -215,7 +215,9 @@ func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
 
 func (tab *Tab[T]) SelectTabItemByIndex(index int) {
 	tab.tab.selected_item_index = index
-	tab.tab.on_select_fn(tab.tab.tab_items[index].tab_item, index)
+	if tab.tab.on_select_fn != nil {
+		tab.tab.on_select_fn(tab.tab.tab_items[index].tab_item, index)
+	}
 }
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
