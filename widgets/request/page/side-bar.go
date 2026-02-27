@@ -237,7 +237,7 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 }
 
 func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return sd.list.contextmenu.menu.Measure(ctx, constraints)
+	return sd.list.widget.Measure(ctx, constraints)
 }
 
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
