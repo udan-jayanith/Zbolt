@@ -20,17 +20,19 @@ type sidebar_item struct {
 }
 
 func (si *sidebar_item) GetPath() string {
-	request, ok := si.Data.(*def.Request)
-	if ok {
-		return request.Path
-	}
-
-	folder, ok := si.Data.(*def.Folder)
-	if ok {
+	if si.IsFolder {
+		folder, ok := si.Data.(*def.Folder)
+		if !ok {
+			panic("si.IsFolder is true but inference failed")
+		}
 		return folder.Path
 	}
 
-	panic("unknown sidebar item")
+	request, ok := si.Data.(*def.Request)
+	if !ok {
+		panic("si.IsFolder is fauls but inference failed")
+	}
+	return request.Path
 }
 
 type RequestPage struct {
@@ -38,7 +40,10 @@ type RequestPage struct {
 
 	background widget.Background
 
-	sidebar       gui.WidgetWithPadding[*Sidebar[sidebar_item]]
+	sidebar gui.WidgetWithPadding[*Sidebar[sidebar_item]]
+
+	// made sidebar_items map[string][]SidebarItem[sidebar_item]
+	current_directory string
 	sidebar_items []SidebarItem[sidebar_item]
 
 	tab_widget CommonWidgets.Tab[*def.Request]
@@ -72,6 +77,19 @@ func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
 
 	rp.tab_widget.SelectTabItemByIndex(len(rp.tab_items) - 1)
 	return nil
+}
+
+func (rp *RequestPage) create_sidebar_item(request *def.Request) {
+	request_container := sidebar_item{
+		Data: request,
+	}
+	rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
+		IconName: request.Type.IconName(),
+		Text:     request.Path,
+		Value:    request_container,
+	})
+	
+	//TODO: Open the the sidebar item if there were no items before on creation.
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -129,14 +147,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 
 	rp.popup_content.OnCreateButtonClicked(func(request *def.Request) {
-		request_container := sidebar_item{
-			Data: request,
-		}
-		rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
-			IconName: request.Type.IconName(),
-			Text:     request.Path,
-			Value:    request_container,
-		})
+		rp.create_sidebar_item(request)
 		rp.popup_widget.SetOpen(false)
 		rp.popup_content.Clear()
 	})
