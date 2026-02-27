@@ -118,7 +118,7 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 		sd.list.items = append(sd.list.items, widget.ListItem[T]{
 			Content: &content_widget,
 			Value:   item.Value,
-			Movable: true,
+			Movable: false,
 		})
 	}
 }
