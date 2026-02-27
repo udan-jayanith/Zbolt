@@ -6,7 +6,7 @@ import (
 	"API-Client/icons"
 	"API-Client/widgets/request/def"
 	"API-Client/widgets/request/page/http"
-	"errors"
+	"fmt"
 
 	"image"
 
@@ -44,7 +44,7 @@ type RequestPage struct {
 
 	// made sidebar_items map[string][]SidebarItem[sidebar_item]
 	current_directory string
-	sidebar_items []SidebarItem[sidebar_item]
+	sidebar_items     []SidebarItem[sidebar_item]
 
 	tab_widget CommonWidgets.Tab[*def.Request]
 	tab_items  []CommonWidgets.TabItem[*def.Request]
@@ -56,13 +56,15 @@ type RequestPage struct {
 	popup_widget  widget.Popup
 	popup_content sidebar_item_types_panel
 	is_popup_open bool
+
+	notify_widget CommonWidgets.Notify
 }
 
 func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
 	for i, req := range rp.tab_items {
 		if req.Value.Path == request.Path {
 			rp.tab_widget.SelectTabItemByIndex(i)
-			return errors.New("Alredy opened")
+			return fmt.Errorf("%s is already opened", request.Path)
 		}
 	}
 
@@ -88,7 +90,7 @@ func (rp *RequestPage) create_sidebar_item(request *def.Request) {
 		Text:     request.Path,
 		Value:    request_container,
 	})
-	
+
 	//TODO: Open the the sidebar item if there were no items before on creation.
 }
 
@@ -117,7 +119,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 
 		request := item.Data.(*def.Request)
-		rp.open_tab(request, ctx)
+		err := rp.open_tab(request, ctx)
+		if err != nil {
+			rp.notify_widget.SetText(err.Error())
+			rp.notify_widget.Open()
+		}
 	})
 	adder.AddChild(&rp.sidebar)
 
@@ -152,6 +158,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.popup_content.Clear()
 	})
 
+	adder.AddChild(&rp.notify_widget)
 	return nil
 }
 
@@ -167,6 +174,8 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	popup_size.Max = image.Pt(popup_size.Min.X+popup_content_bounds.X, popup_size.Min.Y+popup_content_bounds.Y)
 
 	layouter.LayoutWidget(&rp.popup_widget, popup_size)
+
+	rp.notify_widget.LayoutWidget(ctx, widgetBounds, layouter)
 
 	tab_container_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
