@@ -1,6 +1,6 @@
 module API-Client
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/guigui-gui/guigui v0.0.0-20260228142515-9fd29405cdbb
