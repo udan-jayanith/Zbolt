@@ -1,9 +1,11 @@
 package http
 
 import (
+	"API-Client/widgets/request/def"
+
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
-	"API-Client/widgets/request/def"
+	"github.com/hajimehoshi/ebiten/v2"
 	// "image"
 )
 
@@ -18,10 +20,10 @@ func (brp *HTTP_Widget) RequestType() def.RequestType {
 }
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(gui.ColorModeDark)
+	ctx.SetColorMode(ebiten.ColorModeDark)
 
-	adder.AddChild(&brp.request_widget)
-	adder.AddChild(&brp.response_widget)
+	adder.AddWidget(&brp.request_widget)
+	adder.AddWidget(&brp.response_widget)
 	return nil
 }
 

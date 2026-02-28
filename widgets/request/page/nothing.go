@@ -24,7 +24,7 @@ func (nw *NothingWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	nw.image.Point = &point
 	nw.image.OnClick(func() {})
 
-	adder.AddChild(&nw.image)
+	adder.AddWidget(&nw.image)
 
 	if nw.on_click != nil {
 		nw.image.OnClick(nw.on_click)

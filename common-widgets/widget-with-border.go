@@ -18,7 +18,7 @@ type WidgetWithBorder[T gui.Widget] struct {
 }
 
 func (item *WidgetWithBorder[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(item.widget)
+	adder.AddWidget(item.widget)
 	return nil
 }
 

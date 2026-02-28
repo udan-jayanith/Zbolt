@@ -19,7 +19,7 @@ type response_widget struct {
 }
 
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&rw.header_widget)
+	adder.AddWidget(&rw.header_widget)
 	
 	u := widget.UnitSize(ctx)
 	rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
@@ -70,8 +70,8 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 			panic("Unknown tab selected")
 		}
 
-		adder.AddChild(&rw.tab)
-		adder.AddChild(rw.tab_content.selected_content)
+		adder.AddWidget(&rw.tab)
+		adder.AddWidget(rw.tab_content.selected_content)
 	}
 
 	return nil

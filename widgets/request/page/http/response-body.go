@@ -29,27 +29,26 @@ func (rbh *response_body_header) Build(ctx *gui.Context, adder *gui.ChildAdder) 
 	{
 		rbh.file_type.SetValue("Json")
 		rbh.file_type.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbh.file_type)
+		adder.AddWidget(&rbh.file_type)
 	}
 	{
 		rbh.options.auto_wrap.text.SetValue("Auto wrap")
 		rbh.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbh.options.auto_wrap.text)
+		adder.AddWidget(&rbh.options.auto_wrap.text)
 
-		adder.AddChild(&rbh.options.auto_wrap.toggle)
+		adder.AddWidget(&rbh.options.auto_wrap.toggle)
 	}
 	{
 		rbh.options.format.text.SetValue("Format")
 		rbh.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
-		adder.AddChild(&rbh.options.format.text)
+		adder.AddWidget(&rbh.options.format.text)
 
-		adder.AddChild(&rbh.options.format.toggle)
+		adder.AddWidget(&rbh.options.format.toggle)
 	}
 	{
 		rbh.options.open_with.SetText("Open")
-		rbh.options.open_with.SetOnUp(func(context *gui.Context) {
-		})
-		adder.AddChild(&rbh.options.open_with)
+		rbh.options.open_with.OnUp(func(context *gui.Context) {})
+		adder.AddWidget(&rbh.options.open_with)
 	}
 	return nil
 }
@@ -121,7 +120,7 @@ type response_body_widget struct {
 }
 
 func (rbw *response_body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&rbw.header)
+	adder.AddWidget(&rbw.header)
 	
 	rbw.view.SetAutoWrap(true)
 	rbw.view.SetMultiline(true)
@@ -137,7 +136,7 @@ func (rbw *response_body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) 
 
 		Hello world
 		`)
-	adder.AddChild(&rbw.view)
+	adder.AddWidget(&rbw.view)
 
 	return nil
 }

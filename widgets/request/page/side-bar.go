@@ -35,10 +35,10 @@ func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder)
 	} else if sd.icon_widget == nil {
 		sd.icon_widget = icons.NewIcon(sd.sidebar_item.IconName, line_height)
 	}
-	adder.AddChild(sd.icon_widget)
+	adder.AddWidget(sd.icon_widget)
 
 	sd.text_widget.SetValue(sd.sidebar_item.Text)
-	adder.AddChild(&sd.text_widget)
+	adder.AddWidget(&sd.text_widget)
 
 	return nil
 }
@@ -136,15 +136,15 @@ func (sd *Sidebar[T]) OnItemClicked(callback func(value T)) {
 }
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&sd.options.search_widget)
+	adder.AddWidget(&sd.options.search_widget)
 
 	if sd.on_items_moved != nil {
-		sd.list.widget.SetOnItemsMoved(sd.on_items_moved)
+		sd.list.widget.OnItemsMoved(sd.on_items_moved)
 	}
 
 	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
 	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
-	sd.options.add.widget.SetOnDown(func(ctx *gui.Context) {
+	sd.options.add.widget.OnDown(func(ctx *gui.Context) {
 		sd.options.add.add_button_pos = image.Pt(ebiten.CursorPosition())
 		sd.options.add.menu.SetOpen(true)
 	})
@@ -152,25 +152,25 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add.folder_popup.SetButtonText("Create")
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
 
-	sd.options.add.menu.SetOnItemSelected(func(context *gui.Context, index int) {
+	sd.options.add.menu.OnItemSelected(func(context *gui.Context, index int) {
 		if sd.options.add.on_request_clicked != nil && index == 0 {
 			sd.options.add.on_request_clicked(ctx)
 		} else if index == 1 {
 			sd.options.add.folder_popup.SetOpen(true)
 		}
 	})
-	adder.AddChild(&sd.options.add.widget)
+	adder.AddWidget(&sd.options.add.widget)
 
 	sd.list.widget.SetItems(sd.list.items)
-	sd.list.widget.SetOnItemSelected(func(context *gui.Context, index int) {
+	sd.list.widget.OnItemsSelected(func(context *gui.Context, indices []int) {
 		if sd.on_item_clicked != nil {
-			sd.on_item_clicked(sd.list.items[index].Value)
+			sd.on_item_clicked(sd.list.items[indices[0]].Value)
 		}
 	})
-	adder.AddChild(&sd.list.widget)
+	adder.AddWidget(&sd.list.widget)
 
 	sd.list.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
-	sd.list.contextmenu.menu.SetOnItemSelected(func(context *gui.Context, index int) {
+	sd.list.contextmenu.menu.OnItemSelected(func(context *gui.Context, index int) {
 		if index == 0 {
 			sd.list.contextmenu.rename_popup_widget.SetOpen(true)
 		}
@@ -179,10 +179,10 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.list.contextmenu.rename_popup_widget.SetButtonText("Rename")
 	sd.list.contextmenu.rename_popup_widget.SetFieldValue("Set new name")
 
-	adder.AddChild(&sd.list.contextmenu.rename_popup_widget)
-	adder.AddChild(&sd.list.contextmenu.menu)
-	adder.AddChild(&sd.options.add.menu)
-	adder.AddChild(&sd.options.add.folder_popup)
+	adder.AddWidget(&sd.list.contextmenu.rename_popup_widget)
+	adder.AddWidget(&sd.list.contextmenu.menu)
+	adder.AddWidget(&sd.options.add.menu)
+	adder.AddWidget(&sd.options.add.folder_popup)
 	return nil
 }
 

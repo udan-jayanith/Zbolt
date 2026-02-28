@@ -27,14 +27,14 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 
 	selected_item_index := max(rib.method_select_widget.SelectedItemIndex(), 0)
 	rib.method_select_widget.SelectItemByIndex(selected_item_index)
-	adder.AddChild(&rib.method_select_widget)
+	adder.AddWidget(&rib.method_select_widget)
 
 	rib.input_widget.SetEditable(true)
-	adder.AddChild(&rib.input_widget)
+	adder.AddWidget(&rib.input_widget)
 
 	rib.request_btn_widget.SetText("Request")
 	rib.request_btn_widget.SetTextBold(true)
-	adder.AddChild(&rib.request_btn_widget)
+	adder.AddWidget(&rib.request_btn_widget)
 	return nil
 }
 

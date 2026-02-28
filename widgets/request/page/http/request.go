@@ -22,14 +22,14 @@ type request_widget struct {
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&rw.input_bar_widget)
+	adder.AddWidget(&rw.input_bar_widget)
 
 	{
 		rw.url_preview.SetEditable(false)
 		rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
 		rw.url_preview.SetMultiline(true)
 		rw.url_preview.SetAutoWrap(true)
-		adder.AddChild(&rw.url_preview)
+		adder.AddWidget(&rw.url_preview)
 	}
 
 	{
@@ -60,8 +60,8 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			panic("Unknown tab was selected")
 		}
 
-		adder.AddChild(rw.tab_content.selected_widget)
-		adder.AddChild(&rw.tab)
+		adder.AddWidget(rw.tab_content.selected_widget)
+		adder.AddWidget(&rw.tab)
 	}
 	return nil
 }

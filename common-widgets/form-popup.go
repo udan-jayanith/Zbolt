@@ -21,13 +21,13 @@ func (content *popup_form_content) Build(ctx *gui.Context, adder *gui.ChildAdder
 		content.field_widget.SetVerticalAlign(widget.VerticalAlignBottom)
 		content.field_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 		content.field_widget.SetOpacity(0.82)
-		adder.AddChild(&content.field_widget)
+		adder.AddWidget(&content.field_widget)
 	}
 
-	adder.AddChild(&content.input_widget)
+	adder.AddWidget(&content.input_widget)
 
 	content.button_widget.SetType(widget.ButtonTypePrimary)
-	adder.AddChild(&content.button_widget)
+	adder.AddWidget(&content.button_widget)
 	return nil
 }
 
@@ -101,7 +101,7 @@ func (sfp *SimpleFormPopup) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 	sfp.popup_widget.SetContent(&sfp.padding_widget)
 	sfp.popup_widget.SetAnimated(true)
 	sfp.popup_widget.SetCloseByClickingOutside(true)
-	adder.AddChild(&sfp.popup_widget)
+	adder.AddWidget(&sfp.popup_widget)
 	return nil
 }
 

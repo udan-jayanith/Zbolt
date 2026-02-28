@@ -39,14 +39,14 @@ type tab_item[T any] struct {
 
 func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if item.tab_item.Icon != nil {
-		adder.AddChild(item.tab_item.Icon)
+		adder.AddWidget(item.tab_item.Icon)
 	}
 
 	text_widget := &item.text_widget
 	text_widget.SetValue(item.tab_item.Text)
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	adder.AddChild(&item.text_widget)
+	adder.AddWidget(&item.text_widget)
 
 	if item.tab_item.Closable {
 		if item.close_widget.icon == nil {
@@ -61,7 +61,7 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		} else {
 			item.close_widget.icon = item.close_widget.selected
 		}
-		adder.AddChild(item.close_widget.icon)
+		adder.AddWidget(item.close_widget.icon)
 	}
 
 	if item.tab_widget.selected_item_index == item.index {
@@ -146,7 +146,7 @@ type tab[T any] struct {
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	for _, tab_item := range tab.tab_items {
-		adder.AddChild(tab_item)
+		adder.AddWidget(tab_item)
 	}
 	return nil
 }
@@ -224,7 +224,7 @@ func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab)
 	tab.panel.SetStyle(widget.PanelStyleSide)
 	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	adder.AddChild(&tab.panel)
+	adder.AddWidget(&tab.panel)
 	return nil
 }
 

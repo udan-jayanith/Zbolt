@@ -70,7 +70,7 @@ type Icon struct {
 
 func (icon *Icon) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	icon.image_widget.SetImage(Store.Open(icon.IconName))
-	adder.AddChild(&icon.image_widget)
+	adder.AddWidget(&icon.image_widget)
 	return nil
 }
 

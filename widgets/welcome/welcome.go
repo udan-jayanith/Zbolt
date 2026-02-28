@@ -5,6 +5,7 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Welcome struct {
@@ -16,34 +17,34 @@ type Welcome struct {
 	new_request     widget.Button
 	create_project  widget.Button
 	recent_projects widget.Text
-	recent_list RecentList
+	recent_list     RecentList
 }
 
 func (wp *Welcome) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(gui.ColorModeDark)
-	adder.AddChild(&wp.background)
+	ctx.SetColorMode(ebiten.ColorModeDark)
+	adder.AddWidget(&wp.background)
 
 	wp.create_a_text.SetValue("Create a")
 	wp.create_a_text.SetBold(true)
 	wp.create_a_text.SetScale(basic.HeadingSize)
-	adder.AddChild(&wp.create_a_text)
+	adder.AddWidget(&wp.create_a_text)
 
 	wp.open.SetText("Open project")
 	wp.open.SetTextBold(true)
-	adder.AddChild(&wp.open)
-	
+	adder.AddWidget(&wp.open)
+
 	wp.new_request.SetText("New Request")
 	wp.new_request.SetTextBold(true)
-	adder.AddChild(&wp.new_request)
+	adder.AddWidget(&wp.new_request)
 
 	wp.create_project.SetText("Create Project")
 	wp.create_project.SetTextBold(true)
-	adder.AddChild(&wp.create_project)
+	adder.AddWidget(&wp.create_project)
 
 	wp.recent_projects.SetValue("Recent projects")
 	wp.recent_projects.SetBold(true)
 	wp.recent_projects.SetScale(basic.HeadingSize)
-	adder.AddChild(&wp.recent_projects)
+	adder.AddWidget(&wp.recent_projects)
 
 	wp.recent_list.Add([]*RecentItem{
 		{
@@ -56,7 +57,7 @@ func (wp *Welcome) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			Text: basic.NewTextWidget(`C:\Users\Udan\Pictures\Camera Roll`),
 		},
 	})
-	adder.AddChild(&wp.recent_list)
+	adder.AddWidget(&wp.recent_list)
 	return nil
 }
 
@@ -67,8 +68,8 @@ func (wp *Welcome) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layo
 	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap: u/4,
-		Padding: basic.NewPadding(u*2, u, u, u),
+		Gap:       u / 4,
+		Padding:   basic.NewPadding(u*2, u, u, u),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &wp.create_a_text,
@@ -91,7 +92,7 @@ func (wp *Welcome) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layo
 				},
 			},
 			{
-				Size: gui.FixedSize(u*2),
+				Size: gui.FixedSize(u * 2),
 			},
 			{
 				Widget: &wp.recent_projects,

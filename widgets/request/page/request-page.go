@@ -12,6 +12,7 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type sidebar_item struct {
@@ -95,9 +96,9 @@ func (rp *RequestPage) create_sidebar_item(request *def.Request) {
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(gui.ColorModeDark)
+	ctx.SetColorMode(ebiten.ColorModeDark)
 
-	adder.AddChild(&rp.background)
+	adder.AddWidget(&rp.background)
 	padding := basic.NewPadding(widget.UnitSize(ctx)/4, 0)
 
 	sidebar := rp.sidebar.Widget()
@@ -125,28 +126,28 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			rp.notify_widget.Open()
 		}
 	})
-	adder.AddChild(&rp.sidebar)
+	adder.AddWidget(&rp.sidebar)
 
 	if len(rp.tab_items) > 0 {
 		rp.tab_widget.SetTabItems(rp.tab_items)
-		adder.AddChild(&rp.tab_widget)
+		adder.AddWidget(&rp.tab_widget)
 
 		//_, req := rp.tab_widget.GetSelectedTab()
 		rp.request_widget.SetWidget(&rp.http_widget)
 		rp.request_widget.SetPadding(padding)
-		adder.AddChild(&rp.request_widget)
+		adder.AddWidget(&rp.request_widget)
 	} else {
 		rp.nothing_widget.OnClick(func() {
 			rp.popup_widget.SetOpen(true)
 		})
-		adder.AddChild(&rp.nothing_widget)
+		adder.AddWidget(&rp.nothing_widget)
 	}
 
 	rp.popup_widget.SetContent(&rp.popup_content)
 	rp.popup_widget.SetBackgroundDark(true)
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
-	adder.AddChild(&rp.popup_widget)
+	adder.AddWidget(&rp.popup_widget)
 
 	rp.sidebar.Widget().OnAddButtonClicked(func(ctx *gui.Context) {
 		rp.popup_widget.SetOpen(true)
@@ -158,7 +159,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.popup_content.Clear()
 	})
 
-	adder.AddChild(&rp.notify_widget)
+	adder.AddWidget(&rp.notify_widget)
 	return nil
 }
 

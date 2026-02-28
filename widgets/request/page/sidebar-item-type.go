@@ -25,12 +25,12 @@ func (sitc *sidebar_item_type_card) Build(ctx *gui.Context, adder *gui.ChildAdde
 	u := widget.UnitSize(ctx)
 	icon_size := image.Pt(u*2, u*2)
 	sitc.icon_widget.Point = &icon_size
-	adder.AddChild(&sitc.icon_widget)
+	adder.AddWidget(&sitc.icon_widget)
 
 	sitc.text_widget.SetValue(sitc.Text)
 	sitc.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	sitc.text_widget.SetHorizontalAlign(widget.HorizontalAlignCenter)
-	adder.AddChild(&sitc.text_widget)
+	adder.AddWidget(&sitc.text_widget)
 
 	return nil
 }
@@ -93,18 +93,18 @@ func (rniw *request_name_inputs_widget) Build(ctx *gui.Context, adder *gui.Child
 	rniw.text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	rniw.text_widget.SetHorizontalAlign(widget.HorizontalAlignStart)
 	rniw.text_widget.SetScale(1)
-	adder.AddChild(&rniw.text_widget)
+	adder.AddWidget(&rniw.text_widget)
 
-	adder.AddChild(&rniw.input_widget)
+	adder.AddWidget(&rniw.input_widget)
 
 	rniw.create_button_widget.SetText("Create")
 	rniw.create_button_widget.SetType(widget.ButtonTypePrimary)
 	if rniw.on_create_button_clicked != nil {
-		rniw.create_button_widget.SetOnDown(func(context *gui.Context) {
+		rniw.create_button_widget.OnDown(func(context *gui.Context) {
 			rniw.on_create_button_clicked(rniw.input_widget.Value())
 		})
 	}
-	adder.AddChild(&rniw.create_button_widget)
+	adder.AddWidget(&rniw.create_button_widget)
 	return nil
 }
 
@@ -180,7 +180,7 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 	sitp.select_type_text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	sitp.select_type_text_widget.SetHorizontalAlign(widget.HorizontalAlignStart)
 	sitp.select_type_text_widget.SetScale(1)
-	adder.AddChild(&sitp.select_type_text_widget)
+	adder.AddWidget(&sitp.select_type_text_widget)
 
 	u := widget.UnitSize(ctx)
 	item_size := image.Pt(u*4, u*4)
@@ -191,10 +191,10 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		Text:      "HTTP",
 		Icon_name: "http",
 	})
-	http.SetOnDown(func(context *gui.Context) {
+	http.OnDown(func(context *gui.Context) {
 		sitp.selected_request_type = def.HTTP
 	})
-	adder.AddChild(&sitp.http)
+	adder.AddWidget(&sitp.http)
 
 	sitp.websocket.SetFixedSize(item_size)
 	websocket := sitp.websocket.Widget()
@@ -202,11 +202,11 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		Text:      "Websocket",
 		Icon_name: "websocket",
 	})
-	websocket.SetOnDown(func(context *gui.Context) {
+	websocket.OnDown(func(context *gui.Context) {
 		sitp.selected_request_type = def.Websocket
 	})
 
-	adder.AddChild(&sitp.websocket)
+	adder.AddWidget(&sitp.websocket)
 
 	sitp.graphql.SetFixedSize(item_size)
 	graphql := sitp.graphql.Widget()
@@ -214,10 +214,10 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		Text:      "GraphQL",
 		Icon_name: "graphql",
 	})
-	graphql.SetOnDown(func(context *gui.Context) {
+	graphql.OnDown(func(context *gui.Context) {
 		sitp.selected_request_type = def.GraphQL
 	})
-	adder.AddChild(&sitp.graphql)
+	adder.AddWidget(&sitp.graphql)
 
 	sitp.grpc.SetFixedSize(item_size)
 	grpc := sitp.grpc.Widget()
@@ -225,10 +225,10 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		Text:      "gRPC",
 		Icon_name: "grpc",
 	})
-	grpc.SetOnDown(func(context *gui.Context) {
+	grpc.OnDown(func(context *gui.Context) {
 		sitp.selected_request_type = def.Grpc
 	})
-	adder.AddChild(&sitp.grpc)
+	adder.AddWidget(&sitp.grpc)
 
 	http.SetType(widget.ButtonTypeNormal)
 	websocket.SetType(widget.ButtonTypeNormal)
@@ -254,7 +254,7 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 			Path: name,
 		})
 	})
-	adder.AddChild(&sitp.request_name_input)
+	adder.AddWidget(&sitp.request_name_input)
 	return nil
 }
 

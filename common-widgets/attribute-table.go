@@ -20,7 +20,7 @@ func (et *EditableText) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	et.widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	et.widget.SetSelectable(true)
 	et.widget.SetEditable(true)
-	adder.AddChild(&et.widget)
+	adder.AddWidget(&et.widget)
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 
 	at.table.SetItems(at.table_rows)
-	adder.AddChild(&at.table)
+	adder.AddWidget(&at.table)
 	return nil
 }
 

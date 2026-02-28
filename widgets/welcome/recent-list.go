@@ -23,7 +23,7 @@ func (rl *RecentList) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 	
 	for _, recent_project := range rl.recent_projects {
-		adder.AddChild(recent_project.Text)
+		adder.AddWidget(recent_project.Text)
 	}
 	return nil
 }

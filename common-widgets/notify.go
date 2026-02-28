@@ -75,7 +75,7 @@ func (notify *Notify) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	line_height := widget.LineHeight(ctx)
 	notify.layered_padding.Widget().SetPadding(basic.NewPadding(line_height/3, line_height/2+line_height/3))
 	notify.layered_padding.Widget().SetWidget(&notify.text_widget)
-	adder.AddChild(&notify.layered_padding)
+	adder.AddWidget(&notify.layered_padding)
 	return nil
 }
 

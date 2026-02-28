@@ -20,7 +20,7 @@ type Root struct {
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(&r.request_page_widget)
+	adder.AddWidget(&r.request_page_widget)
 	return nil
 }
 

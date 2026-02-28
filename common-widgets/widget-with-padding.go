@@ -28,7 +28,7 @@ func (wwp *WidgetWithPadding[T]) IsSet() bool {
 }
 
 func (wwp *WidgetWithPadding[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddChild(wwp.widget)
+	adder.AddWidget(wwp.widget)
 	return nil
 }
 

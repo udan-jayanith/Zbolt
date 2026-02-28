@@ -18,19 +18,19 @@ type response_header_widget struct {
 func (rhw *response_header_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rhw.status.SetTabular(true)
 	rhw.status.SetValue("200 Ok")
-	adder.AddChild(&rhw.status)
+	adder.AddWidget(&rhw.status)
 
 	rhw.response_time.SetTabular(true)
 	rhw.response_time.SetValue("200 ms")
-	adder.AddChild(&rhw.response_time)
+	adder.AddWidget(&rhw.response_time)
 
 	rhw.size.SetTabular(true)
 	rhw.size.SetValue("131 B")
-	adder.AddChild(&rhw.size)
+	adder.AddWidget(&rhw.size)
 
 	rhw.proto.SetTabular(true)
 	rhw.proto.SetValue("HTTP v1.1")
-	adder.AddChild(&rhw.proto)
+	adder.AddWidget(&rhw.proto)
 	return nil
 }
 
