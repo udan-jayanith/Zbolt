@@ -212,12 +212,11 @@ type tab[T any] struct {
 
 	selected_item_index int
 	on_select_fn        func(tab_item *TabItem[T], index int)
-	on_swap func(ctx *gui.Context, swap Swap)
-	
+	on_swap             func(ctx *gui.Context, swap Swap)
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	if tab.swap != nil{
+	if tab.swap != nil {
 		if tab.on_swap != nil {
 			tab.on_swap(ctx, *tab.swap)
 		}
@@ -331,7 +330,7 @@ func (tab *Tab[T]) SelectTabItemByIndex(index int) {
 	}
 }
 
-func (tab *Tab[T]) OnSwap(fn func(ctx *gui.Context, swap Swap)){
+func (tab *Tab[T]) OnSwap(fn func(ctx *gui.Context, swap Swap)) {
 	tab.tab.on_swap = fn
 }
 

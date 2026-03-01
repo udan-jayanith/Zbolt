@@ -5,12 +5,6 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type path_separator_widget struct{
-	gui.DefaultWidget
-	
-	sep widget.Text
-}
-
 type path_segment_widget struct{
 	gui.DefaultWidget
 	
@@ -20,7 +14,7 @@ type path_segment_widget struct{
 type path_widget struct{
 	gui.DefaultWidget
 	
-	segments []gui.Widget
+	segments []path_segment_widget
 }
 
 type Path struct {
