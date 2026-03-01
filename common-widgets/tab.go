@@ -2,6 +2,7 @@ package CommonWidgets
 
 import (
 	"image"
+	"image/color"
 
 	"API-Client/basic"
 	"API-Client/icons"
@@ -33,6 +34,9 @@ type tab_item[T any] struct {
 	tab_item   *TabItem[T]
 	tab_widget *tab[T]
 
+	relative_cursor_axis int
+	bounds               image.Rectangle
+
 	is_hovering bool
 	index       int
 }
@@ -46,6 +50,13 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	text_widget.SetValue(item.tab_item.Text)
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+
+	if item.tab_widget.closest != nil && item.tab_widget.closest.index == item.index {
+		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeInset)
+	} else {
+		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeRegular)
+	}
+
 	adder.AddWidget(&item.text_widget)
 
 	if item.tab_item.Closable {
@@ -64,11 +75,6 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		adder.AddWidget(item.close_widget.icon)
 	}
 
-	if item.tab_widget.selected_item_index == item.index {
-		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeInset)
-	} else {
-		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeRegular)
-	}
 	return nil
 }
 
@@ -112,7 +118,7 @@ func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) 
 		point.X += icon_measurement.X + gap
 	}
 
-	if item.tab_item.Closable {
+	if item.tab_item.Closable && item.close_widget.icon != nil {
 		icon_measurement := item.close_widget.icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
 	}
@@ -123,30 +129,110 @@ func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) 
 }
 
 func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	var background_color color.Color
+	if item.tab_widget.selected_item_index == item.index {
+		background_color = basicwidgetdraw.BackgroundColor(ctx.ColorMode())
+	} else {
+		background_color = basicwidgetdraw.BackgroundSecondaryColor(ctx.ColorMode())
+	}
+
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, 1)
 	item.border_widget.Draw(ctx, widgetBounds, dst)
 }
 
 func (item *tab_item[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	item.bounds = widgetBounds.Bounds()
 	item.is_hovering = widgetBounds.IsHitAtCursor()
 
 	if item.is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
 		item.tab_widget.selected_item_index = item.index
+	} else if item.is_hovering && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && item.tab_widget.holding_tab_item == nil {
+		item.tab_widget.holding_tab_item = item
+		cursor_axis, _ := ebiten.CursorPosition()
+		item.relative_cursor_axis = cursor_axis - widgetBounds.Bounds().Min.X
+	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && item.tab_widget.holding_tab_item != nil {
+		tab_widget := item.tab_widget
+
+		if tab_widget.closest != nil {
+			tab_widget.swap = &Swap{
+				From: tab_widget.holding_tab_item.index,
+				To:   tab_widget.closest.index,
+			}
+		}
+
+		tab_widget.holding_tab_item = nil
+		tab_widget.closest = nil
+	}
+
+	is_overlapping := item.is_overlapping()
+	if is_overlapping {
+		if item.tab_widget.closest == nil {
+			item.tab_widget.closest = item
+		}
+
+		dis1, dis2 := item.distance(), item.tab_widget.closest.distance()
+		if dis1 < dis2 {
+			item.tab_widget.closest = item
+		}
+	} else if !is_overlapping && item.tab_widget.closest != nil && item.tab_widget.closest.index == item.index {
+		item.tab_widget.closest = nil
 	}
 
 	return gui.HandleInputResult{}
+}
+
+func (item *tab_item[T]) is_overlapping() bool {
+	return item.tab_widget.holding_tab_item != nil &&
+		item.tab_widget.holding_tab_item.index != item.index &&
+		!item.bounds.Intersect(item.tab_widget.holding_tab_item.bounds).Empty()
+}
+
+func (item *tab_item[T]) distance() int {
+	min_x, max_x := item.bounds.Min.X, item.bounds.Max.X
+	x, _ := ebiten.CursorPosition()
+
+	var min_dis, max_dis int
+	min_dis = max(x, min_x) - min(x, min_x)
+	max_dis = max(x, max_x) - min(x, max_x)
+	return min(max_dis, min_dis)
+}
+
+type Swap struct {
+	From int
+	To   int
 }
 
 type tab[T any] struct {
 	gui.DefaultWidget
 	tab_items []*tab_item[T]
 
+	holding_tab_item *tab_item[T]
+	closest          *tab_item[T]
+	swap             *Swap
+
 	selected_item_index int
 	on_select_fn        func(tab_item *TabItem[T], index int)
+	on_swap func(ctx *gui.Context, swap Swap)
+	
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	if tab.swap != nil{
+		if tab.on_swap != nil {
+			tab.on_swap(ctx, *tab.swap)
+		}
+		tab.swap = nil
+	}
+
 	for _, tab_item := range tab.tab_items {
+		if tab.holding_tab_item != nil && tab.holding_tab_item.index == tab_item.index {
+			continue
+		}
 		adder.AddWidget(tab_item)
+	}
+
+	if tab.holding_tab_item != nil {
+		adder.AddWidget(tab.holding_tab_item)
 	}
 	return nil
 }
@@ -157,7 +243,32 @@ func (tab *tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layo
 		Items:     make([]gui.LinearLayoutItem, 0, len(tab.tab_items)),
 	}
 
+	b := widgetBounds.Bounds()
+
+	if tab.holding_tab_item != nil {
+		cursor_axis, _ := ebiten.CursorPosition()
+		tab_item_bounds := image.Rectangle{
+			Min: image.Point{
+				X: cursor_axis - tab.holding_tab_item.relative_cursor_axis,
+				Y: b.Min.Y,
+			},
+		}
+
+		tab_item_bounds.Max.X = tab_item_bounds.Min.X + tab.holding_tab_item.Measure(ctx, gui.Constraints{}).X
+		tab_item_bounds.Max.Y = b.Max.Y
+
+		layouter.LayoutWidget(tab.holding_tab_item, tab_item_bounds)
+	}
+
 	for _, tab_item := range tab.tab_items {
+		if tab.holding_tab_item != nil && tab.holding_tab_item.index == tab_item.index {
+			w := tab.holding_tab_item.Measure(ctx, gui.Constraints{}).X
+			layout.Items = append(layout.Items, gui.LinearLayoutItem{
+				Size: gui.FixedSize(w),
+			})
+			continue
+		}
+
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
 			Widget: tab_item,
 		})
@@ -220,9 +331,14 @@ func (tab *Tab[T]) SelectTabItemByIndex(index int) {
 	}
 }
 
+func (tab *Tab[T]) OnSwap(fn func(ctx *gui.Context, swap Swap)){
+	tab.tab.on_swap = fn
+}
+
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab)
 	tab.panel.SetStyle(widget.PanelStyleSide)
+	tab.panel.SetAutoBorder(true)
 	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
 	adder.AddWidget(&tab.panel)
 	return nil
