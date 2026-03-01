@@ -130,6 +130,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	if len(rp.tab_items) > 0 {
 		rp.tab_widget.SetTabItems(rp.tab_items)
+		rp.tab_widget.OnSwap(func(ctx *gui.Context, swap CommonWidgets.Swap) {
+			temp := rp.tab_items[swap.From]
+			rp.tab_items[swap.From] = rp.tab_items[swap.To]
+			rp.tab_items[swap.To] = temp
+		})
 		adder.AddWidget(&rp.tab_widget)
 
 		//_, req := rp.tab_widget.GetSelectedTab()
