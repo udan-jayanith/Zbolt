@@ -1,6 +1,7 @@
 package CommonWidgets
 
 import (
+	"API-Client/basic"
 	"image"
 	"image/color"
 	"path/filepath"
@@ -24,7 +25,7 @@ type path_segment_widget struct {
 func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	text := psw.path_name
 	if !psw.is_end {
-		text += "/"
+		//text += "/"
 	}
 
 	text_widget := &psw.text_widget
@@ -39,6 +40,7 @@ func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdde
 func (psw *path_segment_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
+		Padding:   basic.NewPadding(0, widget.UnitSize(ctx)/4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &psw.text_widget,
@@ -49,7 +51,9 @@ func (psw *path_segment_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 }
 
 func (psw *path_segment_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return psw.text_widget.Measure(ctx, gui.Constraints{})
+	point := psw.text_widget.Measure(ctx, gui.Constraints{})
+	point.X += widget.UnitSize(ctx) / 2
+	return point
 }
 
 func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
@@ -57,9 +61,9 @@ func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetB
 	cm := ctx.ColorMode()
 
 	if widgetBounds.IsHitAtCursor() {
-		background_color = draw.BackgroundSecondaryColor(cm)
-	} else {
 		background_color = draw.BackgroundColor(cm)
+	} else {
+		background_color = draw.BackgroundSecondaryColor(cm)
 	}
 
 	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, widget.UnitSize(ctx)/4)
@@ -82,6 +86,7 @@ func (pw *path_widget) Build(context *gui.Context, adder *gui.ChildAdder) error 
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
+		Padding:   basic.NewPadding(widget.UnitSize(ctx) / 6),
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
@@ -96,7 +101,8 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	point.Y = widget.LineHeight(ctx)
+	point.Y = widget.LineHeight(ctx) + widget.UnitSize(ctx)/3
+	point.X = widget.UnitSize(ctx) / 3
 
 	for i, _ := range pw.segments {
 		measurements := pw.segments[i].Measure(ctx, constraints)
@@ -115,6 +121,7 @@ type Path struct {
 func (path *Path) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	path.panel.SetContent(&path.path_widget)
 	path.panel.SetAutoBorder(true)
+	path.panel.SetStyle(widget.PanelStyleSide)
 	path.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
 	adder.AddWidget(&path.panel)
 	return nil
@@ -126,7 +133,7 @@ func (path *Path) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layou
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &path.panel,
-				Size: gui.FlexibleSize(1),
+				Size:   gui.FlexibleSize(1),
 			},
 		},
 	}
@@ -160,7 +167,7 @@ func (path_widget *Path) SetPath(directory_path string) {
 	for i, path_name := range list {
 		path_widget.path_widget.segments = append(path_widget.path_widget.segments, path_segment_widget{
 			path_name: path_name,
-			is_end: l == i,
+			is_end:    l-1 == i,
 		})
 	}
 }
