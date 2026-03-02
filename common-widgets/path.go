@@ -86,7 +86,6 @@ func (pw *path_widget) Build(context *gui.Context, adder *gui.ChildAdder) error 
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding:   basic.NewPadding(widget.UnitSize(ctx) / 6),
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
@@ -101,8 +100,7 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	point.Y = widget.LineHeight(ctx) + widget.UnitSize(ctx)/3
-	point.X = widget.UnitSize(ctx) / 3
+	point.Y = widget.LineHeight(ctx)
 
 	for i, _ := range pw.segments {
 		measurements := pw.segments[i].Measure(ctx, constraints)
@@ -130,6 +128,7 @@ func (path *Path) Build(context *gui.Context, adder *gui.ChildAdder) error {
 func (path *Path) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
+		Padding:   basic.NewPadding(3),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &path.panel,
@@ -156,7 +155,21 @@ func (path *Path) Measure(ctx *gui.Context, constraints gui.Constraints) image.P
 		point.Y = measurements.Y
 	}
 
+	point.X += 3 * 2
+	point.Y += 3 * 2
 	return point
+}
+
+func (path *Path) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	cm := ctx.ColorMode()
+	r := basic.BorderRadius(ctx)
+	border_type := draw.RoundedRectBorderTypeRegular
+	
+	background_color := draw.BackgroundSecondaryColor(cm)
+	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, r)
+	
+	clr1, clr2 := draw.BorderColors(cm, border_type)
+	draw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), clr1, clr2, r, 2, border_type)
 }
 
 func (path_widget *Path) SetPath(directory_path string) {

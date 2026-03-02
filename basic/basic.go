@@ -105,3 +105,8 @@ func Align(layout1 gui.LinearLayout, horizontal, vertical Alignment) gui.LinearL
 
 	return layout2
 }
+
+
+func BorderRadius(ctx *gui.Context) int {
+	return widget.UnitSize(ctx)/4
+}
