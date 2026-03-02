@@ -7,6 +7,8 @@ import (
 	"API-Client/basic"
 	"API-Client/icons"
 
+	draw_color "API-Client/common-widgets/internal/color"
+
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
@@ -130,17 +132,17 @@ func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	var background_color color.Color
 	var border_type basicwidgetdraw.RoundedRectBorderType
 
+	cm := ctx.ColorMode()
 	if item.tab_widget.selected_item_index == item.index {
-		background_color = basicwidgetdraw.BackgroundColor(ctx.ColorMode())
+		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
+		//background_color = basicwidgetdraw.BackgroundColor(ctx.ColorMode())
 		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
 	} else {
 		background_color = basicwidgetdraw.BackgroundSecondaryColor(ctx.ColorMode())
 		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
 	}
 
-	cm := ctx.ColorMode()
 	r := basic.BorderRadius(ctx)
-
 	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, r)
 
 	clr1, clr2 := basicwidgetdraw.BorderColors(cm, border_type)
