@@ -79,9 +79,9 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 }
 
 func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	u := widget.UnitSize(ctx)
+	//	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
-		Padding:   basic.NewPadding(u/4, u/2),
+		Padding:   basic.NewPadding(0, widget.LineHeight(ctx)/2),
 		Gap:       widget.UnitSize(ctx) / 4,
 		Direction: gui.LayoutDirectionHorizontal,
 		Items:     make([]gui.LinearLayoutItem, 0, 3),
@@ -109,8 +109,7 @@ func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 
 func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := item.text_widget.Measure(ctx, constraints)
-	u := widget.UnitSize(ctx)
-	padding := basic.NewPadding(u/4, u/2)
+	padding := basic.NewPadding(0, widget.LineHeight(ctx)/2)
 
 	gap := widget.UnitSize(ctx) / 4
 	if item.tab_item.Icon != nil {
@@ -123,21 +122,29 @@ func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) 
 		point.X += icon_measurement.X + gap
 	}
 	point.X += padding.End + padding.Start
-	point.Y = u + u/4
-
+	point.Y = widget.UnitSize(ctx)
 	return point
 }
 
 func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
 	var background_color color.Color
+	var border_type basicwidgetdraw.RoundedRectBorderType
+
 	if item.tab_widget.selected_item_index == item.index {
 		background_color = basicwidgetdraw.BackgroundColor(ctx.ColorMode())
+		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
 	} else {
 		background_color = basicwidgetdraw.BackgroundSecondaryColor(ctx.ColorMode())
+		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
 	}
 
-	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, 1)
-	item.border_widget.Draw(ctx, widgetBounds, dst)
+	cm := ctx.ColorMode()
+	r := basic.BorderRadius(ctx)
+
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, r)
+
+	clr1, clr2 := basicwidgetdraw.BorderColors(cm, border_type)
+	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), clr1, clr2, r, 1, border_type)
 }
 
 func (item *tab_item[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
@@ -284,7 +291,7 @@ func (tab *tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.
 	}
 
 	u := widget.UnitSize(ctx)
-	point.Y = u + u/4
+	point.Y = u
 
 	return point
 }
@@ -346,6 +353,7 @@ func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (tab *Tab[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
+		Padding:   basic.NewPadding(2),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &tab.panel,
@@ -362,14 +370,26 @@ func (tab *Tab[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.
 	if w, ok := constraints.FixedWidth(); ok {
 		point.X = w
 	} else {
-		point.X = widget.UnitSize(ctx) * 4
+		point.X = widget.UnitSize(ctx)*4 + 4
 	}
 
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h
 	} else {
-		point.Y = tab.tab.Measure(ctx, constraints).Y
+		point.Y = tab.tab.Measure(ctx, constraints).Y + 4
 	}
 
 	return point
+}
+
+func (tab *Tab[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	cm := ctx.ColorMode()
+	r := basic.BorderRadius(ctx)
+	border_type := basicwidgetdraw.RoundedRectBorderTypeRegular
+
+	background_color := basicwidgetdraw.BackgroundSecondaryColor(cm)
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, r)
+
+	clr1, clr2 := basicwidgetdraw.BorderColors(cm, border_type)
+	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), clr1, clr2, r, 2, border_type)
 }
