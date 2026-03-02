@@ -1,9 +1,10 @@
 package CommonWidgets
 
 import (
-	"API-Client/basic"
 	"image"
 	"image/color"
+	"path/filepath"
+	"strings"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -22,7 +23,7 @@ type path_segment_widget struct {
 
 func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	text := psw.path_name
-	if psw.is_end {
+	if !psw.is_end {
 		text += "/"
 	}
 
@@ -30,6 +31,7 @@ func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdde
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	text_widget.SetHorizontalAlign(widget.HorizontalAlignCenter)
+	text_widget.SetValue(text)
 	adder.AddWidget(text_widget)
 	return nil
 }
@@ -37,7 +39,6 @@ func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdde
 func (psw *path_segment_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding:   basic.NewPadding(widget.UnitSize(ctx) / 4),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &psw.text_widget,
@@ -48,11 +49,7 @@ func (psw *path_segment_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 }
 
 func (psw *path_segment_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	point := psw.Measure(ctx, constraints)
-	padding := widget.UnitSize(ctx) / 4
-	point.X += padding * 2
-	point.Y += padding * 2
-	return point
+	return psw.text_widget.Measure(ctx, gui.Constraints{})
 }
 
 func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
@@ -85,7 +82,6 @@ func (pw *path_widget) Build(context *gui.Context, adder *gui.ChildAdder) error 
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap:       widget.UnitSize(ctx) / 4,
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
@@ -100,18 +96,12 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-
-	padding := widget.UnitSize(ctx) / 4
-	point.Y = widget.LineHeight(ctx) + padding*2
+	point.Y = widget.LineHeight(ctx)
 
 	for i, _ := range pw.segments {
 		measurements := pw.segments[i].Measure(ctx, constraints)
 		point.X += measurements.X
 	}
-
-	gaps := (len(pw.segments) - 1) * (widget.UnitSize(ctx) / 4)
-	point.X += gaps
-
 	return point
 }
 
@@ -126,13 +116,21 @@ func (path *Path) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	path.panel.SetContent(&path.path_widget)
 	path.panel.SetAutoBorder(true)
 	path.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	path.panel.SetStyle(widget.PanelStyleSide)
 	adder.AddWidget(&path.panel)
 	return nil
 }
 
 func (path *Path) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&path.panel, widgetBounds.Bounds())
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &path.panel,
+				Size: gui.FlexibleSize(1),
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
 func (path *Path) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
@@ -150,6 +148,19 @@ func (path *Path) Measure(ctx *gui.Context, constraints gui.Constraints) image.P
 	} else {
 		point.Y = measurements.Y
 	}
-	
+
 	return point
+}
+
+func (path_widget *Path) SetPath(directory_path string) {
+	directory_path = filepath.Clean(directory_path)
+	list := strings.Split(filepath.ToSlash(directory_path), "/")
+	l := len(list)
+	path_widget.path_widget.segments = make([]path_segment_widget, 0, l)
+	for i, path_name := range list {
+		path_widget.path_widget.segments = append(path_widget.path_widget.segments, path_segment_widget{
+			path_name: path_name,
+			is_end: l == i,
+		})
+	}
 }

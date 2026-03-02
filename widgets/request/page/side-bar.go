@@ -92,6 +92,7 @@ type Sidebar[T comparable] struct {
 	}
 
 	list struct {
+		path CommonWidgets.Path
 		widget widget.List[T]
 		items  []widget.ListItem[T]
 
@@ -168,6 +169,9 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 	})
 	adder.AddWidget(&sd.list.widget)
+	
+	sd.list.path.SetPath(`C:\Users\Udan\AppData\Local\Zed\extensions\work\codebook`)
+	adder.AddWidget(&sd.list.path)
 
 	sd.list.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
 	sd.list.contextmenu.menu.OnItemSelected(func(context *gui.Context, index int) {
@@ -226,6 +230,10 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 						},
 					},
 				},
+			},
+			{
+				Widget: &sd.list.path,
+				//Size: gui.FixedSize(widget.UnitSize(ctx)),
 			},
 			{
 				Widget: &sd.list.widget,
