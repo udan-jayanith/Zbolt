@@ -2,6 +2,7 @@ package CommonWidgets
 
 import (
 	"API-Client/basic"
+	"API-Client/icons"
 	"image"
 	"image/color"
 	"path/filepath"
@@ -16,18 +17,12 @@ import (
 type path_segment_widget struct {
 	gui.DefaultWidget
 
-	path_name string
-	is_end    bool
-
+	path_name   string
 	text_widget widget.Text
 }
 
 func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	text := psw.path_name
-	if !psw.is_end {
-		//text += "/"
-	}
-
 	text_widget := &psw.text_widget
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
@@ -72,13 +67,28 @@ func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetB
 type path_widget struct {
 	gui.DefaultWidget
 
-	segments []path_segment_widget
+	segments  []path_segment_widget
+	separator []icons.Icon
 }
 
-func (pw *path_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
+func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	l := len(pw.segments)
 	for i, _ := range pw.segments {
 		segment := &pw.segments[i]
 		adder.AddWidget(segment)
+
+		if i != l-1 {
+			separator := &pw.separator[i]
+
+			line_height := widget.LineHeight(ctx)
+			size := line_height - line_height/3
+			separator.Point = &image.Point{
+				X: size,
+				Y: size,
+			}
+			
+			adder.AddWidget(separator)
+		}
 	}
 	return nil
 }
@@ -89,11 +99,19 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
+	l := len(pw.segments)
 	for i, _ := range pw.segments {
 		segment := &pw.segments[i]
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
 			Widget: segment,
 		})
+
+		if i != l-1 {
+			separator := &pw.separator[i]
+			layout.Items = append(layout.Items, gui.LinearLayoutItem{
+				Widget: separator,
+			})
+		}
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
@@ -106,6 +124,10 @@ func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) im
 		measurements := pw.segments[i].Measure(ctx, constraints)
 		point.X += measurements.X
 	}
+	
+	line_height := widget.LineHeight(ctx)
+	size := line_height - line_height/3
+	point.X += (len(pw.segments) - 1) * size
 	return point
 }
 
@@ -164,10 +186,10 @@ func (path *Path) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *eb
 	cm := ctx.ColorMode()
 	r := basic.BorderRadius(ctx)
 	border_type := draw.RoundedRectBorderTypeRegular
-	
+
 	background_color := draw.BackgroundSecondaryColor(cm)
 	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, r)
-	
+
 	clr1, clr2 := draw.BorderColors(cm, border_type)
 	draw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), clr1, clr2, r, 2, border_type)
 }
@@ -176,11 +198,19 @@ func (path_widget *Path) SetPath(directory_path string) {
 	directory_path = filepath.Clean(directory_path)
 	list := strings.Split(filepath.ToSlash(directory_path), "/")
 	l := len(list)
+
 	path_widget.path_widget.segments = make([]path_segment_widget, 0, l)
+	path_widget.path_widget.separator = make([]icons.Icon, 0, l-1)
+
 	for i, path_name := range list {
 		path_widget.path_widget.segments = append(path_widget.path_widget.segments, path_segment_widget{
 			path_name: path_name,
-			is_end:    l-1 == i,
 		})
+
+		if i != l-1 {
+			path_widget.path_widget.separator = append(path_widget.path_widget.separator, icons.Icon{
+				IconName: "arrow_forward",
+			})
+		}
 	}
 }

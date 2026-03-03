@@ -135,7 +135,6 @@ func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	cm := ctx.ColorMode()
 	if item.tab_widget.selected_item_index == item.index {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
-		//background_color = basicwidgetdraw.BackgroundColor(ctx.ColorMode())
 		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
 	} else {
 		background_color = basicwidgetdraw.BackgroundSecondaryColor(ctx.ColorMode())
