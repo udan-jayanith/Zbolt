@@ -136,6 +136,12 @@ func (item *tab_item[T]) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	if item.tab_widget.selected_item_index == item.index {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
 		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
+	} else if item.tab_widget.closest != nil && item.tab_widget.closest.index == item.index {
+		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.4, 0.4)
+		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
+	} else if widgetBounds.IsHitAtCursor() {
+		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
+		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
 	} else {
 		background_color = basicwidgetdraw.BackgroundSecondaryColor(ctx.ColorMode())
 		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
