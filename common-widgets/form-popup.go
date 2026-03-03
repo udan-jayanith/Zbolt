@@ -54,7 +54,7 @@ func (content *popup_form_content) Layout(ctx *gui.Context, widgetBounds *gui.Wi
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap: gap/2,
+		Gap:       gap / 2,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &content.field_widget,
@@ -89,19 +89,21 @@ func (content *popup_form_content) Measure(ctx *gui.Context, constraints gui.Con
 type SimpleFormPopup struct {
 	gui.DefaultWidget
 
-	popup_widget   widget.Popup
-	popup_content  popup_form_content
-	padding_widget WidgetWithPadding[*popup_form_content]
+	popup_widget      widget.Popup
+	popup_content     popup_form_content
+	padding_widget    WidgetWithPadding[*popup_form_content]
 	on_button_clicked func(ctx *gui.Context, value string)
 }
 
 func (sfp *SimpleFormPopup) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	if sfp.on_button_clicked != nil {
-		sfp.popup_content.button_widget.OnUp(func(_ *gui.Context) {
+
+	sfp.popup_content.button_widget.OnUp(func(_ *gui.Context) {
+		sfp.popup_widget.SetOpen(false)
+		if sfp.on_button_clicked != nil {
 			sfp.on_button_clicked(ctx, sfp.popup_content.input_widget.Value())
-		})
-	}
-	
+		}
+	})
+
 	sfp.padding_widget.SetWidget(&sfp.popup_content)
 	sfp.padding_widget.SetPadding(basic.NewPadding(widget.UnitSize(ctx) / 3))
 
@@ -132,6 +134,6 @@ func (sfp *SimpleFormPopup) SetOpen(open bool) {
 	sfp.popup_widget.SetOpen(open)
 }
 
-func (sfp *SimpleFormPopup) OnButtonClicked(fn func(ctx *gui.Context, value string)){
+func (sfp *SimpleFormPopup) OnButtonClicked(fn func(ctx *gui.Context, value string)) {
 	sfp.on_button_clicked = fn
 }

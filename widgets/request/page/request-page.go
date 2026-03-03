@@ -95,6 +95,19 @@ func (rp *RequestPage) create_sidebar_item(request *def.Request) {
 	//TODO: Open the the sidebar item if there were no items before on creation.
 }
 
+func (rp *RequestPage) create_folder(request *def.Request) {
+	request_container := sidebar_item{
+		Data: request,
+	}
+	rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
+		IconName: request.Type.IconName(),
+		Text:     request.Path,
+		Value:    request_container,
+	})
+
+	//TODO: Open the the sidebar item if there were no items before on creation.
+}
+
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(ebiten.ColorModeDark)
 
@@ -103,17 +116,13 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sidebar := rp.sidebar.Widget()
 	sidebar.SetItems(rp.sidebar_items)
-	sidebar.OneItemsMoved(func(context *gui.Context, from, count, to int) {
-		if to == len(rp.sidebar_items) {
-			to--
-		}
-
-		f := rp.sidebar_items[from]
-		rp.sidebar_items[from] = rp.sidebar_items[to]
-		rp.sidebar_items[to] = f
+	rp.sidebar.SetPadding(padding)
+	
+	sidebar.OnFolderCreate(func(ctx *gui.Context, folder_name, current_directory string) {
+		println(folder_name)
+		print(current_directory)
 	})
 
-	rp.sidebar.SetPadding(padding)
 	sidebar.OnItemClicked(func(item sidebar_item) {
 		if item.IsFolder {
 			return
@@ -154,7 +163,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.popup_widget.SetBackgroundBlurred(true)
 	adder.AddWidget(&rp.popup_widget)
 
-	rp.sidebar.Widget().OnAddButtonClicked(func(ctx *gui.Context) {
+	sidebar.OnAddButtonClicked(func(ctx *gui.Context) {
 		rp.popup_widget.SetOpen(true)
 	})
 

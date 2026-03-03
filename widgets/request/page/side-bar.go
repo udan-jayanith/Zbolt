@@ -88,13 +88,15 @@ type Sidebar[T comparable] struct {
 
 			on_request_clicked func(ctx *gui.Context)
 			folder_popup       CommonWidgets.SimpleFormPopup
+			on_folder_create   func(ctx *gui.Context, folder_name string, current_directory string)
 		}
 	}
 
 	list struct {
-		path CommonWidgets.Path
-		widget widget.List[T]
-		items  []widget.ListItem[T]
+		path            CommonWidgets.Path
+		widget          widget.List[T]
+		items           []widget.ListItem[T]
+		on_item_clicked func(value T)
 
 		contextmenu struct {
 			menu     widget.PopupMenu[struct{}]
@@ -104,10 +106,6 @@ type Sidebar[T comparable] struct {
 			right_clicked_item  *sidebar_item_widget[T]
 		}
 	}
-
-	on_item_clicked func(value T)
-	on_items_moved  func(ctx *gui.Context, from int, count int, to int)
-	on_folder_create func(ctx *gui.Context, folder_name string, current_directory string)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
@@ -125,24 +123,20 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	}
 }
 
-func (sd *Sidebar[T]) OneItemsMoved(f func(context *gui.Context, from int, count int, to int)) {
-	sd.on_items_moved = f
-}
-
 func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
 	sd.options.add.on_request_clicked = callback
 }
 
-func (sd *Sidebar[T]) OnItemClicked(callback func(value T)) {
-	sd.on_item_clicked = callback
+func (sd *Sidebar[T]) OnFolderCreate(fn func(ctx *gui.Context, folder_name string, current_directory string)){
+	sd.options.add.on_folder_create = fn
+}
+
+func (sd *Sidebar[T]) OnItemClicked(fn func(item T)){
+	sd.list.on_item_clicked = fn
 }
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&sd.options.search_widget)
-
-	if sd.on_items_moved != nil {
-		sd.list.widget.OnItemsMoved(sd.on_items_moved)
-	}
 
 	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
 	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
@@ -153,6 +147,11 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sd.options.add.folder_popup.SetButtonText("Create")
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
+	sd.options.add.folder_popup.OnButtonClicked(func(ctx *gui.Context, value string) {
+		if sd.options.add.on_request_clicked != nil {
+			sd.options.add.on_folder_create(ctx, value, sd.list.path.Path())
+		}
+	})
 
 	sd.options.add.menu.OnItemSelected(func(context *gui.Context, index int) {
 		if sd.options.add.on_request_clicked != nil && index == 0 {
@@ -165,12 +164,12 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sd.list.widget.SetItems(sd.list.items)
 	sd.list.widget.OnItemsSelected(func(context *gui.Context, indices []int) {
-		if sd.on_item_clicked != nil {
-			sd.on_item_clicked(sd.list.items[indices[0]].Value)
+		if sd.list.on_item_clicked != nil {
+			sd.list.on_item_clicked(sd.list.items[indices[0]].Value)
 		}
 	})
 	adder.AddWidget(&sd.list.widget)
-	
+
 	sd.list.path.SetPath(`Root\Zed\extensions\work\codebook`)
 	sd.list.path.OnSelect(func(ctx *gui.Context, path string) {
 		println(path)
