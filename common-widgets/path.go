@@ -12,6 +12,7 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	draw "github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type path_segment_widget struct {
@@ -19,6 +20,9 @@ type path_segment_widget struct {
 
 	path_name   string
 	text_widget widget.Text
+
+	path_widget *path_widget
+	index       int
 }
 
 func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
@@ -64,11 +68,27 @@ func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetB
 	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, widget.UnitSize(ctx)/4)
 }
 
+func (psw *path_segment_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if !(widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)) || psw.path_widget.on_select == nil {
+		return gui.HandleInputResult{}
+	}
+
+	var path string
+	for i := 0; i <= psw.index; i++ {
+		path = filepath.Join(path, psw.path_widget.segments[i].text_widget.Value())
+	}
+	psw.path_widget.on_select(ctx, path)
+
+	return gui.HandleInputResult{}
+}
+
 type path_widget struct {
 	gui.DefaultWidget
 
 	segments  []path_segment_widget
 	separator []icons.Icon
+
+	on_select func(ctx *gui.Context, path string)
 }
 
 func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -86,7 +106,7 @@ func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 				X: size,
 				Y: size,
 			}
-			
+
 			adder.AddWidget(separator)
 		}
 	}
@@ -124,7 +144,7 @@ func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) im
 		measurements := pw.segments[i].Measure(ctx, constraints)
 		point.X += measurements.X
 	}
-	
+
 	line_height := widget.LineHeight(ctx)
 	size := line_height - line_height/3
 	point.X += (len(pw.segments) - 1) * size
@@ -204,7 +224,9 @@ func (path_widget *Path) SetPath(directory_path string) {
 
 	for i, path_name := range list {
 		path_widget.path_widget.segments = append(path_widget.path_widget.segments, path_segment_widget{
-			path_name: path_name,
+			path_name:   path_name,
+			path_widget: &path_widget.path_widget,
+			index:       i,
 		})
 
 		if i != l-1 {
@@ -213,4 +235,8 @@ func (path_widget *Path) SetPath(directory_path string) {
 			})
 		}
 	}
+}
+
+func (path_widget *Path) OnSelect(fn func(ctx *gui.Context, path string)) {
+	path_widget.path_widget.on_select = fn
 }

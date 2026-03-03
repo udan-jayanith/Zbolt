@@ -170,7 +170,10 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&sd.list.widget)
 	
-	sd.list.path.SetPath(`C:\Users\Udan\AppData\Local\Zed\extensions\work\codebook`)
+	sd.list.path.SetPath(`Root\Zed\extensions\work\codebook`)
+	sd.list.path.OnSelect(func(ctx *gui.Context, path string) {
+		println(path)
+	})
 	adder.AddWidget(&sd.list.path)
 
 	sd.list.contextmenu.menu.SetItemsByStrings([]string{"Rename", "Delete"})
