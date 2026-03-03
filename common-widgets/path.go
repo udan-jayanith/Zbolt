@@ -240,3 +240,12 @@ func (path_widget *Path) SetPath(directory_path string) {
 func (path_widget *Path) OnSelect(fn func(ctx *gui.Context, path string)) {
 	path_widget.path_widget.on_select = fn
 }
+
+func (path_widget *Path) Path() string {
+	var path string
+	for i, _ := range path_widget.path_widget.segments {
+		seg := path_widget.path_widget.segments[i].text_widget.Value()
+		path = filepath.Join(path, seg)
+	}
+	return path
+}

@@ -106,7 +106,8 @@ type Sidebar[T comparable] struct {
 	}
 
 	on_item_clicked func(value T)
-	on_items_moved  func(context *gui.Context, from int, count int, to int)
+	on_items_moved  func(ctx *gui.Context, from int, count int, to int)
+	on_folder_create func(ctx *gui.Context, folder_name string, current_directory string)
 }
 
 func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
