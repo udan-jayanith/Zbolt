@@ -11,7 +11,7 @@ import (
 type request_widget struct {
 	gui.DefaultWidget
 	input_bar_widget request_input_bar_widget
-	url_preview      widget.TextInput
+	url_preview      CommonWidgets.URLPreview
 
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
@@ -25,10 +25,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rw.input_bar_widget)
 
 	{
-		rw.url_preview.SetEditable(false)
-		rw.url_preview.SetValue("https://github.com/guigui-gui/guigui/issues?q=is%3Aissue%20state%3Aopen%20milestone%3Av0.1.0&page=2")
-		rw.url_preview.SetMultiline(true)
-		rw.url_preview.SetAutoWrap(true)
+		rw.url_preview.SetURL("https://fonts.google.com/icons?icon.size=24&icon.color=%23FFFFFF&selected=Material+Symbols+Outlined:copy_all:FILL@0;wght@400;GRAD@0;opsz@24&icon.style=Rounded")
 		adder.AddWidget(&rw.url_preview)
 	}
 
@@ -78,7 +75,6 @@ func (rw *request_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 			},
 			{
 				Widget: &rw.url_preview,
-				Size:   gui.FixedSize(u * 2),
 			},
 			{
 				Widget: &rw.tab,
@@ -102,7 +98,7 @@ func (rw *request_widget) Measure(ctx *gui.Context, constraints gui.Constraints)
 		point.Y += rw.tab.Measure(ctx, constraints).Y
 		point.Y += rw.tab_content.selected_widget.Measure(ctx, constraints).Y
 	}
-	
+
 	if w, ok := constraints.FixedWidth(); ok {
 		point.X = w
 	}
