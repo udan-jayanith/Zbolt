@@ -17,23 +17,11 @@ import (
 
 type sidebar_item struct {
 	IsFolder bool
-	Data     any
+	Data     def.FolderOrFile
 }
 
 func (si *sidebar_item) GetPath() string {
-	if si.IsFolder {
-		folder, ok := si.Data.(*def.Folder)
-		if !ok {
-			panic("si.IsFolder is true but inference failed")
-		}
-		return folder.Path
-	}
-
-	request, ok := si.Data.(*def.Request)
-	if !ok {
-		panic("si.IsFolder is fauls but inference failed")
-	}
-	return request.Path
+	return si.Data.Path()
 }
 
 type RequestPage struct {
@@ -63,9 +51,9 @@ type RequestPage struct {
 
 func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
 	for i, req := range rp.tab_items {
-		if req.Value.Path == request.Path {
+		if req.Value.Path() == request.Path() {
 			rp.tab_widget.SelectTabItemByIndex(i)
-			return fmt.Errorf("%s is already opened", request.Path)
+			return fmt.Errorf("%s is already opened", request.Path())
 		}
 	}
 
@@ -73,7 +61,7 @@ func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
 	size := line_height - line_height/4
 	rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
 		Value:    request,
-		Text:     request.Path,
+		Text:     request.Name(),
 		Closable: true,
 		Icon:     icons.NewIcon(request.Type.IconName(), size),
 	})
@@ -88,20 +76,22 @@ func (rp *RequestPage) create_sidebar_item(request *def.Request) {
 	}
 	rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
 		IconName: request.Type.IconName(),
-		Text:     request.Path,
+		Text:     request.Name(),
 		Value:    request_container,
 	})
 
 	//TODO: Open the the sidebar item if there were no items before on creation.
 }
 
-func (rp *RequestPage) create_folder(request *def.Request) {
+func (rp *RequestPage) create_folder(path string, name string) {
+	folder := def.NewFolder(path, name)
 	request_container := sidebar_item{
-		Data: request,
+		IsFolder: true,
+		Data:     &folder,
 	}
 	rp.sidebar_items = append(rp.sidebar_items, SidebarItem[sidebar_item]{
-		IconName: request.Type.IconName(),
-		Text:     request.Path,
+		IconName: "folder",
+		Text:     folder.Name(),
 		Value:    request_container,
 	})
 
@@ -117,10 +107,9 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sidebar := rp.sidebar.Widget()
 	sidebar.SetItems(rp.sidebar_items)
 	rp.sidebar.SetPadding(padding)
-	
-	sidebar.OnFolderCreate(func(ctx *gui.Context, folder_name, current_directory string) {
-		println(folder_name)
-		print(current_directory)
+
+	sidebar.OnFolderCreate(func(ctx *gui.Context, folder_name string) {
+		rp.create_folder(rp.current_directory, folder_name)
 	})
 
 	sidebar.OnItemClicked(func(item sidebar_item) {

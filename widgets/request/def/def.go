@@ -1,6 +1,7 @@
 package def
 
 import (
+	"path/filepath"
 	"weak"
 
 	gui "github.com/guigui-gui/guigui"
@@ -32,12 +33,27 @@ func (t RequestType) IconName() string {
 
 type Request struct {
 	Type RequestType
-	Path string
+	path string
 	data weak.Pointer[any]
 }
 
 func (r *Request) Data() any {
 	return nil
+}
+
+func (r *Request) Path() string {
+	return r.path
+}
+
+func (r *Request) Name() string {
+	return filepath.Base(r.path)
+}
+
+func NewRequest(t RequestType, path string) Request{
+	return Request{
+		Type: t,
+		path: path,
+	}
 }
 
 type RequestWidget interface {
@@ -46,5 +62,24 @@ type RequestWidget interface {
 }
 
 type Folder struct {
-	Path string
+	path string
+}
+
+func (r *Folder) Path() string {
+	return r.path
+}
+
+func (r *Folder) Name() string {
+	return filepath.Base(r.path)
+}
+
+func NewFolder(path, name string) Folder{
+	return Folder{
+		path: filepath.Join(path, name),
+	}
+}
+
+type FolderOrFile interface {
+	Path() string
+	Name() string
 }

@@ -1,3 +1,4 @@
+// icon transparency is ``CF`` if icon is too bright. 
 package icons
 
 import (

@@ -88,7 +88,7 @@ type Sidebar[T comparable] struct {
 
 			on_request_clicked func(ctx *gui.Context)
 			folder_popup       CommonWidgets.SimpleFormPopup
-			on_folder_create   func(ctx *gui.Context, folder_name string, current_directory string)
+			on_folder_create   func(ctx *gui.Context, folder_name string)
 		}
 	}
 
@@ -127,7 +127,7 @@ func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
 	sd.options.add.on_request_clicked = callback
 }
 
-func (sd *Sidebar[T]) OnFolderCreate(fn func(ctx *gui.Context, folder_name string, current_directory string)){
+func (sd *Sidebar[T]) OnFolderCreate(fn func(ctx *gui.Context, folder_name string)){
 	sd.options.add.on_folder_create = fn
 }
 
@@ -149,7 +149,7 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
 	sd.options.add.folder_popup.OnButtonClicked(func(ctx *gui.Context, value string) {
 		if sd.options.add.on_request_clicked != nil {
-			sd.options.add.on_folder_create(ctx, value, sd.list.path.Path())
+			sd.options.add.on_folder_create(ctx, value)
 		}
 	})
 

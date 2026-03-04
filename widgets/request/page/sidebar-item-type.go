@@ -249,10 +249,8 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 	}
 
 	sitp.request_name_input.OnCreateButtonClicked(func(name string) {
-		sitp.on_create_clicked(&def.Request{
-			Type: sitp.selected_request_type,
-			Path: name,
-		})
+		req := def.NewRequest(sitp.selected_request_type, name)
+		sitp.on_create_clicked(&req)
 	})
 	adder.AddWidget(&sitp.request_name_input)
 	return nil
