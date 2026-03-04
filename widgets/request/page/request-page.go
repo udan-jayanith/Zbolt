@@ -40,7 +40,7 @@ type RequestPage struct {
 
 	request_widget CommonWidgets.WidgetWithPadding[def.RequestWidget]
 	nothing_widget NothingWidget
-	http_widget    http.HTTP_Widget
+	http_widget    http_widget.HTTP_Widget
 
 	popup_widget  widget.Popup
 	popup_content sidebar_item_types_panel

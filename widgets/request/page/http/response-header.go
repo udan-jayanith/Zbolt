@@ -1,4 +1,4 @@
-package http
+package http_widget
 
 import (
 	"API-Client/basic"
