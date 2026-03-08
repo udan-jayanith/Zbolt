@@ -5,7 +5,8 @@ import (
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
 	"API-Client/widgets/request/def"
-	"API-Client/widgets/request/page/http"
+	http_widget "API-Client/widgets/request/page/http"
+	websocket_widget "API-Client/widgets/request/page/websocket"
 	"fmt"
 
 	"image"
@@ -38,9 +39,11 @@ type RequestPage struct {
 	tab_widget CommonWidgets.Tab[*def.Request]
 	tab_items  []CommonWidgets.TabItem[*def.Request]
 
-	request_widget CommonWidgets.WidgetWithPadding[def.RequestWidget]
 	nothing_widget NothingWidget
-	http_widget    http_widget.HTTP_Widget
+
+	request_widget   CommonWidgets.WidgetWithPadding[def.RequestWidget]
+	http_widget      http_widget.HTTP_Widget
+	websocket_widget websocket_widget.WebsocketWidget
 
 	popup_widget  widget.Popup
 	popup_content sidebar_item_types_panel
@@ -135,8 +138,16 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		})
 		adder.AddWidget(&rp.tab_widget)
 
-		//_, req := rp.tab_widget.GetSelectedTab()
-		rp.request_widget.SetWidget(&rp.http_widget)
+		_, req := rp.tab_widget.GetSelectedTab()
+		switch req.Type {
+		case def.HTTP:
+			rp.request_widget.SetWidget(&rp.http_widget)
+		case def.Websocket:
+			rp.request_widget.SetWidget(&rp.websocket_widget)
+		default:
+			panic("request type not handled")
+		}
+
 		rp.request_widget.SetPadding(padding)
 		adder.AddWidget(&rp.request_widget)
 	} else {

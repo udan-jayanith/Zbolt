@@ -2,6 +2,7 @@ package websocket_widget
 
 import (
 	"API-Client/basic"
+	"API-Client/widgets/request/def"
 
 	gui "github.com/guigui-gui/guigui"
 )
@@ -36,4 +37,8 @@ func (ww *WebsocketWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	}
 
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (ww *WebsocketWidget) RequestType() def.RequestType {
+	return def.Websocket
 }
