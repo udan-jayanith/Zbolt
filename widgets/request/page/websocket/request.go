@@ -37,13 +37,13 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	
 	rw.tab_widget.SetTabItems([]CommonWidgets.TabItem[struct{}]{
 		{
-			Text: "Params",
+			Text: "Parameters",
+		},
+		{
+			Text: "Headers",
 		},
 		{
 			Text: "Body",
-		},
-		{
-			Text: "Header",
 		},
 	})
 
@@ -53,11 +53,11 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	rw.tab_widget.OnSelect(func(tab_item *CommonWidgets.TabItem[struct{}], index int) {
 		switch tab_item.Text {
-		case "Params":
+		case "Parameters":
 			rw.content.selected = &rw.content.params
 		case "Body":
 			rw.content.selected = &rw.content.body
-		case "Header":
+		case "Headers":
 			rw.content.selected = &rw.content.headers
 		}
 	})

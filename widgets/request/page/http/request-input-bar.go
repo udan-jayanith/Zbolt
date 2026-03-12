@@ -33,7 +33,7 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	adder.AddWidget(&rib.input_widget)
 
 	rib.request_btn_widget.SetText("Request")
-	rib.request_btn_widget.SetTextBold(true)
+	rib.request_btn_widget.SetType(widget.ButtonTypePrimary)
 	adder.AddWidget(&rib.request_btn_widget)
 	return nil
 }
