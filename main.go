@@ -13,13 +13,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	request_page "API-Client/widgets/request/page"
-	Welcome "API-Client/widgets/welcome"
+	home "API-Client/widgets/home"
 )
 
 type Root struct {
 	gui.DefaultWidget
 
-	welcome_page_widget Welcome.Welcome
+	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
 }
 
