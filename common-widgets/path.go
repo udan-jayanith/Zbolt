@@ -216,7 +216,7 @@ func (path *Path) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *eb
 
 func (path_widget *Path) SetPath(directory_path string) {
 	directory_path = filepath.Clean(directory_path)
-	list := strings.Split(filepath.ToSlash(directory_path), "/")
+	list := strings.Split(filepath.ToSlash(directory_path), string(filepath.Separator))
 	l := len(list)
 
 	path_widget.path_widget.segments = make([]path_segment_widget, 0, l)
