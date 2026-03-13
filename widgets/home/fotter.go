@@ -8,6 +8,7 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/pkg/browser"
 )
 
 type footer_widget struct {
@@ -41,6 +42,9 @@ func (fw *footer_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	fw.repo_link.IconName = "github"
 	fw.repo_link.Point = icon_point
+	fw.repo_link.OnClick(func() {
+		browser.OpenURL("https://github.com/udan-jayanith/API-Client")
+	})
 	adder.AddWidget(&fw.repo_link)
 
 	fw.stars.star_icon.IconName = "star"

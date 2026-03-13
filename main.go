@@ -12,8 +12,8 @@ import (
 	gui "github.com/guigui-gui/guigui"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	request_page "API-Client/widgets/request/page"
 	home "API-Client/widgets/home"
+	request_page "API-Client/widgets/request/page"
 )
 
 type Root struct {

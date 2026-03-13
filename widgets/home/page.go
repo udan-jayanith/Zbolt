@@ -29,7 +29,7 @@ func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	wp.recently_opened.Widget().SetValue("Recently opened")
 	wp.recently_opened.Widget().SetScale(1.2)
 	wp.recently_opened.SetPadding(gui.Padding{
-		Start: widget.UnitSize(ctx)/2,
+		Start: widget.UnitSize(ctx) / 2,
 	})
 	adder.AddWidget(&wp.recently_opened)
 
