@@ -66,7 +66,7 @@ func (rhw *response_header_widget) Measure(ctx *gui.Context, constraints gui.Con
 	gap := u / 4
 	padding := u / 2
 
-	point := image.Pt(padding+gap*3, padding)
+	point := image.Pt(padding+gap*4, padding)
 
 	if w, ok := constraints.FixedWidth(); ok {
 		point.X = w
