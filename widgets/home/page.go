@@ -112,7 +112,7 @@ func (wp *HomePage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, lay
 				},
 			},
 			{
-				Size: gui.FixedSize(40),
+				Size: gui.FlexibleSize(1),
 			},
 			// buttons
 			{
