@@ -38,7 +38,7 @@ func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&wp.sidebar)
 
 	wp.zbolt_icon.IconName = "large-icons/zbolt-passtrough"
-	size := widget.UnitSize(ctx) * 10
+	size := widget.UnitSize(ctx) * 14
 	wp.zbolt_icon.Point = &image.Point{
 		X: size,
 		Y: size,
