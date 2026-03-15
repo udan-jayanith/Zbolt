@@ -18,7 +18,7 @@ type HomePage struct {
 	sidebar         widget.List[struct{}]
 
 	zbolt_icon                                          icons.Icon
-	open_button, new_project_button, new_request_button widget.Button
+	open_button, new_project_button, quick_request_button widget.Button
 	footer_widget                                       footer_widget
 }
 
@@ -51,8 +51,8 @@ func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	wp.new_project_button.SetText("New project")
 	adder.AddWidget(&wp.new_project_button)
 
-	wp.new_request_button.SetText("New request")
-	adder.AddWidget(&wp.new_request_button)
+	wp.quick_request_button.SetText("Quick request")
+	adder.AddWidget(&wp.quick_request_button)
 
 	adder.AddWidget(&wp.footer_widget)
 	return nil
@@ -130,7 +130,7 @@ func (wp *HomePage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, lay
 							Widget: &wp.new_project_button,
 						},
 						{
-							Widget: &wp.new_request_button,
+							Widget: &wp.quick_request_button,
 						},
 						{
 							Size: gui.FlexibleSize(1),

@@ -41,7 +41,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	ebiten.SetWindowIcon([]image.Image{zebolt_icon})
-
 	op := &gui.RunOptions{
 		Title:         "Zbolt",
 		WindowMinSize: image.Pt(800, 444),
