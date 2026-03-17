@@ -116,6 +116,7 @@ func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
+		Padding: gui.Padding{Bottom: widget.UnitSize(ctx)/3},
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
@@ -138,7 +139,7 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	point.Y = widget.LineHeight(ctx)
+	point.Y = widget.LineHeight(ctx)+widget.UnitSize(ctx)/3
 
 	for i, _ := range pw.segments {
 		measurements := pw.segments[i].Measure(ctx, constraints)
