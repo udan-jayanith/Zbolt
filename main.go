@@ -13,6 +13,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	home "API-Client/widgets/home"
+	"API-Client/widgets/inspect"
 	request_page "API-Client/widgets/request/page"
 )
 
@@ -21,15 +22,32 @@ type Root struct {
 
 	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
+	inspect_widget inspect.InspectWidget
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddWidget(&r.welcome_page_widget)
+	adder.AddWidget(&r.request_page_widget)
+	
+	r.inspect_widget.SetOpen(true)
+	adder.AddWidget(&r.inspect_widget)
 	return nil
 }
 
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&r.welcome_page_widget, widgetBounds.Bounds())
+	b := widgetBounds.Bounds()
+	
+	layouter.LayoutWidget(&r.request_page_widget, b)
+	
+	layouter.LayoutWidget(&r.inspect_widget, image.Rectangle{
+		Min: image.Point{
+			X: b.Min.X,
+			Y: b.Max.Y/2,
+		},
+		Max: image.Point{
+			X: b.Max.X,
+			Y: b.Max.Y,
+		},
+	})
 }
 
 //go:embed icon.png
