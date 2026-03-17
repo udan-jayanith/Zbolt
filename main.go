@@ -11,6 +11,7 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	home "API-Client/widgets/home"
 	"API-Client/widgets/inspect"
@@ -22,32 +23,44 @@ type Root struct {
 
 	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
-	inspect_widget inspect.InspectWidget
+	inspect_widget      inspect.InspectWidget
+	inspect_open        bool
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&r.request_page_widget)
-	
-	r.inspect_widget.SetOpen(true)
-	adder.AddWidget(&r.inspect_widget)
+
+	if r.inspect_open {
+		r.inspect_widget.SetOpen(r.inspect_open)
+		adder.AddWidget(&r.inspect_widget)
+	}
 	return nil
+}
+
+func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if ebiten.IsKeyPressed(ebiten.KeyControlLeft) && ebiten.IsKeyPressed(ebiten.KeyShiftLeft) && inpututil.IsKeyJustPressed(ebiten.KeyI) {
+		r.inspect_open = !r.inspect_open
+	}
+	return gui.HandleInputResult{}
 }
 
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
-	
+
 	layouter.LayoutWidget(&r.request_page_widget, b)
-	
-	layouter.LayoutWidget(&r.inspect_widget, image.Rectangle{
-		Min: image.Point{
-			X: b.Min.X,
-			Y: b.Max.Y/2,
-		},
-		Max: image.Point{
-			X: b.Max.X,
-			Y: b.Max.Y,
-		},
-	})
+
+	if r.inspect_open {
+		layouter.LayoutWidget(&r.inspect_widget, image.Rectangle{
+			Min: image.Point{
+				X: b.Min.X,
+				Y: b.Max.Y / 2,
+			},
+			Max: image.Point{
+				X: b.Max.X,
+				Y: b.Max.Y,
+			},
+		})
+	}
 }
 
 //go:embed icon.png

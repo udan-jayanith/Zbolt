@@ -14,11 +14,11 @@ type InspectWidget struct {
 	gui.DefaultWidget
 	open         bool
 	tabs         CommonWidgets.Tab[string]
-	logs, stdout widget.Text
+	logs, stdout gui.WidgetWithPadding[*widget.Text]
 	panel        widget.Panel
 }
 
-func (r *InspectWidget) Build(context *gui.Context, adder *gui.ChildAdder) error {
+func (r *InspectWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if !r.open {
 		return nil
 	}
@@ -28,7 +28,7 @@ func (r *InspectWidget) Build(context *gui.Context, adder *gui.ChildAdder) error
 			Text: "Logs",
 		},
 		CommonWidgets.TabItem[string]{
-			Text: "StdOut",
+			Text: "Stdout",
 		},
 		CommonWidgets.TabItem[string]{
 			Text: "Database",
@@ -36,13 +36,18 @@ func (r *InspectWidget) Build(context *gui.Context, adder *gui.ChildAdder) error
 	})
 	adder.AddWidget(&r.tabs)
 
-	r.logs.SetAutoWrap(true)
-	r.logs.SetMultiline(true)
-	r.logs.SetSelectable(true)
+	padding_end := gui.Padding{End: widget.UnitSize(ctx) / 2}
+	r.logs.SetPadding(padding_end)
+	logs_widget := r.logs.Widget()
+	logs_widget.SetAutoWrap(true)
+	logs_widget.SetMultiline(true)
+	logs_widget.SetSelectable(true)
 
-	r.stdout.SetAutoWrap(true)
-	r.stdout.SetMultiline(true)
-	r.stdout.SetSelectable(true)
+	r.stdout.SetPadding(padding_end)
+	stdout_widget := r.stdout.Widget()
+	stdout_widget.SetAutoWrap(true)
+	stdout_widget.SetMultiline(true)
+	stdout_widget.SetSelectable(true)
 
 	selected_index := r.tabs.GetSelectedIndex()
 	switch selected_index {
@@ -55,7 +60,7 @@ func (r *InspectWidget) Build(context *gui.Context, adder *gui.ChildAdder) error
 	default:
 		panic("Not handled")
 	}
-	r.logs.SetValue(`What is Lorem Ipsum?
+	logs_widget.SetValue(`What is Lorem Ipsum?
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 Why do we use it?
@@ -78,7 +83,7 @@ func (r *InspectWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 
 	u := widget.UnitSize(ctx)
 	padding := u / 4
-	
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Padding:   basic.NewPadding(padding),
