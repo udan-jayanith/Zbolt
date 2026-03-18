@@ -46,6 +46,7 @@ type RequestPage struct {
 	websocket_widget websocket_widget.WebsocketWidget
 
 	request_create_widget sidebar_item_types_panel
+	popup_content         gui.Widget
 	popup_widget          widget.Popup
 
 	notify_widget CommonWidgets.Notify
@@ -152,7 +153,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	} else {
 		rp.nothing_widget.OnClick(func() {
 			rp.request_create_widget.Clear()
-			rp.popup_widget.SetContent(&rp.request_create_widget)
+			rp.popup_content = &rp.request_create_widget
 			rp.popup_widget.SetOpen(true)
 		})
 		adder.AddWidget(&rp.nothing_widget)
@@ -165,7 +166,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sidebar.OnRequestCreate(func(ctx *gui.Context) {
 		rp.request_create_widget.Clear()
-		rp.popup_widget.SetContent(&rp.request_create_widget)
+		rp.popup_content = &rp.request_create_widget
 		rp.popup_widget.SetOpen(true)
 	})
 
@@ -174,6 +175,9 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.popup_widget.SetOpen(false)
 	})
 
+	if rp.popup_content != nil {
+		rp.popup_widget.SetContent(rp.popup_content)
+	}
 	adder.AddWidget(&rp.notify_widget)
 	return nil
 }
@@ -182,15 +186,16 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	layouter.LayoutWidget(&rp.background, widgetBounds.Bounds())
 
 	b := widgetBounds.Bounds()
-	popup_content_bounds := rp.request_create_widget.Measure(ctx, gui.Constraints{})
+	if rp.popup_widget.IsOpen() {
+		popup_content_bounds := rp.request_create_widget.Measure(ctx, gui.Constraints{})
 
-	popup_size := image.Rectangle{
-		Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
+		popup_size := image.Rectangle{
+			Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
+		}
+		popup_size.Max = image.Pt(popup_size.Min.X+popup_content_bounds.X, popup_size.Min.Y+popup_content_bounds.Y)
+
+		layouter.LayoutWidget(&rp.popup_widget, popup_size)
 	}
-	popup_size.Max = image.Pt(popup_size.Min.X+popup_content_bounds.X, popup_size.Min.Y+popup_content_bounds.Y)
-
-	layouter.LayoutWidget(&rp.popup_widget, popup_size)
-
 	rp.notify_widget.LayoutWidget(ctx, widgetBounds, layouter)
 
 	tab_container_layout := gui.LinearLayout{
