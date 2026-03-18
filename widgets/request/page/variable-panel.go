@@ -15,6 +15,7 @@ type variable_panel_widget struct {
 	public_table_header, private_table_header       widget.Text
 	public_description, private_description CommonWidgets.Description
 	public_variables_table, private_variables_table CommonWidgets.AttributeTable
+	line CommonWidgets.HorizontalLine
 }
 
 func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -36,6 +37,8 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 		
 	adder.AddWidget(&w.public_variables_table)
 	adder.AddWidget(&w.private_variables_table)
+	
+	adder.AddWidget(&w.line)
 	return nil
 }
 
@@ -64,6 +67,10 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 				Widget: &w.public_variables_table,
 				Size:   gui.FlexibleSize(1),
 			},
+			{},
+			{
+				Widget: &w.line,
+			},
 			{
 				Widget: &w.private_table_header,
 			},
@@ -79,9 +86,6 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
-
-//func (w *variable_panel_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-//}
 
 func (w *variable_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
