@@ -2,10 +2,11 @@ package request_page
 
 import (
 	"API-Client/basic"
+	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
+	"API-Client/widgets/request/def"
 	"image"
 	"log"
-	"API-Client/widgets/request/def"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -161,6 +162,8 @@ type sidebar_item_types_panel struct {
 	http, websocket, graphql, grpc gui.WidgetWithSize[*widget.Button]
 	selected_request_type          def.RequestType
 
+	line CommonWidgets.HorizontalLine
+
 	select_type_text_widget widget.Text
 	request_name_input      request_name_inputs_widget
 	on_create_clicked       func(request *def.Request)
@@ -248,6 +251,8 @@ func (sitp *sidebar_item_types_panel) Build(ctx *gui.Context, adder *gui.ChildAd
 		log.Fatal("Unknown request type selected")
 	}
 
+	adder.AddWidget(&sitp.line)
+
 	sitp.request_name_input.OnCreateButtonClicked(func(name string) {
 		req := def.NewRequest(sitp.selected_request_type, name)
 		sitp.on_create_clicked(&req)
@@ -289,6 +294,12 @@ func (sitp *sidebar_item_types_panel) Layout(ctx *gui.Context, widgetBounds *gui
 				},
 			},
 			{
+				Size: gui.FixedSize(size * 2),
+			},
+			{
+				Widget: &sitp.line,
+			},
+			{
 				Size: gui.FixedSize(size),
 			},
 			{
@@ -309,7 +320,7 @@ func (sitp *sidebar_item_types_panel) Measure(ctx *gui.Context, constraints gui.
 	} else {
 		point.Y = sitp.select_type_text_widget.Measure(ctx, constraints).Y
 		point.Y += sitp.request_name_input.Measure(ctx, constraints).Y
-		point.Y += (u * 4) + gap + padding*3
+		point.Y += (u * 4) + gap + gap*2 + padding*3+sitp.line.Measure(ctx, gui.Constraints{}).Y
 	}
 
 	if w, ok := constraints.FixedWidth(); ok {
