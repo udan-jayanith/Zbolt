@@ -13,6 +13,7 @@ type variable_panel_widget struct {
 	gui.DefaultWidget
 
 	public_table_header, private_table_header       widget.Text
+	public_description, private_description CommonWidgets.Description
 	public_variables_table, private_variables_table CommonWidgets.AttributeTable
 }
 
@@ -27,6 +28,12 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 	w.private_table_header.SetVerticalAlign(widget.VerticalAlignBottom)
 	adder.AddWidget(&w.private_table_header)
 
+	w.public_description.SetDescription(`Public variables are visible to everyone.`)
+	adder.AddWidget(&w.public_description)
+
+	w.private_description.SetDescription(`Only variable names are visible to others.`)
+	adder.AddWidget(&w.private_description)
+		
 	adder.AddWidget(&w.public_variables_table)
 	adder.AddWidget(&w.private_variables_table)
 	return nil
@@ -48,6 +55,10 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &w.public_table_header,
+				Size: gui.FixedSize(widget.LineHeight(ctx)),
+			},
+			{
+				Widget: &w.public_description,
 			},
 			{
 				Widget: &w.public_variables_table,
@@ -55,6 +66,9 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 			},
 			{
 				Widget: &w.private_table_header,
+			},
+			{
+				Widget: &w.private_description,
 			},
 			{
 				Widget: &w.private_variables_table,
