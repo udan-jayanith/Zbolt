@@ -137,6 +137,10 @@ func (sd *Sidebar[T]) OnItemClicked(fn func(item T)) {
 	sd.list.on_item_clicked = fn
 }
 
+func (sd *Sidebar[T]) OnVariableClicked(fn func(ctx *gui.Context)){
+	sd.options.add.on_variable_clicked = fn
+}
+
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if sd.options.add.create_request_icon == nil {
 		sd.options.add.create_request_icon = icons.Store.Open("add-box")
@@ -162,6 +166,9 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&sd.options.add.create_folder_button)
 
 	sd.options.add.variable_button.SetIcon(sd.options.add.variable_icon)
+	if sd.options.add.on_variable_clicked != nil {
+		sd.options.add.variable_button.OnDown(sd.options.add.on_variable_clicked)
+	}
 	adder.AddWidget(&sd.options.add.variable_button)
 
 	sd.options.add.create_request_button.SetIcon(sd.options.add.create_request_icon)

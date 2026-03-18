@@ -46,6 +46,7 @@ type RequestPage struct {
 	websocket_widget websocket_widget.WebsocketWidget
 
 	request_create_widget sidebar_item_types_panel
+	variable_panel_widget variable_panel_widget
 	popup_content         gui.Widget
 	popup_widget          widget.Popup
 
@@ -174,6 +175,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.create_sidebar_item(request)
 		rp.popup_widget.SetOpen(false)
 	})
+	
+	rp.sidebar.Widget().OnVariableClicked(func(ctx *gui.Context) {
+		rp.popup_content = &rp.variable_panel_widget
+		rp.popup_widget.SetOpen(true)
+	})
 
 	if rp.popup_content != nil {
 		rp.popup_widget.SetContent(rp.popup_content)
@@ -187,7 +193,7 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	b := widgetBounds.Bounds()
 	if rp.popup_widget.IsOpen() {
-		popup_content_bounds := rp.request_create_widget.Measure(ctx, gui.Constraints{})
+		popup_content_bounds := rp.popup_content.Measure(ctx, gui.Constraints{})
 
 		popup_size := image.Rectangle{
 			Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
