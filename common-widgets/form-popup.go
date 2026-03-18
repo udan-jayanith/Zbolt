@@ -11,16 +11,13 @@ import (
 type popup_form_content struct {
 	gui.DefaultWidget
 
-	field_widget  widget.Text
+	field_widget  Description
 	input_widget  widget.TextInput
 	button_widget widget.Button
 }
 
 func (content *popup_form_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	if content.field_widget.Value() != "" {
-		content.field_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-		content.field_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-		content.field_widget.SetOpacity(0.84)
+	if content.field_widget.Description() != "" {
 		adder.AddWidget(&content.field_widget)
 	}
 
@@ -65,7 +62,7 @@ func (content *popup_form_content) Layout(ctx *gui.Context, widgetBounds *gui.Wi
 		},
 	}
 
-	if content.field_widget.Value() == "" {
+	if content.field_widget.Description() == "" {
 		layout = horizontal_layout
 	}
 
@@ -78,7 +75,7 @@ func (content *popup_form_content) Measure(ctx *gui.Context, constraints gui.Con
 	gap := content.gap(ctx)
 
 	point.X = u * 10
-	if content.field_widget.Value() != "" {
+	if content.field_widget.Description() != "" {
 		point.Y += content.field_widget.Measure(ctx, gui.Constraints{}).Y + gap/2
 	}
 
@@ -127,7 +124,7 @@ func (sfp *SimpleFormPopup) SetButtonText(text string) {
 }
 
 func (sfp *SimpleFormPopup) SetFieldValue(text string) {
-	sfp.popup_content.field_widget.SetValue(text)
+	sfp.popup_content.field_widget.SetDescription(text)
 }
 
 func (sfp *SimpleFormPopup) SetOpen(open bool) {
