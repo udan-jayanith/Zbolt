@@ -125,7 +125,7 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 	}
 }
 
-func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
+func (sd *Sidebar[T]) OnRequestCreate(callback func(ctx *gui.Context)) {
 	sd.options.add.on_request_create = callback
 }
 

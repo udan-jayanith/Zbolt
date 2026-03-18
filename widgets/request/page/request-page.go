@@ -45,9 +45,8 @@ type RequestPage struct {
 	http_widget      http_widget.HTTP_Widget
 	websocket_widget websocket_widget.WebsocketWidget
 
-	popup_widget  widget.Popup
-	popup_content sidebar_item_types_panel
-	is_popup_open bool
+	request_create_widget sidebar_item_types_panel
+	popup_widget          widget.Popup
 
 	notify_widget CommonWidgets.Notify
 }
@@ -152,25 +151,27 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		adder.AddWidget(&rp.request_widget)
 	} else {
 		rp.nothing_widget.OnClick(func() {
+			rp.request_create_widget.Clear()
+			rp.popup_widget.SetContent(&rp.request_create_widget)
 			rp.popup_widget.SetOpen(true)
 		})
 		adder.AddWidget(&rp.nothing_widget)
 	}
 
-	rp.popup_widget.SetContent(&rp.popup_content)
 	rp.popup_widget.SetBackgroundDark(true)
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
 	adder.AddWidget(&rp.popup_widget)
 
-	sidebar.OnAddButtonClicked(func(ctx *gui.Context) {
+	sidebar.OnRequestCreate(func(ctx *gui.Context) {
+		rp.request_create_widget.Clear()
+		rp.popup_widget.SetContent(&rp.request_create_widget)
 		rp.popup_widget.SetOpen(true)
 	})
 
-	rp.popup_content.OnCreateButtonClicked(func(request *def.Request) {
+	rp.request_create_widget.OnCreateButtonClicked(func(request *def.Request) {
 		rp.create_sidebar_item(request)
 		rp.popup_widget.SetOpen(false)
-		rp.popup_content.Clear()
 	})
 
 	adder.AddWidget(&rp.notify_widget)
@@ -181,7 +182,7 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	layouter.LayoutWidget(&rp.background, widgetBounds.Bounds())
 
 	b := widgetBounds.Bounds()
-	popup_content_bounds := rp.popup_content.Measure(ctx, gui.Constraints{})
+	popup_content_bounds := rp.request_create_widget.Measure(ctx, gui.Constraints{})
 
 	popup_size := image.Rectangle{
 		Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),
