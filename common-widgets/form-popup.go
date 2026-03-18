@@ -18,9 +18,9 @@ type popup_form_content struct {
 
 func (content *popup_form_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if content.field_widget.Value() != "" {
-		content.field_widget.SetVerticalAlign(widget.VerticalAlignBottom)
+		content.field_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 		content.field_widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-		content.field_widget.SetOpacity(0.82)
+		content.field_widget.SetOpacity(0.84)
 		adder.AddWidget(&content.field_widget)
 	}
 
