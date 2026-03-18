@@ -51,10 +51,12 @@ func (w *variable_panel_widget) padding(ctx *gui.Context) gui.Padding {
 }
 
 func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	gap := gui.LinearLayoutItem{
+		Size: gui.FixedSize(w.gap(ctx)),
+	}
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Padding:   w.padding(ctx),
-		Gap:       w.gap(ctx),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &w.public_table_header,
@@ -63,20 +65,23 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 			{
 				Widget: &w.public_description,
 			},
+			gap,
 			{
 				Widget: &w.public_variables_table,
 				Size:   gui.FlexibleSize(1),
 			},
-			{},
+			{Size: gui.FixedSize(w.gap(ctx)*2)},
 			{
 				Widget: &w.line,
 			},
+			gap,
 			{
 				Widget: &w.private_table_header,
 			},
 			{
 				Widget: &w.private_description,
 			},
+			gap,
 			{
 				Widget: &w.private_variables_table,
 				Size:   gui.FlexibleSize(1),
