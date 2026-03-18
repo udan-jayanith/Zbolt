@@ -34,7 +34,7 @@ func (line *HorizontalLine) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBound
 	b.Min.Add(image.Pt(line.padding.Start, 0))
 	b.Max.Sub(image.Pt(line.padding.End, 0))
 
-	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeInfo, 0), 2/32.0)
+	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
 	width := line.width(ctx)
 	
 	vector.StrokeLine(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Max.X), float32(b.Min.Y), width, line_color, false)
