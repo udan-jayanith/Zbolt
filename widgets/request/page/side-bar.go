@@ -82,13 +82,15 @@ type Sidebar[T comparable] struct {
 	options struct {
 		search_widget widget.TextInput
 		add           struct {
-			widget         widget.Button
-			add_button_pos image.Point
-			menu           widget.PopupMenu[struct{}]
+			create_request_button, create_folder_button, variable_button widget.Button
+			create_request_icon, create_folder_icon, variable_icon       *ebiten.Image
 
-			on_request_clicked func(ctx *gui.Context)
-			folder_popup       CommonWidgets.SimpleFormPopup
-			on_folder_create   func(ctx *gui.Context, folder_name string)
+			on_variable_clicked func(ctx *gui.Context)
+			on_request_create   func(ctx *gui.Context)
+
+			folder_popup          CommonWidgets.SimpleFormPopup
+			folder_popup_position image.Point
+			on_folder_create      func(ctx *gui.Context, folder_name string)
 		}
 	}
 
@@ -124,43 +126,56 @@ func (sd *Sidebar[T]) SetItems(items []SidebarItem[T]) {
 }
 
 func (sd *Sidebar[T]) OnAddButtonClicked(callback func(ctx *gui.Context)) {
-	sd.options.add.on_request_clicked = callback
+	sd.options.add.on_request_create = callback
 }
 
-func (sd *Sidebar[T]) OnFolderCreate(fn func(ctx *gui.Context, folder_name string)){
+func (sd *Sidebar[T]) OnFolderCreate(fn func(ctx *gui.Context, folder_name string)) {
 	sd.options.add.on_folder_create = fn
 }
 
-func (sd *Sidebar[T]) OnItemClicked(fn func(item T)){
+func (sd *Sidebar[T]) OnItemClicked(fn func(item T)) {
 	sd.list.on_item_clicked = fn
 }
 
 func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddWidget(&sd.options.search_widget)
+	if sd.options.add.create_request_icon == nil {
+		sd.options.add.create_request_icon = icons.Store.Open("add-box")
+	}
+	if sd.options.add.create_folder_icon == nil {
+		sd.options.add.create_folder_icon = icons.Store.Open("create-new-folder")
+	}
+	if sd.options.add.variable_icon == nil {
+		sd.options.add.variable_icon = icons.Store.Open("variable")
+	}
 
-	sd.options.add.widget.SetIcon(icons.Store.Open("add"))
-	sd.options.add.menu.SetItemsByStrings([]string{"Request", "Folder"})
-	sd.options.add.widget.OnDown(func(ctx *gui.Context) {
-		sd.options.add.add_button_pos = image.Pt(ebiten.CursorPosition())
-		sd.options.add.menu.SetOpen(true)
+	sd.options.add.create_request_button.SetIcon(sd.options.add.create_request_icon)
+	sd.options.add.create_request_button.OnDown(func(context *gui.Context) {
+		sd.options.add.on_request_create(ctx)
 	})
+	adder.AddWidget(&sd.options.add.create_request_button)
+
+	sd.options.add.create_folder_button.SetIcon(sd.options.add.create_folder_icon)
+	sd.options.add.create_folder_button.OnDown(func(context *gui.Context) {
+		sd.options.add.folder_popup_position = image.Pt(ebiten.CursorPosition())
+		sd.options.add.folder_popup.SetOpen(true)
+	})
+	adder.AddWidget(&sd.options.add.create_folder_button)
+
+	sd.options.add.variable_button.SetIcon(sd.options.add.variable_icon)
+	adder.AddWidget(&sd.options.add.variable_button)
+
+	sd.options.add.create_request_button.SetIcon(sd.options.add.create_request_icon)
+	adder.AddWidget(&sd.options.add.create_request_button)
 
 	sd.options.add.folder_popup.SetButtonText("Create")
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
 	sd.options.add.folder_popup.OnButtonClicked(func(ctx *gui.Context, value string) {
-		if sd.options.add.on_request_clicked != nil {
+		if sd.options.add.on_request_create != nil {
 			sd.options.add.on_folder_create(ctx, value)
 		}
 	})
 
-	sd.options.add.menu.OnItemSelected(func(context *gui.Context, index int) {
-		if sd.options.add.on_request_clicked != nil && index == 0 {
-			sd.options.add.on_request_clicked(ctx)
-		} else if index == 1 {
-			sd.options.add.folder_popup.SetOpen(true)
-		}
-	})
-	adder.AddWidget(&sd.options.add.widget)
+	adder.AddWidget(&sd.options.search_widget)
 
 	sd.list.widget.SetItems(sd.list.items)
 	sd.list.widget.OnItemsSelected(func(context *gui.Context, indices []int) {
@@ -188,7 +203,6 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	adder.AddWidget(&sd.list.contextmenu.rename_popup_widget)
 	adder.AddWidget(&sd.list.contextmenu.menu)
-	adder.AddWidget(&sd.options.add.menu)
 	adder.AddWidget(&sd.options.add.folder_popup)
 	return nil
 }
@@ -198,14 +212,10 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Min: sd.list.contextmenu.position,
 	})
 
-	layouter.LayoutWidget(&sd.options.add.menu, image.Rectangle{
-		Min: sd.options.add.add_button_pos,
-	})
-
-	form_measurements := sd.options.add.folder_popup.Measure(ctx, gui.Constraints{})
+	folder_popup_measurements := sd.options.add.folder_popup.Measure(ctx, gui.Constraints{})
 	layouter.LayoutWidget(&sd.options.add.folder_popup, image.Rectangle{
-		Min: sd.options.add.add_button_pos,
-		Max: sd.options.add.add_button_pos.Add(form_measurements),
+		Min: sd.options.add.folder_popup_position,
+		Max: sd.options.add.folder_popup_position.Add(folder_popup_measurements),
 	})
 
 	rename_measurements := sd.list.contextmenu.rename_popup_widget.Measure(ctx, gui.Constraints{})
@@ -220,23 +230,28 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Gap:       u / 4,
 		Items: []gui.LinearLayoutItem{
 			{
+				Widget: &sd.list.path,
+				//Size: gui.FixedSize(widget.UnitSize(ctx)),
+			},
+			{
 				Layout: gui.LinearLayout{
 					Direction: gui.LayoutDirectionHorizontal,
 					Gap:       u / 4,
 					Items: []gui.LinearLayoutItem{
 						{
-							Widget: &sd.options.search_widget,
-							Size:   gui.FlexibleSize(1),
+							Widget: &sd.options.add.create_request_button,
 						},
 						{
-							Widget: &sd.options.add.widget,
+							Widget: &sd.options.add.create_folder_button,
+						},
+						{
+							Widget: &sd.options.add.variable_button,
 						},
 					},
 				},
 			},
 			{
-				Widget: &sd.list.path,
-				//Size: gui.FixedSize(widget.UnitSize(ctx)),
+				Widget: &sd.options.search_widget,
 			},
 			{
 				Widget: &sd.list.widget,

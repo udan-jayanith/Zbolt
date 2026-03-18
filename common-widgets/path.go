@@ -116,7 +116,7 @@ func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding: gui.Padding{Bottom: widget.UnitSize(ctx)/3},
+		Padding: basic.NewPadding(widget.UnitSize(ctx)/3-10, 0),
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
