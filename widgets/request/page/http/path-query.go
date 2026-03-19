@@ -14,6 +14,7 @@ func (r *url_path_query) Path() string {
 	return ""
 }
 
+// This isn't robust but enough.
 func Parse_url_path_query(url_path string) (url_path_query, error) {
 	list := make(map[string]url_query_data, 3)
 
