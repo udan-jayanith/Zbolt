@@ -24,9 +24,8 @@ type Root struct {
 	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
 
-	alert_box    messages.AlertBox
-	alerts_count int
-	popup        widget.Popup
+	alert_box messages.AlertBox
+	popup     widget.Popup
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
@@ -37,18 +36,14 @@ func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
 		r.popup.SetContent(&r.alert_box)
 		adder.AddWidget(&r.popup)
 	} else {
-		r.alerts_count = messages.Alerts.Len()
-
 		alert, ok := messages.Alerts.Get()
 		r.popup.SetOpen(ok)
 		r.alert_box.SetAlert(alert)
-		r.alerts_count--
 
 		r.alert_box.OnOk(func(ctx *gui.Context) {
 			alert, ok := messages.Alerts.Get()
 			r.popup.SetOpen(ok)
 			r.alert_box.SetAlert(alert)
-			r.alerts_count--
 		})
 	}
 
