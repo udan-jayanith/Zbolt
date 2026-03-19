@@ -3,6 +3,7 @@ module API-Client
 go 1.26.0
 
 require (
+	github.com/golang-ds/queue v1.0.0
 	github.com/guigui-gui/guigui v0.0.0-20260309084136-4ad450670697
 	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.10.0.20260302122915-c1069c18e771
 	github.com/hajimehoshi/iro v0.2.0

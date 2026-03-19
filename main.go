@@ -10,11 +10,11 @@ import (
 	"os"
 
 	gui "github.com/guigui-gui/guigui"
+	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
+	messages "API-Client/massages"
 	home "API-Client/widgets/home"
-	"API-Client/widgets/inspect"
 	request_page "API-Client/widgets/request/page"
 )
 
@@ -23,44 +23,59 @@ type Root struct {
 
 	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
-	inspect_widget      inspect.InspectWidget
-	inspect_open        bool
+
+	alert_box    messages.AlertBox
+	alerts_count int
+	popup        widget.Popup
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&r.request_page_widget)
 
-	if r.inspect_open {
-		r.inspect_widget.SetOpen(r.inspect_open)
-		adder.AddWidget(&r.inspect_widget)
+	if r.popup.IsOpen() {
+		r.popup.SetAnimated(true)
+		r.popup.SetContent(&r.alert_box)
+		adder.AddWidget(&r.popup)
+	} else {
+		r.alerts_count = messages.Alerts.Len()
+
+		alert, ok := messages.Alerts.Get()
+		r.popup.SetOpen(ok)
+		r.alert_box.SetAlert(alert)
+		r.alerts_count--
+
+		r.alert_box.OnOk(func(ctx *gui.Context) {
+			alert, ok := messages.Alerts.Get()
+			r.popup.SetOpen(ok)
+			r.alert_box.SetAlert(alert)
+			r.alerts_count--
+		})
 	}
+
 	return nil
 }
 
 func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if ebiten.IsKeyPressed(ebiten.KeyControlLeft) && ebiten.IsKeyPressed(ebiten.KeyShiftLeft) && inpututil.IsKeyJustPressed(ebiten.KeyI) {
-		r.inspect_open = !r.inspect_open
-	}
 	return gui.HandleInputResult{}
 }
 
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
 
-	layouter.LayoutWidget(&r.request_page_widget, b)
-
-	if r.inspect_open {
-		layouter.LayoutWidget(&r.inspect_widget, image.Rectangle{
+	if r.popup.IsOpen() {
+		alert_box_point := r.alert_box.Measure(ctx, gui.Constraints{})
+		middle := image.Rectangle{
 			Min: image.Point{
-				X: b.Min.X,
-				Y: b.Max.Y / 2,
+				X: b.Max.X/2 - alert_box_point.X/2,
+				Y: b.Max.Y/2 - alert_box_point.Y/2,
 			},
-			Max: image.Point{
-				X: b.Max.X,
-				Y: b.Max.Y,
-			},
-		})
+		}
+		middle.Max = middle.Min.Add(alert_box_point)
+
+		layouter.LayoutWidget(&r.popup, middle)
 	}
+
+	layouter.LayoutWidget(&r.request_page_widget, b)
 }
 
 //go:embed icon.png

@@ -11,6 +11,7 @@ import (
 
 type HTTP_Widget struct {
 	gui.DefaultWidget
+	//https://api.github.com/repos/udan-jayanith/Zbolt
 	request_widget  request_widget
 	response_widget response_widget
 }
