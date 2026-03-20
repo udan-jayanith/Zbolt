@@ -1,10 +1,12 @@
 package http_widget
 
 import (
+	"API-Client/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type request_input_bar_widget struct {
@@ -12,6 +14,8 @@ type request_input_bar_widget struct {
 	method_select_widget widget.Select[string]
 	input_widget         widget.TextInput
 	request_btn_widget   widget.Button
+	open_in_icon *ebiten.Image
+	open_in widget.Button
 	on_request func(ctx *gui.Context, url, method string)
 }
 
@@ -32,6 +36,12 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 
 	rib.input_widget.SetEditable(true)
 	adder.AddWidget(&rib.input_widget)
+	
+	if rib.open_in_icon == nil {
+		rib.open_in_icon = icons.Store.Open("open-in")
+	}
+	rib.open_in.SetIcon(rib.open_in_icon)
+	adder.AddWidget(&rib.open_in)
 
 	rib.request_btn_widget.SetText("Request")
 	rib.request_btn_widget.SetType(widget.ButtonTypePrimary)
@@ -56,6 +66,9 @@ func (rib *request_input_bar_widget) Layout(ctx *gui.Context, widgetBounds *gui.
 						{
 							Widget: &rib.input_widget,
 							Size:   gui.FlexibleSize(1),
+						},
+						{
+							Widget: &rib.open_in,
 						},
 						{
 							Widget: &rib.request_btn_widget,
