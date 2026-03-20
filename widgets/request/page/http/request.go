@@ -22,6 +22,11 @@ type request_widget struct {
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	rw.input_bar_widget.OnRequest(func(ctx *gui.Context, url, method string) {
+		//http.Request{
+		//Method: strings.ToUpper(method),
+		//}
+	})
 	adder.AddWidget(&rw.input_bar_widget)
 
 	{
