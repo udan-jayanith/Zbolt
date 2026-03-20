@@ -5,6 +5,7 @@ import (
 	"API-Client/widgets/request/def"
 
 	gui "github.com/guigui-gui/guigui"
+	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
 type WebsocketWidget struct {
@@ -41,4 +42,7 @@ func (ww *WebsocketWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 
 func (ww *WebsocketWidget) RequestType() def.RequestType {
 	return def.Websocket
+}
+
+func (ww *WebsocketWidget) Popup(popup_content *gui.Widget, popup_widget *widget.Popup) {
 }

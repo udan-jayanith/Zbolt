@@ -160,6 +160,11 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		adder.AddWidget(&rp.nothing_widget)
 	}
 
+	req_widget := rp.request_widget.Widget()
+	if req_widget != nil {
+		req_widget.Popup(&rp.popup_content, &rp.popup_widget)
+	}
+
 	rp.popup_widget.SetBackgroundDark(true)
 	rp.popup_widget.SetCloseByClickingOutside(true)
 	rp.popup_widget.SetBackgroundBlurred(true)
@@ -175,7 +180,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.create_sidebar_item(request)
 		rp.popup_widget.SetOpen(false)
 	})
-	
+
 	rp.sidebar.Widget().OnVariableClicked(func(ctx *gui.Context) {
 		rp.popup_content = &rp.variable_panel_widget
 		rp.popup_widget.SetOpen(true)

@@ -98,3 +98,7 @@ func (rib *request_input_bar_widget) OnRequest(fn func(ctx *gui.Context, url, me
 		fn(ctx, rib.input_widget.Value(), method.Text)
 	})
 }
+
+func (rib *request_input_bar_widget) OnOpenIn(fn func(ctx *gui.Context)){
+	rib.open_in.OnDown(fn)
+}

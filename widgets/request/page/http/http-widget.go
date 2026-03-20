@@ -14,15 +14,30 @@ type HTTP_Widget struct {
 	//https://api.github.com/repos/udan-jayanith/Zbolt
 	request_widget  request_widget
 	response_widget response_widget
+	
+	popup_content *gui.Widget 
+	popup_widget *widget.Popup
 }
 
 func (brp *HTTP_Widget) RequestType() def.RequestType {
 	return def.HTTP
 }
 
+func (brp *HTTP_Widget) Popup(popup_content *gui.Widget, popup_widget *widget.Popup) {
+	brp.popup_content = popup_content
+	brp.popup_widget = popup_widget
+}
+
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(ebiten.ColorModeDark)
 
+	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
+		if brp.popup_widget == nil {
+			return
+		}
+		*brp.popup_content = url_panel
+		brp.popup_widget.SetOpen(true)
+	})
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.response_widget)
 	return nil

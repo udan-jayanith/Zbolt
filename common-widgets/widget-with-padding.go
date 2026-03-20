@@ -23,6 +23,10 @@ func (wwp *WidgetWithPadding[T]) SetWidget(widget T){
 	wwp.is_set = true
 }
 
+func (wwp *WidgetWithPadding[T]) Widget()T{
+	return wwp.widget
+}
+
 func (wwp *WidgetWithPadding[T]) IsSet() bool {
 	return wwp.is_set
 }

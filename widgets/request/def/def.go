@@ -5,6 +5,7 @@ import (
 	"weak"
 
 	gui "github.com/guigui-gui/guigui"
+	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
 type RequestType uint8
@@ -59,6 +60,7 @@ func NewRequest(t RequestType, path string) Request{
 type RequestWidget interface {
 	gui.Widget
 	RequestType() RequestType
+	Popup(popup_content *gui.Widget, popup_widget *widget.Popup)
 }
 
 type Folder struct {
