@@ -4,6 +4,9 @@ import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 	"image"
+	"net/url"
+	"strings"
+	"time"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -12,8 +15,8 @@ import (
 
 var url_panel *url_panel_widget_scrollable = func() *url_panel_widget_scrollable {
 	w := &url_panel_widget{}
-	w.host.SetValue("api.github.com")
-	w.path.SetValue("/repos/{user-name}/{repo-name}")
+	u, _ := url.Parse("https://api.github.com/repos/{user-name}/{repo-name}?visibility=public&editable=false")
+	w.set_url(u)
 	return &url_panel_widget_scrollable{
 		content: w,
 	}
@@ -41,11 +44,13 @@ type url_panel_widget struct {
 	query_description, pattern_description CommonWidgets.Description
 	query, pattern                         CommonWidgets.AttributeTable
 
-	hr1, hr2         CommonWidgets.HorizontalLine
+	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
-	
+
 	url_preview_header widget.Text
-	url_preview CommonWidgets.URLPreview
+	url_preview        CommonWidgets.URLPreview
+
+	t time.Time
 }
 
 func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -90,13 +95,17 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.pseudo_url.SetDescription("The general form represented is:\n``[scheme:][//[userinfo@]host][/]path[?query][#fragment]``")
 	adder.AddWidget(&w.pseudo_url)
 	adder.AddWidget(&w.hr1)
-	
+
 	adder.AddWidget(&w.hr2)
-	
+
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
-	
-	w.url_preview.SetURL("https://api.github.com/repos/udan-jayanith/Zbolt")
+
+	if time.Now().Sub(w.t).Seconds() > 1 {
+		println("working")
+		w.url_preview.SetURL("https://api.github.com/repos/{user-name}/Zbolt")
+		w.t = time.Now()
+	}
 	adder.AddWidget(&w.url_preview)
 	return nil
 }
@@ -174,6 +183,21 @@ func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints
 	return point
 }
 
+func (w *url_panel_widget) set_url(u *url.URL) {
+	w.host.SetValue(u.Host)
+	w.path.SetValue(u.Path)
+
+	values := u.Query()
+	for k, v := range values {
+		w.query.PushRow(k, strings.Join(v, ", "))
+	}
+
+	q, _ := Parse_url_path_query(u.Path)
+	for k, v := range q.List {
+		w.pattern.PushRow(k, v.Value)
+	}
+}
+
 type url_panel_widget_scrollable struct {
 	gui.DefaultWidget
 
@@ -201,7 +225,11 @@ func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.
 	x, y := ebiten.WindowSize()
 	if x < point.X && y < point.Y {
 		point.X = u * 28
-		point.Y = u*18
+		point.Y = u * 18
 	}
 	return point
+}
+
+func (w *url_panel_widget_scrollable) SetURL(u *url.URL) {
+	w.content.set_url(u)
 }

@@ -41,6 +41,33 @@ type AttributeTable struct {
 	panel widget.Panel
 }
 
+func (at *AttributeTable) PushRow(cell1_text, cell2_text string){
+	cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
+	
+	cell1.Widget().widget.SetValue(cell1_text)
+	cell2.Widget().widget.SetValue(cell2_text)
+	
+	u := 26
+	padding := basic.NewPadding(0, u/3)
+	cell1.SetPadding(padding)
+	cell2.SetPadding(padding)
+
+	at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
+		Movable: true,
+		Cells: []widget.TableCell{
+			{
+				Content: cell1,
+			},
+			{
+				Content: cell2,
+			},
+			{
+				Content: icons.NewIcon("delete", 20),
+			},
+		},
+	})
+}
+
 func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	at.table.SetColumns([]widget.TableColumn{
 		{
@@ -66,26 +93,7 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 
 	if ok || no_of_rows == 0 {
-		cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
-		u := widget.UnitSize(ctx)
-		padding := basic.NewPadding(0, u/3)
-		cell1.SetPadding(padding)
-		cell2.SetPadding(padding)
-
-		at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
-			Movable: true,
-			Cells: []widget.TableCell{
-				{
-					Content: cell1,
-				},
-				{
-					Content: cell2,
-				},
-				{
-					Content: icons.NewIcon("delete", widget.LineHeight(ctx)),
-				},
-			},
-		})
+		at.PushRow("", "")
 	}
 
 	at.table.SetItems(at.table_rows)
