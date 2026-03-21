@@ -35,7 +35,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		if brp.popup_widget == nil {
 			return
 		}
-		*brp.popup_content = url_panel
+		*brp.popup_content = get_url_panel(ctx)
 		brp.popup_widget.SetOpen(true)
 	})
 	adder.AddWidget(&brp.request_widget)

@@ -13,14 +13,19 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var url_panel *url_panel_widget_scrollable = func() *url_panel_widget_scrollable {
-	w := &url_panel_widget{}
-	u, _ := url.Parse("https://api.github.com/repos/{user-name}/{repo-name}?visibility=public&editable=false")
-	w.set_url(u)
-	return &url_panel_widget_scrollable{
-		content: w,
+var url_panel *url_panel_widget_scrollable
+
+func get_url_panel(ctx *gui.Context) *url_panel_widget_scrollable {
+	if url_panel == nil {
+		w := &url_panel_widget{}
+		u, _ := url.Parse("https://api.github.com/repos/{user-name}/{repo-name}?visibility=public&editable=false")
+		w.set_url(u, ctx)
+		url_panel = &url_panel_widget_scrollable{
+			content: w,
+		}
 	}
-}()
+	return url_panel
+}
 
 type long_text_input_widget struct {
 	widget.TextInput
@@ -92,7 +97,7 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	adder.AddWidget(&w.query)
 	adder.AddWidget(&w.pattern)
 
-	w.pseudo_url.SetDescription("The general form represented is:\n``[scheme:][//[userinfo@]host][/]path[?query][#fragment]``")
+	w.pseudo_url.SetDescription("The general form of the URL is:\n``[scheme:][//[host][/]path[?query]``")
 	adder.AddWidget(&w.pseudo_url)
 	adder.AddWidget(&w.hr1)
 
@@ -183,18 +188,18 @@ func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints
 	return point
 }
 
-func (w *url_panel_widget) set_url(u *url.URL) {
+func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	w.host.SetValue(u.Host)
 	w.path.SetValue(u.Path)
 
 	values := u.Query()
 	for k, v := range values {
-		w.query.PushRow(k, strings.Join(v, ", "))
+		w.query.PushRow(k, strings.Join(v, ", "), ctx)
 	}
 
 	q, _ := Parse_url_path_query(u.Path)
 	for k, v := range q.List {
-		w.pattern.PushRow(k, v.Value)
+		w.pattern.PushRow(k, v.Value, ctx)
 	}
 }
 
@@ -230,6 +235,6 @@ func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.
 	return point
 }
 
-func (w *url_panel_widget_scrollable) SetURL(u *url.URL) {
-	w.content.set_url(u)
+func (w *url_panel_widget_scrollable) SetURL(u *url.URL, ctx *gui.Context) {
+	w.content.set_url(u, ctx)
 }
