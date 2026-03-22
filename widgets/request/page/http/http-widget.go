@@ -38,6 +38,7 @@ func (brp *HTTP_Widget) handle_popup() {
 	
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
+		url_panel.content.query.Empty()
 		*brp.popup_size  = url_panel.Measure(ctx, gui.Constraints{})
 		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value())
 		if err != nil {

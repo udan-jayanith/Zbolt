@@ -17,7 +17,7 @@ var url_panel *url_panel_widget_scrollable
 func get_url_panel(ctx *gui.Context) *url_panel_widget_scrollable {
 	if url_panel == nil {
 		w := &url_panel_widget{}
-		u, _ := url.Parse("https://api.github.com/repos/{user-name}/{repo-name}?visibility=public&editable=false")
+		u, _ := url.Parse("")
 		w.set_url(u, ctx)
 		url_panel = &url_panel_widget_scrollable{
 			content: w,
