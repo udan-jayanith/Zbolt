@@ -1,5 +1,9 @@
 package http_widget
 
+import (
+	"bytes"
+)
+
 type url_query_data struct {
 	Value      string
 	start, end int
@@ -10,8 +14,18 @@ type url_path_query struct {
 	List     map[string]url_query_data
 }
 
-func (r *url_path_query) Path() string {
-	return ""
+func (r *url_path_query) Set(k, v string){
+	data := r.List[k]
+	data.Value = v
+	r.List[k] = data
+}
+
+func (r *url_path_query) Path() []byte {
+	p := r.raw_path
+	for k, v := range r.List {
+		p = bytes.Replace(p, []byte("{"+k+"}"), []byte(v.Value), 1)
+	}
+	return p
 }
 
 // This isn't robust but enough.

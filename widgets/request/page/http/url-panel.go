@@ -58,6 +58,7 @@ type url_panel_widget struct {
 	t time.Time
 }
 
+
 func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	w.scheme.SetValue("http")
 	ctx.SetEnabled(&w.scheme, false)
@@ -106,7 +107,7 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
 
-	if time.Now().Sub(w.t).Seconds() > 1 {
+	if time.Now().Sub(w.t).Seconds() >= 1 {
 		println("working")
 		w.url_preview.SetURL("https://api.github.com/repos/{user-name}/Zbolt")
 		w.t = time.Now()
