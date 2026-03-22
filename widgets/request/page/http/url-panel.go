@@ -5,7 +5,6 @@ import (
 	CommonWidgets "API-Client/common-widgets"
 	"image"
 	"net/url"
-	"strings"
 	"time"
 
 	gui "github.com/guigui-gui/guigui"
@@ -184,11 +183,6 @@ func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints
 func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	w.host.SetValue(u.Host)
 	w.path.SetValue(u.Path)
-
-	values := u.Query()
-	for k, v := range values {
-		w.query.PushRow(k, strings.Join(v, ", "), ctx)
-	}
 
 	q, _ := Parse_url_path_query(u.Path)
 	for _, v := range q.List {
