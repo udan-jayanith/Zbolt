@@ -47,7 +47,9 @@ type RequestPage struct {
 
 	request_create_widget sidebar_item_types_panel
 	variable_panel_widget variable_panel_widget
+	
 	popup_content         gui.Widget
+	popup_size image.Point
 	popup_widget          widget.Popup
 
 	notify_widget CommonWidgets.Notify
@@ -102,6 +104,13 @@ func (rp *RequestPage) create_folder(path string, name string) {
 	//TODO: Open the the sidebar item if there were no items before on creation.
 }
 
+func (rp *RequestPage) open_popup(widget gui.Widget, ctx *gui.Context) {
+	rp.popup_content = widget
+	rp.popup_size = widget.Measure(ctx, gui.Constraints{})
+	rp.popup_widget.SetContent(rp.popup_content)
+	rp.popup_widget.SetOpen(true)
+}
+
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(ebiten.ColorModeDark)
 
@@ -148,21 +157,16 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		default:
 			panic("request type not handled")
 		}
+		rp.request_widget.Widget().SetPopupWidget(&rp.popup_widget, &rp.popup_size)
 
 		rp.request_widget.SetPadding(padding)
 		adder.AddWidget(&rp.request_widget)
 	} else {
 		rp.nothing_widget.OnClick(func() {
 			rp.request_create_widget.Clear()
-			rp.popup_content = &rp.request_create_widget
-			rp.popup_widget.SetOpen(true)
+			rp.open_popup(&rp.request_create_widget, ctx)
 		})
 		adder.AddWidget(&rp.nothing_widget)
-	}
-
-	req_widget := rp.request_widget.Widget()
-	if req_widget != nil {
-		req_widget.Popup(&rp.popup_content, &rp.popup_widget)
 	}
 
 	rp.popup_widget.SetBackgroundDark(true)
@@ -172,8 +176,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sidebar.OnRequestCreate(func(ctx *gui.Context) {
 		rp.request_create_widget.Clear()
-		rp.popup_content = &rp.request_create_widget
-		rp.popup_widget.SetOpen(true)
+		rp.open_popup(&rp.request_create_widget, ctx)
 	})
 
 	rp.request_create_widget.OnCreateButtonClicked(func(request *def.Request) {
@@ -182,13 +185,9 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 
 	rp.sidebar.Widget().OnVariableClicked(func(ctx *gui.Context) {
-		rp.popup_content = &rp.variable_panel_widget
-		rp.popup_widget.SetOpen(true)
+		rp.open_popup(&rp.variable_panel_widget, ctx)
 	})
 
-	if rp.popup_content != nil {
-		rp.popup_widget.SetContent(rp.popup_content)
-	}
 	adder.AddWidget(&rp.notify_widget)
 	return nil
 }
@@ -198,7 +197,7 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	b := widgetBounds.Bounds()
 	if rp.popup_widget.IsOpen() {
-		popup_content_bounds := rp.popup_content.Measure(ctx, gui.Constraints{})
+		popup_content_bounds := rp.popup_size
 
 		popup_size := image.Rectangle{
 			Min: image.Pt(b.Min.X+b.Max.X/2-popup_content_bounds.X/2, b.Min.Y+b.Max.Y/2-popup_content_bounds.Y/2),

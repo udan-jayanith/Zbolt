@@ -1,11 +1,12 @@
 package def
 
 import (
+	"image"
 	"path/filepath"
 	"weak"
 
 	gui "github.com/guigui-gui/guigui"
-	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/guigui-gui/guigui/basicwidget"
 )
 
 type RequestType uint8
@@ -50,7 +51,7 @@ func (r *Request) Name() string {
 	return filepath.Base(r.path)
 }
 
-func NewRequest(t RequestType, path string) Request{
+func NewRequest(t RequestType, path string) Request {
 	return Request{
 		Type: t,
 		path: path,
@@ -60,7 +61,7 @@ func NewRequest(t RequestType, path string) Request{
 type RequestWidget interface {
 	gui.Widget
 	RequestType() RequestType
-	Popup(popup_content *gui.Widget, popup_widget *widget.Popup)
+	SetPopupWidget(popup *basicwidget.Popup, popup_size *image.Point)
 }
 
 type Folder struct {
@@ -75,7 +76,7 @@ func (r *Folder) Name() string {
 	return filepath.Base(r.path)
 }
 
-func NewFolder(path, name string) Folder{
+func NewFolder(path, name string) Folder {
 	return Folder{
 		path: filepath.Join(path, name),
 	}

@@ -67,3 +67,7 @@ func (up *URLPreview) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 func (up *URLPreview) SetURL(url string) {
 	up.url_preview.SetValue(url)
 }
+
+func (up *URLPreview) URL() string {
+	return up.url_preview.Value()
+}

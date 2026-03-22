@@ -29,10 +29,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&rw.input_bar_widget)
 
-	{
-		rw.url_preview.SetURL("https://fonts.google.com/icons?icon.size=24&icon.color=%23FFFFFF&selected=Material+Symbols+Outlined:copy_all:FILL@0;wght@400;GRAD@0;opsz@24&icon.style=Rounded")
-		adder.AddWidget(&rw.url_preview)
-	}
+	adder.AddWidget(&rw.url_preview)
 
 	{
 		rw.tab_content.body.SetAutoWrap(true)
