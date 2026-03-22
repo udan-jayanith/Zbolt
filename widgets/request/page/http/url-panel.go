@@ -45,9 +45,9 @@ type url_panel_widget struct {
 	scheme_text, host_text, path_text widget.Text
 	scheme, host, path                long_text_input_widget
 
-	query_header, pattern_header           widget.Text
-	query_description, pattern_description CommonWidgets.Description
-	query, pattern                         CommonWidgets.AttributeTable
+	query_header           widget.Text
+	query_description CommonWidgets.Description
+	query                      CommonWidgets.AttributeTable
 
 	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
@@ -65,13 +65,6 @@ func (w *url_panel_widget) generate_url() *url.URL {
 		Host:   w.host.Value(),
 		Path:   url.PathEscape(q.Path()),
 	}
-
-	attrs := u.Query()
-	// iterate over attribute table
-	for _, v := range q.List {
-		attrs.Set(v.K, v.V)
-	}
-	u.RawQuery = attrs.Encode()
 	return u
 }
 
@@ -102,17 +95,10 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.query_header.SetValue("Query")
 	adder.AddWidget(&w.query_header)
 
-	w.query_description.SetDescription("Attributes after the url path followed by ? mark.")
+	w.query_description.SetDescription("Attributes enclosed by {} in path.")
 	adder.AddWidget(&w.query_description)
 
-	w.pattern_header.SetValue("Patterns")
-	adder.AddWidget(&w.pattern_header)
-
-	w.pattern_description.SetDescription("Attributes in the url path enclosed by {}.")
-	adder.AddWidget(&w.pattern_description)
-
 	adder.AddWidget(&w.query)
-	adder.AddWidget(&w.pattern)
 
 	w.pseudo_url.SetDescription("The general form of the URL is:\n``[scheme:][//[host][/]path[?query]``")
 	adder.AddWidget(&w.pseudo_url)
@@ -159,17 +145,6 @@ func (w *url_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 			},
 			gap,
 			{
-				Widget: &w.pattern_header,
-			},
-			{
-				Widget: &w.pattern_description,
-			},
-			{
-				Widget: &w.pattern,
-				Size:   gui.FlexibleSize(1),
-			},
-			gap,
-			{
 				Widget: &w.hr1,
 			},
 			gap,
@@ -197,7 +172,7 @@ func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints
 	var point image.Point
 	u := widget.UnitSize(ctx)
 	point.X = u * 36
-	point.Y = u * 30
+	point.Y = u * 20
 
 	x, y := ebiten.WindowSize()
 	if x < point.X && y < point.Y {
@@ -217,7 +192,7 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 
 	q, _ := Parse_url_path_query(u.Path)
 	for _, v := range q.List {
-		w.pattern.PushRow(string(v.K), string(v.V), ctx)
+		w.query.PushRow(string(v.K), string(v.V), ctx)
 	}
 }
 
@@ -240,11 +215,9 @@ func (w *url_panel_widget_scrollable) Layout(context *gui.Context, widgetBounds 
 }
 
 func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	var point image.Point
+	point := w.content.Measure(ctx, gui.Constraints{})
 	u := widget.UnitSize(ctx)
-	point.X = u * 36
-	point.Y = u * 28
-
+	
 	x, y := ebiten.WindowSize()
 	if x < point.X && y < point.Y {
 		point.X = u * 28
