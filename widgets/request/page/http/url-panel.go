@@ -58,6 +58,16 @@ type url_panel_widget struct {
 	t time.Time
 }
 
+func (w *url_panel_widget) generate_url() {
+	/*
+	q, _ := Parse_url_path_query(w.path.Value())
+	
+	u := url.URL{
+		Scheme: "http",
+		Host: w.host_text.Value(),
+	}
+	*/
+}
 
 func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	w.scheme.SetValue("http")
@@ -199,8 +209,8 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	}
 
 	q, _ := Parse_url_path_query(u.Path)
-	for k, v := range q.List {
-		w.pattern.PushRow(k, v.Value, ctx)
+	for _, v := range q.List {
+		w.pattern.PushRow(string(v.K), string(v.V), ctx)
 	}
 }
 
