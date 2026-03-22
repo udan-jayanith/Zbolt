@@ -58,15 +58,21 @@ type url_panel_widget struct {
 	t time.Time
 }
 
-func (w *url_panel_widget) generate_url() {
-	/*
+func (w *url_panel_widget) generate_url() *url.URL {
 	q, _ := Parse_url_path_query(w.path.Value())
-	
-	u := url.URL{
+	u := &url.URL{
 		Scheme: "http",
-		Host: w.host_text.Value(),
+		Host:   w.host.Value(),
+		Path:   url.PathEscape(q.Path()),
 	}
-	*/
+
+	attrs := u.Query()
+	// iterate over attribute table
+	for _, v := range q.List {
+		attrs.Set(v.K, v.V)
+	}
+	u.RawQuery = attrs.Encode()
+	return u
 }
 
 func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -117,9 +123,10 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
 
-	if time.Now().Sub(w.t).Seconds() >= 1 {
-		println("working")
-		w.url_preview.SetURL("https://api.github.com/repos/{user-name}/Zbolt")
+	if time.Now().Sub(w.t).Seconds() > 1 {
+		u := w.generate_url()
+		w.url_preview.SetURL(u.String())
+
 		w.t = time.Now()
 	}
 	adder.AddWidget(&w.url_preview)
