@@ -46,7 +46,7 @@ type url_panel_widget struct {
 
 	query_header           widget.Text
 	query_description CommonWidgets.Description
-	query                      CommonWidgets.AttributeTable
+	query                      query_table_widget
 
 	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
@@ -59,10 +59,18 @@ type url_panel_widget struct {
 
 func (w *url_panel_widget) generate_url() *url.URL {
 	q, _ := Parse_url_path_query(w.path.Value())
+	values := w.query.GetValues()
+	
+	if len(q.List) == len(values) {
+		for i, v := range values{
+			q.List[i].V = v
+		}
+	}
+	
 	u := &url.URL{
 		Scheme: "http",
 		Host:   w.host.Value(),
-		Path:   url.PathEscape(q.Path()),
+		Path:   q.Path(),
 	}
 	return u
 }
@@ -75,6 +83,14 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.host_text.SetValue("Host")
 	w.path_text.SetValue("Path")
 
+	w.path.OnValueChanged(func(context *gui.Context, text string, committed bool) {
+		w.query.Empty()
+		q, _ := Parse_url_path_query(text)
+		for _, v := range q.List {
+			w.query.push_row(string(v.K), string(v.V))
+		}
+	})
+	
 	w.form.SetItems([]widget.FormItem{
 		{
 			PrimaryWidget:   &w.scheme_text,
@@ -186,7 +202,7 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 
 	q, _ := Parse_url_path_query(u.Path)
 	for _, v := range q.List {
-		w.query.PushRow(string(v.K), string(v.V), ctx)
+		w.query.push_row(string(v.K), string(v.V))
 	}
 }
 

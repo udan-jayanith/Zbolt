@@ -24,6 +24,14 @@ func (et *EditableText) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
+func (et *EditableText) SetValue(text string) {
+	et.widget.SetValue(text)
+}
+
+func (et *EditableText) Value() string{
+	return et.widget.Value()
+}
+
 func (et *EditableText) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&et.widget, widgetBounds.Bounds())
 }
