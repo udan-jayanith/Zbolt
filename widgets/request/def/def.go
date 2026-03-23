@@ -3,7 +3,6 @@ package def
 import (
 	"image"
 	"path/filepath"
-	"weak"
 
 	gui "github.com/guigui-gui/guigui"
 	"github.com/guigui-gui/guigui/basicwidget"
@@ -33,10 +32,14 @@ func (t RequestType) IconName() string {
 	}
 }
 
+type RequestData interface {
+	TempData() any // Returns a pointer to temp data
+}
+
 type Request struct {
 	Type RequestType
 	path string
-	data weak.Pointer[any]
+	data RequestData
 }
 
 func (r *Request) Data() any {
@@ -49,6 +52,11 @@ func (r *Request) Path() string {
 
 func (r *Request) Name() string {
 	return filepath.Base(r.path)
+}
+
+// Clear deletes the data in RAM
+func (r *Request) Clear() {
+	
 }
 
 func NewRequest(t RequestType, path string) Request {

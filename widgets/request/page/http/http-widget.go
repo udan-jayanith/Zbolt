@@ -14,12 +14,12 @@ import (
 
 type HTTP_Widget struct {
 	gui.DefaultWidget
-	//https://api.github.com/repos/udan-jayanith/Zbolt
+
 	request_widget  request_widget
 	response_widget response_widget
-	
-	popup_widget    *widget.Popup
-	popup_size *image.Point
+
+	popup_widget *widget.Popup
+	popup_size   *image.Point
 }
 
 func (brp *HTTP_Widget) RequestType() def.RequestType {
@@ -35,11 +35,11 @@ func (brp *HTTP_Widget) handle_popup() {
 	if brp.popup_widget == nil {
 		return
 	}
-	
+
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
 		url_panel.content.query.Empty()
-		*brp.popup_size  = url_panel.Measure(ctx, gui.Constraints{})
+		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
 		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value())
 		if err != nil {
 			messages.Alerts.Push(err.Error())
@@ -52,7 +52,7 @@ func (brp *HTTP_Widget) handle_popup() {
 	brp.popup_widget.OnClose(func(ctx *gui.Context, reason widget.PopupCloseReason) {
 		u1 := url_panel.content.generate_url()
 		brp.request_widget.input_bar_widget.input_widget.SetValue(u1.String())
-		
+
 		u2, err := url.Parse(brp.request_widget.url_preview.URL())
 		if err != nil {
 			messages.Alerts.Push(err.Error())
@@ -66,9 +66,9 @@ func (brp *HTTP_Widget) handle_popup() {
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(ebiten.ColorModeDark)
-	
+
 	brp.handle_popup()
-	
+
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.response_widget)
 	return nil
