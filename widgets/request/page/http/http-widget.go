@@ -40,7 +40,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.req = req
 }
 
-func (brp *HTTP_Widget) Update() {
+func (brp *HTTP_Widget) update() {
 	
 }
 

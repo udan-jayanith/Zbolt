@@ -67,5 +67,6 @@ type TempHTTP_Data struct {
 		Major, Minor int
 	}
 	Headers []Attribute
+	ContentType string
 	Body    HTTP_res_body
 }

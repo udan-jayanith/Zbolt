@@ -122,20 +122,9 @@ type response_body_widget struct {
 func (rbw *response_body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rbw.header)
 	
-	rbw.view.SetAutoWrap(true)
+	rbw.view.SetAutoWrap(rbw.header.options.auto_wrap.toggle.Value())
 	rbw.view.SetMultiline(true)
 	rbw.view.SetEditable(false)
-	rbw.view.SetValue(`
-		git clone https://github.com/guigui-gui/guigui.git
-		cd guigui
-		go run ./example/gallery
-
-
-		hi
-
-
-		Hello world
-		`)
 	adder.AddWidget(&rbw.view)
 
 	return nil

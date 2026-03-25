@@ -16,18 +16,18 @@ type response_widget struct {
 	header_widget response_header_widget
 	tab           CommonWidgets.Tab[struct{}]
 	tab_content   struct {
-		response_header  widget.Table[string]
+		response_header  widget.Table[struct{}]
 		response_body    response_body_widget
 		selected_content gui.Widget
 	}
 }
 
 func (rw *response_widget) SetAutowrap(autowrap bool) {
-
+	rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
 }
 
 func (rw *response_widget) SetFormat(format bool) {
-
+		rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
 }
 
 func (rw *response_widget) SetResponseData(res_data *def.TempHTTP_Data) {
@@ -37,6 +37,30 @@ func (rw *response_widget) SetResponseData(res_data *def.TempHTTP_Data) {
 	rw.header_widget.response_time.SetValue(res_data.ResponseTime.String())
 	rw.header_widget.size.SetValue(strconv.Itoa(res_data.ResponseSize))
 	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", res_data.Version.Major, res_data.Version.Minor))
+}
+
+func (rw *response_widget) SetHeaders(headers []def.Attribute) {
+	header_items := make([]widget.TableRow[struct{}], 0, len(headers))
+
+	for _, v := range headers {
+		header_items = append(header_items, widget.TableRow[struct{}]{
+			Cells: []widget.TableCell{
+				{
+					Text: v.Key,
+				},
+				{
+					Text: v.Key,
+				},
+			},
+		})
+	}
+
+	rw.tab_content.response_header.SetItems(header_items)
+}
+
+func (rw *response_widget) SetResponseBody(body *def.HTTP_res_body, content_type string) {
+	rw.tab_content.response_body.header.file_type.SetValue(content_type)
+	rw.tab_content.response_body.view.SetValue(body.Content)
 }
 
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -65,20 +89,6 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 				HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,
 				MinWidth:                  u * 4,
 				Width:                     gui.FlexibleSize(1),
-			},
-		})
-		rw.tab_content.response_header.SetItems([]widget.TableRow[string]{
-			{
-				Cells: []widget.TableCell{
-					{Text: "Content-Type"},
-					{Text: "test/json"},
-				},
-			},
-			{
-				Cells: []widget.TableCell{
-					{Text: "Content-Length"},
-					{Text: "141"},
-				},
 			},
 		})
 
