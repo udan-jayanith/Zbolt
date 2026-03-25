@@ -10,7 +10,7 @@ type Attribute struct {
 	Value string `json:"Value"`
 }
 
-type HTTP_body struct {
+type HTTP_req_body struct {
 	FilePath string `json:"filepath"`
 
 	ContentType string `json:"content-type"`
@@ -33,9 +33,9 @@ type HTTP_Data struct {
 
 	} `json:"url"`
 
-	Parameters []Attribute `json:"parameters"`
-	Headers    []Attribute `json:"headers"`
-	Body       HTTP_body   `json:"body"` // Filepath of Content
+	Parameters []Attribute   `json:"parameters"`
+	Headers    []Attribute   `json:"headers"`
+	Body       HTTP_req_body `json:"body"` // Filepath of Content
 
 	Response struct {
 		AutoWrap bool `json:"auto-wrap"`
@@ -53,6 +53,12 @@ func (data *HTTP_Data) TempData() *TempHTTP_Data {
 	return &data.temp
 }
 
+type HTTP_res_body struct {
+	File        *os.File
+	ContentType string
+	Content     string
+}
+
 type TempHTTP_Data struct {
 	Status_code  int
 	ResponseTime time.Duration
@@ -61,9 +67,5 @@ type TempHTTP_Data struct {
 		Major, Minor int
 	}
 	Headers []Attribute
-	Body    struct {
-		File        *os.File
-		ContentType string
-		Content     string
-	}
+	Body    HTTP_res_body
 }
