@@ -2,6 +2,7 @@ package http_widget
 
 import (
 	CommonWidgets "API-Client/common-widgets"
+	"API-Client/widgets/request/def"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -19,6 +20,25 @@ type request_widget struct {
 		body            widget.TextInput
 		selected_widget gui.Widget
 	}
+}
+
+// sets the http method
+func (rw *request_widget) SetMethod(method string) {
+
+}
+
+func (rw *request_widget) SetURL(url string) {
+
+}
+
+func (rw *request_widget) SetParameters(parameters []def.Attribute) {
+}
+
+func (rw *request_widget) SetHeaders(headers []def.Attribute) {
+}
+
+func (rw *request_widget) SetBody(body *def.HTTP_body){
+	
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

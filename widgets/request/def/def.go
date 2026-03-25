@@ -32,14 +32,10 @@ func (t RequestType) IconName() string {
 	}
 }
 
-type RequestData interface {
-	TempData() any // Returns a pointer to temp data
-}
-
 type Request struct {
 	Type RequestType
 	path string
-	data RequestData
+	data any // pointer to data
 }
 
 func (r *Request) Data() any {
@@ -56,20 +52,29 @@ func (r *Request) Name() string {
 
 // Clear deletes the data in RAM
 func (r *Request) Clear() {
-	
+
 }
 
 func NewRequest(t RequestType, path string) Request {
-	return Request{
+	req := Request{
 		Type: t,
 		path: path,
 	}
+	if t == HTTP {
+		data := HTTP_Data{}
+		data.Response.AutoWrap = true
+		data.Response.Formate = true
+		req.data = &data
+
+	}
+	return req
 }
 
 type RequestWidget interface {
 	gui.Widget
 	RequestType() RequestType
 	SetPopupWidget(popup *basicwidget.Popup, popup_size *image.Point)
+	SetReq(req *Request)
 }
 
 type Folder struct {

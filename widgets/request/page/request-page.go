@@ -47,10 +47,10 @@ type RequestPage struct {
 
 	request_create_widget sidebar_item_types_panel
 	variable_panel_widget variable_panel_widget
-	
-	popup_content         gui.Widget
-	popup_size image.Point
-	popup_widget          widget.Popup
+
+	popup_content gui.Widget
+	popup_size    image.Point
+	popup_widget  widget.Popup
 
 	notify_widget CommonWidgets.Notify
 }
@@ -151,8 +151,10 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		_, req := rp.tab_widget.GetSelectedTab()
 		switch req.Type {
 		case def.HTTP:
+			rp.http_widget.SetReq(req)
 			rp.request_widget.SetWidget(&rp.http_widget)
 		case def.Websocket:
+			rp.websocket_widget.SetReq(req)
 			rp.request_widget.SetWidget(&rp.websocket_widget)
 		default:
 			panic("request type not handled")

@@ -20,6 +20,8 @@ type HTTP_Widget struct {
 
 	popup_widget *widget.Popup
 	popup_size   *image.Point
+
+	req *def.Request
 }
 
 func (brp *HTTP_Widget) RequestType() def.RequestType {
@@ -29,6 +31,17 @@ func (brp *HTTP_Widget) RequestType() def.RequestType {
 func (brp *HTTP_Widget) SetPopupWidget(w *widget.Popup, popup_size *image.Point) {
 	brp.popup_widget = w
 	brp.popup_size = popup_size
+}
+
+func (brp *HTTP_Widget) SetReq(req *def.Request) {
+	if req.Type != def.HTTP {
+		panic("Invalid request type")
+	}
+	brp.req = req
+}
+
+func (brp *HTTP_Widget) Update() {
+	
 }
 
 func (brp *HTTP_Widget) handle_popup() {

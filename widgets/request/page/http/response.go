@@ -2,6 +2,10 @@ package http_widget
 
 import (
 	CommonWidgets "API-Client/common-widgets"
+	"API-Client/widgets/request/def"
+	"fmt"
+	"net/http"
+	"strconv"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -10,17 +14,34 @@ import (
 type response_widget struct {
 	gui.DefaultWidget
 	header_widget response_header_widget
-	tab         CommonWidgets.Tab[struct{}]
-	tab_content struct {
+	tab           CommonWidgets.Tab[struct{}]
+	tab_content   struct {
 		response_header  widget.Table[string]
 		response_body    response_body_widget
 		selected_content gui.Widget
 	}
 }
 
+func (rw *response_widget) SetAutowrap(autowrap bool) {
+
+}
+
+func (rw *response_widget) SetFormat(format bool) {
+
+}
+
+func (rw *response_widget) SetResponseData(res_data *def.TempHTTP_Data) {
+	res_status := fmt.Sprintf("%v %s", res_data.Status_code, http.StatusText(res_data.Status_code))
+	rw.header_widget.status.SetValue(res_status)
+
+	rw.header_widget.response_time.SetValue(res_data.ResponseTime.String())
+	rw.header_widget.size.SetValue(strconv.Itoa(res_data.ResponseSize))
+	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", res_data.Version.Major, res_data.Version.Minor))
+}
+
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rw.header_widget)
-	
+
 	u := widget.UnitSize(ctx)
 	rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
 		{

@@ -47,3 +47,5 @@ func (ww *WebsocketWidget) RequestType() def.RequestType {
 
 func (ww *WebsocketWidget) SetPopupWidget(w *widget.Popup, popup_size *image.Point) {
 }
+
+func (ww *WebsocketWidget) SetReq(req *def.Request)
