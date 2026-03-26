@@ -1,6 +1,7 @@
 package def
 
 import (
+	"net/url"
 	"os"
 	"time"
 )
@@ -10,7 +11,7 @@ type Attribute struct {
 	Value string `json:"Value"`
 }
 
-type HTTP_req_body struct {
+type HTTP_Request_Body struct {
 	FilePath string `json:"filepath"`
 
 	ContentType string `json:"content-type"`
@@ -30,36 +31,45 @@ type HTTP_Data struct {
 				Attributes map[string]string `json:"attributes"`
 			} `json:"pattern"`
 		} `json:"path"` // Both path and pattern can't exists at once.
+		
+		u *url.URL
 
 	} `json:"url"`
 
 	Parameters []Attribute   `json:"parameters"`
 	Headers    []Attribute   `json:"headers"`
-	Body       HTTP_req_body `json:"body"` // Filepath of Content
+	Body       HTTP_Request_Body `json:"body"` // Filepath of Content
 
-	Response struct {
+	ResponseConfig struct {
 		AutoWrap bool `json:"auto-wrap"`
 		Formate  bool `json:"formate"`
 	} `json:"response-config"`
 
-	temp TempHTTP_Data
+	response_data HTTP_Response_Data
 }
 
-func (data *HTTP_Data) Get_URL() string {
+func (data *HTTP_Data) Do() {
+	
+}
+
+func (data *HTTP_Data) Get_URL(parameters bool) string {
 	return ""
 }
 
-func (data *HTTP_Data) TempData() *TempHTTP_Data {
-	return &data.temp
+func (data *HTTP_Data) ResponseData() *HTTP_Response_Data {
+	return &data.response_data
 }
 
-type HTTP_res_body struct {
+func (data *HTTP_Data) UpdateResponseData() {
+}
+
+type HTTP_Response_Body struct {
 	File        *os.File
 	ContentType string
 	Content     string
 }
 
-type TempHTTP_Data struct {
+type HTTP_Response_Data struct {
 	Status_code  int
 	ResponseTime time.Duration
 	ResponseSize int // In bytes
@@ -68,5 +78,5 @@ type TempHTTP_Data struct {
 	}
 	Headers []Attribute
 	ContentType string
-	Body    HTTP_res_body
+	Body    HTTP_Response_Body
 }

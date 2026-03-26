@@ -37,8 +37,7 @@ func (rw *request_widget) SetParameters(parameters []def.Attribute) {
 func (rw *request_widget) SetHeaders(headers []def.Attribute) {
 }
 
-func (rw *request_widget) SetBody(body *def.HTTP_body){
-	
+func (rw *request_widget) SetBody(body *def.HTTP_Request_Body){
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

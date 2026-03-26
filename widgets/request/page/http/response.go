@@ -30,7 +30,7 @@ func (rw *response_widget) SetFormat(format bool) {
 		rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
 }
 
-func (rw *response_widget) SetResponseData(res_data *def.TempHTTP_Data) {
+func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
 	res_status := fmt.Sprintf("%v %s", res_data.Status_code, http.StatusText(res_data.Status_code))
 	rw.header_widget.status.SetValue(res_status)
 
@@ -58,7 +58,7 @@ func (rw *response_widget) SetHeaders(headers []def.Attribute) {
 	rw.tab_content.response_header.SetItems(header_items)
 }
 
-func (rw *response_widget) SetResponseBody(body *def.HTTP_res_body, content_type string) {
+func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body, content_type string) {
 	rw.tab_content.response_body.header.file_type.SetValue(content_type)
 	rw.tab_content.response_body.view.SetValue(body.Content)
 }

@@ -21,7 +21,8 @@ type HTTP_Widget struct {
 	popup_widget *widget.Popup
 	popup_size   *image.Point
 
-	req *def.Request
+	req  *def.Request
+	data *def.HTTP_Data
 }
 
 func (brp *HTTP_Widget) RequestType() def.RequestType {
@@ -38,10 +39,24 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		panic("Invalid request type")
 	}
 	brp.req = req
+
+	data, ok := req.Data().(*def.HTTP_Data)
+	if !ok {
+		panic("Invalid data type")
+	}
+	brp.data = data
+
+	brp.response_widget.SetHeaders(data.Headers)
+
+	temp := data.ResponseData()
+	brp.response_widget.SetResponseBody(&temp.Body, temp.ContentType)
 }
 
 func (brp *HTTP_Widget) update() {
-	
+	d := brp.data
+	brp.response_widget.SetAutowrap(d.ResponseConfig.AutoWrap)
+	brp.response_widget.SetFormat(d.ResponseConfig.Formate)
+	brp.response_widget.SetResponseData(brp.data.ResponseData())
 }
 
 func (brp *HTTP_Widget) handle_popup() {
@@ -80,6 +95,7 @@ func (brp *HTTP_Widget) handle_popup() {
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetColorMode(ebiten.ColorModeDark)
 
+	brp.update()
 	brp.handle_popup()
 
 	adder.AddWidget(&brp.request_widget)

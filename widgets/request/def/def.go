@@ -39,7 +39,7 @@ type Request struct {
 }
 
 func (r *Request) Data() any {
-	return nil
+	return r.data
 }
 
 func (r *Request) Path() string {
@@ -62,10 +62,9 @@ func NewRequest(t RequestType, path string) Request {
 	}
 	if t == HTTP {
 		data := HTTP_Data{}
-		data.Response.AutoWrap = true
-		data.Response.Formate = true
+		data.ResponseConfig.AutoWrap = true
+		data.ResponseConfig.Formate = true
 		req.data = &data
-
 	}
 	return req
 }
