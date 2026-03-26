@@ -4,6 +4,7 @@ import (
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/widgets/request/def"
 	"image"
+	"net/url"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -27,17 +28,33 @@ func (rw *request_widget) SetMethod(method string) {
 
 }
 
-func (rw *request_widget) SetURL(url string) {
+func (rw *request_widget) Method() string {
+	return ""
+}
 
+func (rw *request_widget) SetURL(u *url.URL) {
+
+}
+
+func (rw *request_widget) URL() *url.URL {
+	return nil
 }
 
 func (rw *request_widget) SetParameters(parameters []def.Attribute) {
 }
 
+func (rw *request_widget) Parameters() []def.Attribute {
+	return []def.Attribute{}
+}
+
 func (rw *request_widget) SetHeaders(headers []def.Attribute) {
 }
 
-func (rw *request_widget) SetBody(body *def.HTTP_Request_Body){
+func (rw *request_widget) Headers() []def.Attribute {
+	return []def.Attribute{}
+}
+
+func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

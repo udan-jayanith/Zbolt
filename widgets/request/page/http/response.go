@@ -22,6 +22,10 @@ type response_widget struct {
 	}
 }
 
+func (rw *response_widget) OnAutowrapToggle(fn func(ctx *gui.Context)) {}
+
+func (rw *response_widget) OnFormatToggle(fn func(ctx *gui.Context)) {}
+
 func (rw *response_widget) SetAutowrap(autowrap bool) {
 	rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
 }
