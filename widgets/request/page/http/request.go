@@ -48,6 +48,10 @@ func (rw *request_widget) URL() *url.URL {
 	return u
 }
 
+func (rw *request_widget) OnURLInputChange(fn func(context *gui.Context, text string, committed bool)) {
+	rw.input_bar_widget.input_widget.OnValueChanged(fn)
+}
+
 func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute) {
 }
 
