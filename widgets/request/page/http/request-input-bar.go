@@ -14,9 +14,9 @@ type request_input_bar_widget struct {
 	method_select_widget widget.Select[string]
 	input_widget         widget.TextInput
 	request_btn_widget   widget.Button
-	open_in_icon *ebiten.Image
-	open_in widget.Button
-	on_request func(ctx *gui.Context, url, method string)
+	open_in_icon         *ebiten.Image
+	open_in              widget.Button
+	on_request           func(ctx *gui.Context, url, method string)
 }
 
 func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -36,7 +36,7 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 
 	rib.input_widget.SetEditable(true)
 	adder.AddWidget(&rib.input_widget)
-	
+
 	if rib.open_in_icon == nil {
 		rib.open_in_icon = icons.Store.Open("open-in")
 	}
@@ -92,13 +92,13 @@ func (rib *request_input_bar_widget) Measure(ctx *gui.Context, constraints gui.C
 	return image.Pt(u*10, u*2)
 }
 
-func (rib *request_input_bar_widget) OnRequest(fn func(ctx *gui.Context, url, method string)){
+func (rib *request_input_bar_widget) OnRequest(fn func(ctx *gui.Context, url, method string)) {
 	rib.request_btn_widget.OnDown(func(ctx *gui.Context) {
 		method, _ := rib.method_select_widget.SelectedItem()
 		fn(ctx, rib.input_widget.Value(), method.Text)
 	})
 }
 
-func (rib *request_input_bar_widget) OnOpenIn(fn func(ctx *gui.Context)){
+func (rib *request_input_bar_widget) OnOpenIn(fn func(ctx *gui.Context)) {
 	rib.open_in.OnDown(fn)
 }

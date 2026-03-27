@@ -35,7 +35,12 @@ func (rw *request_widget) Method() string {
 }
 
 func (rw *request_widget) SetURL(u *url.URL) {
-	
+	raw_query := u.RawQuery
+	u.RawQuery = ""
+	rw.input_bar_widget.input_widget.SetValue(u.String())
+
+	u.RawQuery = raw_query
+	rw.url_preview.SetURL(u.String())
 }
 
 func (rw *request_widget) URL() *url.URL {
