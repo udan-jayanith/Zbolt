@@ -43,8 +43,10 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	rw.url_preview.SetURL(u.String())
 }
 
+// URL returns the url without parameters
 func (rw *request_widget) URL() *url.URL {
-	return nil
+	u, _ := url.Parse(rw.input_bar_widget.input_widget.Value())
+	return u
 }
 
 func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute) {
