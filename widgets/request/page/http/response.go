@@ -3,6 +3,7 @@ package http_widget
 import (
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/widgets/request/def"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -43,7 +44,7 @@ func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
 	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", res_data.Version.Major, res_data.Version.Minor))
 }
 
-func (rw *response_widget) SetHeaders(headers []def.Attribute) {
+func (rw *response_widget) SetHeaders(headers []url_pattern.Attribute) {
 	header_items := make([]widget.TableRow[struct{}], 0, len(headers))
 
 	for _, v := range headers {

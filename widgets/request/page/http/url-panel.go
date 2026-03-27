@@ -3,6 +3,7 @@ package http_widget
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
 	"time"
@@ -44,9 +45,9 @@ type url_panel_widget struct {
 	scheme_text, host_text, path_text widget.Text
 	scheme, host, path                long_text_input_widget
 
-	query_header           widget.Text
+	query_header      widget.Text
 	query_description CommonWidgets.Description
-	query                      query_table_widget
+	query             query_table_widget
 
 	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
@@ -58,19 +59,17 @@ type url_panel_widget struct {
 }
 
 func (w *url_panel_widget) generate_url() *url.URL {
-	q, _ := Parse_url_path_query(w.path.Value())
-	values := w.query.GetValues()
-	
-	if len(q.List) == len(values) {
-		for i, v := range values{
-			q.List[i].V = v
-		}
+	pattern, _ := url_pattern.ParsePattern(w.path.Value())
+	list := w.query.GetValues()
+
+	for _, attr := range list {
+		pattern.Set(attr.Key, attr.Value)
 	}
-	
+
 	u := &url.URL{
 		Scheme: "http",
 		Host:   w.host.Value(),
-		Path:   q.Path(),
+		Path:   pattern.Path(),
 	}
 	return u
 }
@@ -85,12 +84,12 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 	w.path.OnValueChanged(func(context *gui.Context, text string, committed bool) {
 		w.query.Empty()
-		q, _ := Parse_url_path_query(text)
-		for _, v := range q.List {
-			w.query.push_row(string(v.K), string(v.V))
+		pattern, _ := url_pattern.ParsePattern(text)
+		for _, attr := range pattern.List {
+			w.query.push_row(attr.Key, attr.Value)
 		}
 	})
-	
+
 	w.form.SetItems([]widget.FormItem{
 		{
 			PrimaryWidget:   &w.scheme_text,
@@ -200,9 +199,9 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	w.host.SetValue(u.Host)
 	w.path.SetValue(u.Path)
 
-	q, _ := Parse_url_path_query(u.Path)
-	for _, v := range q.List {
-		w.query.push_row(string(v.K), string(v.V))
+	pattern, _ := url_pattern.ParsePattern(u.Path)
+	for _, attr := range pattern.List {
+		w.query.push_row(attr.Key, attr.Value)
 	}
 }
 
@@ -227,7 +226,7 @@ func (w *url_panel_widget_scrollable) Layout(context *gui.Context, widgetBounds 
 func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := w.content.Measure(ctx, gui.Constraints{})
 	u := widget.UnitSize(ctx)
-	
+
 	x, y := ebiten.WindowSize()
 	if x < point.X && y < point.Y {
 		point.X = u * 28

@@ -3,6 +3,7 @@ package http_widget
 import (
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/widgets/request/def"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
 
@@ -25,33 +26,34 @@ type request_widget struct {
 
 // sets the http method
 func (rw *request_widget) SetMethod(method string) {
-
+	rw.input_bar_widget.method_select_widget.SelectItemByValue(method)
 }
 
 func (rw *request_widget) Method() string {
-	return ""
+	selected_item, _ := rw.input_bar_widget.method_select_widget.SelectedItem()
+	return selected_item.Value
 }
 
 func (rw *request_widget) SetURL(u *url.URL) {
-
+	
 }
 
 func (rw *request_widget) URL() *url.URL {
 	return nil
 }
 
-func (rw *request_widget) SetParameters(parameters []def.Attribute) {
+func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute) {
 }
 
-func (rw *request_widget) Parameters() []def.Attribute {
-	return []def.Attribute{}
+func (rw *request_widget) Parameters() []url_pattern.Attribute {
+	return []url_pattern.Attribute{}
 }
 
-func (rw *request_widget) SetHeaders(headers []def.Attribute) {
+func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute) {
 }
 
-func (rw *request_widget) Headers() []def.Attribute {
-	return []def.Attribute{}
+func (rw *request_widget) Headers() []url_pattern.Attribute {
+	return []url_pattern.Attribute{}
 }
 
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {

@@ -1,15 +1,11 @@
 package def
 
 import (
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"net/url"
 	"os"
 	"time"
 )
-
-type Attribute struct {
-	Key   string `json:"Key"`
-	Value string `json:"Value"`
-}
 
 type HTTP_Request_Body struct {
 	FilePath string `json:"filepath"`
@@ -28,16 +24,15 @@ type HTTP_Data struct {
 			RawPath string `json:"raw-path"`
 			Pattern struct {
 				Pattern    string            `json:"pattern"`
-				Attributes map[string]string `json:"attributes"`
+				Attributes []url_pattern.Attribute `json:"attributes"`
 			} `json:"pattern"`
 		} `json:"path"` // Both path and pattern can't exists at once.
-		
-		u *url.URL
 
+		u *url.URL
 	} `json:"url"`
 
-	Parameters []Attribute   `json:"parameters"`
-	Headers    []Attribute   `json:"headers"`
+	Parameters []url_pattern.Attribute       `json:"parameters"`
+	Headers    []url_pattern.Attribute       `json:"headers"`
 	Body       HTTP_Request_Body `json:"body"` // Filepath of Content
 
 	ResponseConfig struct {
@@ -48,12 +43,27 @@ type HTTP_Data struct {
 	response_data HTTP_Response_Data
 }
 
-func (data *HTTP_Data) Do() {
-	
+func (data *HTTP_Data) update_url() error {
+	u, err := url.Parse(data.URL.BaseURL)
+	if err != nil {
+		return err
+	}
+
+	if data.URL.Path.RawPath != "" {
+		u.RawPath = data.URL.Path.RawPath
+	}else{
+		
+	}
+	return nil
 }
 
-func (data *HTTP_Data) Get_URL(parameters bool) string {
-	return ""
+func (data *HTTP_Data) Do() {
+
+}
+
+func (data *HTTP_Data) Get_URL() (string, string) {
+
+	return "", ""
 }
 
 func (data *HTTP_Data) ResponseData() *HTTP_Response_Data {
@@ -76,7 +86,7 @@ type HTTP_Response_Data struct {
 	Version      struct {
 		Major, Minor int
 	}
-	Headers []Attribute
+	Headers     []url_pattern.Attribute
 	ContentType string
-	Body    HTTP_Response_Body
+	Body        HTTP_Response_Body
 }

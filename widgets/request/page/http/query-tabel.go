@@ -2,6 +2,7 @@ package http_widget
 
 import (
 	CommonWidgets "API-Client/common-widgets"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -55,14 +56,18 @@ func (w *query_table_widget) Measure(ctx *gui.Context, constraints gui.Constrain
 	return w.table.Measure(ctx, constraints)
 }
 
-func (w *query_table_widget) GetValues() []string {
-	values := make([]string, 0, len(w.items))
+func (w *query_table_widget) GetValues() []url_pattern.Attribute {
+	values := make([]url_pattern.Attribute, 0, len(w.items))
 	for _, cell := range w.items {
-		w, ok := cell.Cells[1].Content.(*CommonWidgets.EditableText)
+		k := cell.Cells[0].Text
+		v, ok := cell.Cells[1].Content.(*CommonWidgets.EditableText)
 		if !ok {
 			panic("Unexpected widget")
 		}
-		values = append(values, w.Value())
+		values = append(values, url_pattern.Attribute{
+			Key: k,
+			Value: v.Value(),
+		})
 	}
 	return values
 }
