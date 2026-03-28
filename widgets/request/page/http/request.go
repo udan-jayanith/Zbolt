@@ -14,6 +14,8 @@ import (
 type request_widget struct {
 	gui.DefaultWidget
 	input_bar_widget request_input_bar_widget
+	on_input_bar_value_change func(context *gui.Context, text string, committed bool)
+	
 	url_preview      CommonWidgets.URLPreview
 
 	tab         CommonWidgets.Tab[string]
@@ -48,7 +50,7 @@ func (rw *request_widget) URL() *url.URL {
 }
 
 func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string, committed bool)) {
-	rw.input_bar_widget.input_widget.OnValueChanged(fn)
+	rw.on_input_bar_value_change = fn
 }
 
 func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute, ctx *gui.Context) {
@@ -85,6 +87,10 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		//Method: strings.ToUpper(method),
 		//}
 	})
+	
+	if rw.on_input_bar_value_change != nil {
+		rw.input_bar_widget.input_widget.OnValueChanged(rw.on_input_bar_value_change)
+	}
 	adder.AddWidget(&rw.input_bar_widget)
 
 	adder.AddWidget(&rw.url_preview)
