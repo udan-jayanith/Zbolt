@@ -48,7 +48,6 @@ func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.Chi
 		point := image.Pt(u*2, line_height+(line_height/4))
 		
 		if ctx.AppBounds().Size().X >= 1000 {
-			println("Hi")
 			point.X = u*6
 		}
 		
