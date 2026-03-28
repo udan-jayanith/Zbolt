@@ -36,7 +36,7 @@ func (rw *response_widget) SetAutowrap(autowrap bool) {
 }
 
 func (rw *response_widget) SetFormat(format bool) {
-		rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
+	rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
 }
 
 func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
@@ -67,9 +67,14 @@ func (rw *response_widget) SetHeaders(headers []url_pattern.Attribute) {
 	rw.tab_content.response_header.SetItems(header_items)
 }
 
-func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body, content_type string) {
-	rw.tab_content.response_body.header.file_type.SetValue(content_type)
-	rw.tab_content.response_body.view.SetValue(body.Content)
+func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
+	if body.File == nil {
+		rw.tab_content.response_body.header.file_type.SetValue(body.ContentType)
+		rw.tab_content.response_body.view.SetValue(body.Content)
+	}
+
+	// If file is not nil and the content type is jpg, png or a text format show it in the response body widget.
+	// Other wise show not unable to open and close the file. User should be able to click the open with button to view it.
 }
 
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

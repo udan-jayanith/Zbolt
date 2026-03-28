@@ -10,6 +10,7 @@ import (
 
 type HTTP_Request_Body struct {
 	FilePath string `json:"filepath"`
+	IsFileOpen bool
 
 	ContentType string `json:"content-type"`
 	Content     string `json:"content"`
@@ -103,6 +104,9 @@ func (data *HTTP_Data) UpdateResponseData() {
 
 type HTTP_Response_Body struct {
 	File        *os.File
+	Path string
+	IsFileClosed bool
+	
 	ContentType string
 	Content     string
 }

@@ -49,7 +49,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.response_widget.SetHeaders(data.Headers)
 
 	temp := data.ResponseData()
-	brp.response_widget.SetResponseBody(&temp.Body, temp.ContentType)
+	brp.response_widget.SetResponseBody(&temp.Body)
 }
 
 func (brp *HTTP_Widget) update() {

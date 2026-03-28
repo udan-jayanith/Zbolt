@@ -48,18 +48,24 @@ func (rw *request_widget) URL() *url.URL {
 	return u
 }
 
-func (rw *request_widget) OnURLInputChange(fn func(context *gui.Context, text string, committed bool)) {
+func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string, committed bool)) {
 	rw.input_bar_widget.input_widget.OnValueChanged(fn)
 }
 
-func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute) {
+func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute, ctx *gui.Context) {
+	for _, param := range parameters {
+		rw.tab_content.params.PushRow(param.Key, param.Value, ctx)
+	}
 }
 
 func (rw *request_widget) Parameters() []url_pattern.Attribute {
 	return []url_pattern.Attribute{}
 }
 
-func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute) {
+func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute, ctx *gui.Context) {
+	for _, header := range headers {
+		rw.tab_content.header.PushRow(header.Key, header.Value, ctx)
+	}
 }
 
 func (rw *request_widget) Headers() []url_pattern.Attribute {
@@ -67,6 +73,11 @@ func (rw *request_widget) Headers() []url_pattern.Attribute {
 }
 
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
+	if body.FilePath == "" {
+		rw.tab_content.body.SetValue(body.Content)
+	}
+
+	// If file exists send it's content with the request. This is not a priority for now.
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
