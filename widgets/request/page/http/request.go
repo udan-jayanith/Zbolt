@@ -26,12 +26,11 @@ type request_widget struct {
 
 // sets the http method
 func (rw *request_widget) SetMethod(method string) {
-	rw.input_bar_widget.method_select_widget.SelectItemByValue(method)
+	rw.input_bar_widget.SelectMethod(method)
 }
 
 func (rw *request_widget) Method() string {
-	selected_item, _ := rw.input_bar_widget.method_select_widget.SelectedItem()
-	return selected_item.Value
+	return rw.input_bar_widget.Method()
 }
 
 func (rw *request_widget) SetURL(u *url.URL) {
