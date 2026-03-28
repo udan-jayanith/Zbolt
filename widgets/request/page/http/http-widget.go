@@ -86,7 +86,7 @@ func (brp *HTTP_Widget) handle_popup() {
 	})
 
 	brp.popup_widget.OnClose(func(ctx *gui.Context, reason widget.PopupCloseReason) {
-		u1 := url_panel.content.generate_url()
+		u1 := get_url_panel(ctx).content.generate_url()
 		brp.request_widget.input_bar_widget.input_widget.SetValue(u1.String())
 
 		u2, err := url.Parse(brp.request_widget.url_preview.URL())
