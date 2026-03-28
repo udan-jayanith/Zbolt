@@ -18,25 +18,25 @@ type response_widget struct {
 	tab           CommonWidgets.Tab[struct{}]
 	tab_content   struct {
 		response_header  widget.Table[struct{}]
-		response_body    response_body_widget
+		response_body    CommonWidgets.BodyWidget
 		selected_content gui.Widget
 	}
 }
 
 func (rw *response_widget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
-	rw.tab_content.response_body.header.options.auto_wrap.toggle.OnValueChanged(fn)
+	//rw.tab_content.response_body.header.options.auto_wrap.toggle.OnValueChanged(fn)
 }
 
 func (rw *response_widget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
-	rw.tab_content.response_body.header.options.format.toggle.OnValueChanged(fn)
+	//rw.tab_content.response_body.header.options.format.toggle.OnValueChanged(fn)
 }
 
 func (rw *response_widget) SetAutowrap(autowrap bool) {
-	rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
+	//rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
 }
 
 func (rw *response_widget) SetFormat(format bool) {
-	rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
+	//rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
 }
 
 func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
@@ -69,8 +69,8 @@ func (rw *response_widget) SetHeaders(headers []url_pattern.Attribute) {
 
 func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
 	if body.File == nil {
-		rw.tab_content.response_body.header.file_type.SetValue(body.ContentType)
-		rw.tab_content.response_body.view.SetValue(body.Content)
+		//rw.tab_content.response_body.header.file_type.SetValue(body.ContentType)
+		//rw.tab_content.response_body.view.SetValue(body.Content)
 	}
 
 	// If file is not nil and the content type is jpg, png or a text format show it in the response body widget.

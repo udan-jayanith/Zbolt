@@ -48,7 +48,7 @@ func (w *http_body_header_widget) response_build(ctx *gui.Context, adder *gui.Ch
 	w.content_type.text.SetVerticalAlign(widget.VerticalAlignMiddle)
 	adder.AddWidget(&w.content_type.text)
 
-	w.options.open_with.SetText("Open")
+	w.options.open_with.SetText("Open with")
 	if w.options.on_open_with != nil {
 		w.options.open_with.OnUp(func(ctx *gui.Context) {
 			w.options.on_open_with(ctx, w.content_type.text.Value())
@@ -176,6 +176,8 @@ func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	w.view.SetEditable(w.t == HTTP_Request)
 	adder.AddWidget(&w.view)
 
+	// make the view handle images and text. 
+	// Show content type not supported if content type is not jpg, png or text type. 
 	return nil
 }
 
@@ -218,4 +220,31 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 	}
 
 	return point
+}
+
+func (body *BodyWidget ) SetType(t RequestResponse){
+	body.t = t
+	body.header.t = t
+}
+
+func (body *BodyWidget) SetBody(content []byte, content_type string){
+	
+}
+
+func (body *BodyWidget) ContentType(){}
+
+func (body *BodyWidget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
+	//rw.tab_content.response_body.header.options.auto_wrap.toggle.OnValueChanged(fn)
+}
+
+func (body *BodyWidget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
+	//rw.tab_content.response_body.header.options.format.toggle.OnValueChanged(fn)
+}
+
+func (body *BodyWidget) SetAutowrap(autowrap bool) {
+	//rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
+}
+
+func (body *BodyWidget) SetFormat(format bool) {
+	//rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
 }

@@ -119,6 +119,5 @@ type HTTP_Response_Data struct {
 		Major, Minor int
 	}
 	Headers     []url_pattern.Attribute
-	ContentType string
 	Body        HTTP_Response_Body
 }
