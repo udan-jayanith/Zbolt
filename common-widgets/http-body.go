@@ -1,0 +1,221 @@
+package CommonWidgets
+
+import (
+	"image"
+
+	gui "github.com/guigui-gui/guigui"
+	widget "github.com/guigui-gui/guigui/basicwidget"
+)
+
+type RequestResponse int
+
+const (
+	HTTP_Request RequestResponse = iota
+	HTTP_Response
+)
+
+type http_body_header_widget struct {
+	gui.DefaultWidget
+
+	t            RequestResponse
+	content_type struct {
+		text  widget.Text
+		input widget.TextInput
+	}
+
+	options struct {
+		auto_wrap struct {
+			text   widget.Text
+			toggle widget.Toggle
+		}
+		format struct {
+			text   widget.Text
+			toggle widget.Toggle
+		}
+		open_with    widget.Button
+		on_open_with func(context *gui.Context, content_type string)
+	}
+}
+
+func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.ChildAdder) {
+	w.content_type.input.SetStyle(widget.TextInputStyleInline)
+	adder.AddWidget(&w.content_type.input)
+
+}
+
+func (w *http_body_header_widget) response_build(ctx *gui.Context, adder *gui.ChildAdder) {
+	w.content_type.text.SetValue("Json")
+	w.content_type.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+	adder.AddWidget(&w.content_type.text)
+
+	w.options.open_with.SetText("Open")
+	if w.options.on_open_with != nil {
+		w.options.open_with.OnUp(func(ctx *gui.Context) {
+			w.options.on_open_with(ctx, w.content_type.text.Value())
+		})
+	}
+
+	adder.AddWidget(&w.options.open_with)
+}
+
+func (w *http_body_header_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	if w.t == HTTP_Request {
+		w.request_build(ctx, adder)
+	} else {
+		w.response_build(ctx, adder)
+	}
+
+	{
+		w.options.auto_wrap.text.SetValue("Auto wrap")
+		w.options.auto_wrap.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddWidget(&w.options.auto_wrap.text)
+
+		adder.AddWidget(&w.options.auto_wrap.toggle)
+	}
+	{
+		w.options.format.text.SetValue("Format")
+		w.options.format.text.SetVerticalAlign(widget.VerticalAlignMiddle)
+		adder.AddWidget(&w.options.format.text)
+
+		adder.AddWidget(&w.options.format.toggle)
+	}
+	return nil
+}
+
+func (rbh *http_body_header_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
+	toggle_size := gui.FixedSize(u*2 - u/3)
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Gap:       u / 4,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &rbh.options.auto_wrap.text,
+			},
+			{
+				Widget: &rbh.options.auto_wrap.toggle,
+				Size:   toggle_size,
+			},
+			{
+				Widget: &rbh.options.format.text,
+			},
+			{
+				Widget: &rbh.options.format.toggle,
+				Size:   toggle_size,
+			},
+			{
+				Size: gui.FlexibleSize(1),
+			},
+			func() gui.LinearLayoutItem {
+				item := gui.LinearLayoutItem{}
+				if rbh.t == HTTP_Request {
+					item.Widget = &rbh.content_type.input
+				} else {
+					item.Widget = &rbh.content_type.text
+				}
+
+				return item
+			}(),
+		},
+	}
+
+	if rbh.t == HTTP_Response {
+		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Widget: &rbh.options.open_with,
+		})
+	}
+
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (rbh *http_body_header_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	u := widget.UnitSize(ctx)
+	gap := u / 4
+	var point image.Point
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X += rbh.options.auto_wrap.text.Measure(ctx, constraints).X + gap
+		point.X += rbh.options.auto_wrap.toggle.Measure(ctx, constraints).X + gap
+		point.X += rbh.options.format.text.Measure(ctx, constraints).X + gap
+		point.X += rbh.options.format.toggle.Measure(ctx, constraints).X + gap
+
+		point.X += func() gui.Widget {
+			if rbh.t == HTTP_Request {
+				return &rbh.content_type.input
+			}
+
+			return &rbh.content_type.text
+		}().Measure(ctx, constraints).X + gap
+
+		point.X += rbh.options.open_with.Measure(ctx, constraints).X
+	}
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y = u
+	}
+	return point
+}
+
+type BodyWidget struct {
+	gui.DefaultWidget
+	t RequestResponse
+	
+	header http_body_header_widget
+	view   widget.TextInput
+}
+
+func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	adder.AddWidget(&w.header)
+
+	w.view.SetAutoWrap(w.header.options.auto_wrap.toggle.Value())
+	w.view.SetMultiline(true)
+	w.view.SetEditable(w.t == HTTP_Request)
+	adder.AddWidget(&w.view)
+
+	return nil
+}
+
+func (w *BodyWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	u := widget.UnitSize(ctx)
+
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Gap:       u / 4,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &w.header,
+			},
+			{
+				Widget: &w.view,
+				Size:   gui.FlexibleSize(1),
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	u := widget.UnitSize(ctx)
+	gap := u / 4
+	var point image.Point
+	point.Y = gap
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = body.header.Measure(ctx, constraints).X
+	}
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y += body.header.Measure(ctx, constraints).Y
+		point.Y += body.view.Measure(ctx, constraints).Y
+	}
+
+	return point
+}
