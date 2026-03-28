@@ -84,7 +84,7 @@ func main() {
 	ebiten.SetWindowIcon([]image.Image{zebolt_icon})
 	op := &gui.RunOptions{
 		Title:         "Zbolt",
-		WindowMinSize: image.Pt(800, 444),
+		WindowMinSize: image.Pt(900, 544),
 		RunGameOptions: &ebiten.RunGameOptions{
 			ApplePressAndHoldEnabled: true,
 		},

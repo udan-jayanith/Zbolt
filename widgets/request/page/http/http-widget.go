@@ -55,7 +55,15 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 func (brp *HTTP_Widget) update() {
 	d := brp.data
 	brp.response_widget.SetAutowrap(d.ResponseConfig.AutoWrap)
+	brp.response_widget.OnAutowrapToggle(func(ctx *gui.Context, value bool) {
+		d.ResponseConfig.AutoWrap = value
+	})
+	
 	brp.response_widget.SetFormat(d.ResponseConfig.Formate)
+	brp.response_widget.OnFormatToggle(func(ctx *gui.Context, value bool) {
+		d.ResponseConfig.Formate = value
+	})
+	
 	brp.response_widget.SetResponseData(brp.data.ResponseData())
 }
 

@@ -1,7 +1,9 @@
 package CommonWidgets
 
 import (
+	"API-Client/widgets/request/def"
 	"image"
+	"strings"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -19,8 +21,10 @@ type http_body_header_widget struct {
 
 	t            RequestResponse
 	content_type struct {
-		text  widget.Text
-		input widget.TextInput
+		content_type def.ContentType
+		text         widget.Text
+
+		input gui.WidgetWithSize[*widget.TextInput]
 	}
 
 	options struct {
@@ -38,13 +42,30 @@ type http_body_header_widget struct {
 }
 
 func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.ChildAdder) {
-	w.content_type.input.SetStyle(widget.TextInputStyleInline)
+	w.content_type.input.SetMeasureFunc(func(ctx *gui.Context, constraints gui.Constraints) image.Point {
+		line_height := widget.LineHeight(ctx)
+		u := widget.UnitSize(ctx)
+		point := image.Pt(u*2, line_height+(line_height/4))
+		
+		if ctx.AppBounds().Size().X >= 1000 {
+			println("Hi")
+			point.X = u*6
+		}
+		
+		return point
+	})
+	
+	input_widget := w.content_type.input.Widget()
+	input_widget.SetStyle(widget.TextInputStyleInline)
+	input_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	
+	w.content_type.content_type = def.ContentType(input_widget.Value())
 	adder.AddWidget(&w.content_type.input)
-
 }
 
 func (w *http_body_header_widget) response_build(ctx *gui.Context, adder *gui.ChildAdder) {
-	w.content_type.text.SetValue("Json")
+	_, sub_t := w.content_type.content_type.Parse()
+	w.content_type.text.SetValue(strings.ToUpper(sub_t))
 	w.content_type.text.SetVerticalAlign(widget.VerticalAlignMiddle)
 	adder.AddWidget(&w.content_type.text)
 
@@ -163,7 +184,7 @@ func (rbh *http_body_header_widget) Measure(ctx *gui.Context, constraints gui.Co
 type BodyWidget struct {
 	gui.DefaultWidget
 	t RequestResponse
-	
+
 	header http_body_header_widget
 	view   widget.TextInput
 }
@@ -176,8 +197,8 @@ func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	w.view.SetEditable(w.t == HTTP_Request)
 	adder.AddWidget(&w.view)
 
-	// make the view handle images and text. 
-	// Show content type not supported if content type is not jpg, png or text type. 
+	// make the view handle images and text.
+	// Show content type not supported if content type is not jpg, png or text type.
 	return nil
 }
 
@@ -222,29 +243,40 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 	return point
 }
 
-func (body *BodyWidget ) SetType(t RequestResponse){
+func (body *BodyWidget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
 }
 
-func (body *BodyWidget) SetBody(content []byte, content_type string){
-	
+func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
+	t, sub_t := content_type.Parse()
+	if t == "text" || (t == "application" && sub_t == "json") {
+		body.view.SetValue(content)
+	}
 }
 
-func (body *BodyWidget) ContentType(){}
+func (body *BodyWidget) ContentType() def.ContentType {
+	return body.header.content_type.content_type
+}
+
+func (body *BodyWidget) SetContentType(content_type def.ContentType) {
+	if body.t == HTTP_Response {
+		body.header.content_type.content_type = content_type
+	}
+}
 
 func (body *BodyWidget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
-	//rw.tab_content.response_body.header.options.auto_wrap.toggle.OnValueChanged(fn)
+	body.header.options.auto_wrap.toggle.OnValueChanged(fn)
 }
 
 func (body *BodyWidget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
-	//rw.tab_content.response_body.header.options.format.toggle.OnValueChanged(fn)
+	body.header.options.format.toggle.OnValueChanged(fn)
 }
 
 func (body *BodyWidget) SetAutowrap(autowrap bool) {
-	//rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
+	body.header.options.auto_wrap.toggle.SetValue(autowrap)
 }
 
 func (body *BodyWidget) SetFormat(format bool) {
-	//rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
+	body.header.options.format.toggle.SetValue(format)
 }

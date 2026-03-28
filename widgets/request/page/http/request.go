@@ -19,7 +19,7 @@ type request_widget struct {
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
 		params, header  CommonWidgets.AttributeTable
-		body            widget.TextInput
+		body            CommonWidgets.BodyWidget
 		selected_widget gui.Widget
 	}
 }
@@ -74,7 +74,7 @@ func (rw *request_widget) Headers() []url_pattern.Attribute {
 
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 	if body.FilePath == "" {
-		rw.tab_content.body.SetValue(body.Content)
+		rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
 	}
 
 	// If file exists send it's content with the request. This is not a priority for now.
@@ -91,10 +91,6 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rw.url_preview)
 
 	{
-		rw.tab_content.body.SetAutoWrap(true)
-		rw.tab_content.body.SetMultiline(true)
-		rw.tab_content.body.SetEditable(true)
-
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{
 				Text: "Parameters",
@@ -114,6 +110,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			rw.tab_content.selected_widget = &rw.tab_content.header
 		case 2:
 			rw.tab_content.selected_widget = &rw.tab_content.body
+			rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
 		default:
 			panic("Unknown tab was selected")
 		}

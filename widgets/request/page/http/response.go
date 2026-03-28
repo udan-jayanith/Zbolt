@@ -24,19 +24,19 @@ type response_widget struct {
 }
 
 func (rw *response_widget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
-	//rw.tab_content.response_body.header.options.auto_wrap.toggle.OnValueChanged(fn)
+	rw.tab_content.response_body.OnAutowrapToggle(fn)
 }
 
 func (rw *response_widget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
-	//rw.tab_content.response_body.header.options.format.toggle.OnValueChanged(fn)
+	rw.tab_content.response_body.OnFormatToggle(fn)
 }
 
 func (rw *response_widget) SetAutowrap(autowrap bool) {
-	//rw.tab_content.response_body.header.options.auto_wrap.toggle.SetValue(autowrap)
+	rw.tab_content.response_body.SetAutowrap(autowrap)
 }
 
 func (rw *response_widget) SetFormat(format bool) {
-	//rw.tab_content.response_body.header.options.format.toggle.SetValue(format)
+	rw.tab_content.response_body.SetFormat(format)
 }
 
 func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
@@ -69,8 +69,8 @@ func (rw *response_widget) SetHeaders(headers []url_pattern.Attribute) {
 
 func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
 	if body.File == nil {
-		//rw.tab_content.response_body.header.file_type.SetValue(body.ContentType)
-		//rw.tab_content.response_body.view.SetValue(body.Content)
+		// TODO: handle this so that images and large files can render.
+		rw.tab_content.response_body.SetBody(body.Content, body.ContentType)
 	}
 
 	// If file is not nil and the content type is jpg, png or a text format show it in the response body widget.
@@ -108,6 +108,8 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 		switch rw.tab.GetSelectedIndex() {
 		case 0:
+			rw.tab_content.response_body.SetType(CommonWidgets.HTTP_Response)
+			rw.tab_content.response_body.SetContentType(def.ContentType("application/json"))
 			rw.tab_content.selected_content = &rw.tab_content.response_body
 		case 1:
 			rw.tab_content.selected_content = &rw.tab_content.response_header

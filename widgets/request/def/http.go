@@ -12,7 +12,7 @@ type HTTP_Request_Body struct {
 	FilePath string `json:"filepath"`
 	IsFileOpen bool
 
-	ContentType string `json:"content-type"`
+	ContentType ContentType `json:"content-type"`
 	Content     string `json:"content"`
 }
 
@@ -107,7 +107,7 @@ type HTTP_Response_Body struct {
 	Path string
 	IsFileClosed bool
 	
-	ContentType string
+	ContentType ContentType
 	Content     string
 }
 
