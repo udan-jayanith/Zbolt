@@ -1,6 +1,7 @@
 package http_widget
 
 import (
+	CommonWidgets "API-Client/common-widgets"
 	messages "API-Client/massages"
 	"API-Client/widgets/request/def"
 	"image"
@@ -16,6 +17,7 @@ type HTTP_Widget struct {
 	gui.DefaultWidget
 
 	request_widget  request_widget
+	vr CommonWidgets.VerticalLine
 	response_widget response_widget
 
 	popup_widget *widget.Popup
@@ -107,6 +109,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	brp.handle_popup()
 
 	adder.AddWidget(&brp.request_widget)
+	adder.AddWidget(&brp.vr)
 	adder.AddWidget(&brp.response_widget)
 	return nil
 }
@@ -119,6 +122,9 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 			{
 				Widget: &brp.request_widget,
 				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &brp.vr,
 			},
 			{
 				Widget: &brp.response_widget,

@@ -4,18 +4,19 @@ import (
 	"API-Client/basic"
 	"API-Client/icons"
 	url_pattern "API-Client/widgets/request/url-pattern"
+	"image"
 	"slices"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-/*
 type table_row_widget struct {
 	gui.DefaultWidget
 
 	checkbox                 widget.Checkbox
 	key_column, value_column EditableText
+	vr                       VerticalLine
 	row_delete_btn           *icons.Icon
 }
 
@@ -33,7 +34,8 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	adder.AddWidget(&w.value_column)
 
 	if w.row_delete_btn == nil {
-		w.row_delete_btn = icons.NewIcon("delete", widget.LineHeight(ctx)/2)
+		l := widget.LineHeight(ctx)
+		w.row_delete_btn = icons.NewIcon("delete", l-(l/3))
 	}
 	adder.AddWidget(w.row_delete_btn)
 	return nil
@@ -53,6 +55,9 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 				Size:   gui.FlexibleSize(1),
 			},
 			{
+				Widget: &w.vr,
+			},
+			{
 				Widget: &w.value_column,
 				Size:   gui.FlexibleSize(1),
 			},
@@ -65,20 +70,39 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (w *table_row_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (row_widget *table_row_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	point.Y = widget.LineHeight(ctx)
+	padding := row_widget.padding(ctx)
+	point.Y = widget.LineHeight(ctx) + padding.Top + padding.Bottom
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = row_widget.checkbox.Measure(ctx, gui.Constraints{}).X
+		point.X += row_widget.key_column.Measure(ctx, gui.Constraints{}).X * 2
+		l := widget.LineHeight(ctx)
+		point.X += l - (l / 3)
+		point.X += row_widget.gap(ctx) * 4
+		point.X = padding.Start + padding.End
+	}
 
 	return point
 }
 
+/*
 func (w *table_row_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	//clr := draw_color.Color2(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0.9, 0.4)
+	//if !ctx.IsEnabled(w) {
+		//clr = draw_color.Color2(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0.8, 0.3)
+		//	}
+
+	//b := widgetBounds.Bounds()
 }
+*/
 
 func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	return gui.HandleInputResult{}
 }
-*/
 
 type AttributeTable struct {
 	gui.DefaultWidget

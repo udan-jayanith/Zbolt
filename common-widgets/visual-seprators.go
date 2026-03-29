@@ -22,7 +22,7 @@ type HorizontalLine struct {
 }
 
 //func (line *HorizontalLine) SetPadding(padding gui.Padding) {
-	//line.padding = padding
+//line.padding = padding
 //}
 
 func (line *HorizontalLine) width(ctx *gui.Context) float32 {
@@ -36,25 +36,55 @@ func (line *HorizontalLine) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBound
 
 	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
 	width := line.width(ctx)
-	
+
 	vector.StrokeLine(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Max.X), float32(b.Min.Y), width, line_color, false)
 }
 
-
 func (line *HorizontalLine) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	
+
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h
-	}else{
+	} else {
 		point.Y = int(line.width(ctx))
 	}
-	
+
 	if w, ok := constraints.FixedWidth(); ok {
 		point.X = w
-	}else{
-		point.X = widget.UnitSize(ctx)*20
+	} else {
+		point.X = widget.UnitSize(ctx) * 20
 	}
-	
+
 	return point
+}
+
+type VerticalLine struct {
+	HorizontalLine
+}
+
+func (line *VerticalLine) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	var point image.Point
+
+	if h, ok := constraints.FixedHeight(); ok {
+		point.Y = h
+	} else {
+		point.Y = widget.UnitSize(ctx) * 20
+	}
+
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = int(line.width(ctx))
+	}
+
+	return point
+}
+
+func (line *VerticalLine) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	b := widgetBounds.Bounds()
+
+	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
+	width := line.width(ctx)
+
+	vector.StrokeLine(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Min.X), float32(b.Max.Y), width, line_color, false)
 }
