@@ -2,13 +2,14 @@ package CommonWidgets
 
 import (
 	"API-Client/basic"
+	draw_color "API-Client/common-widgets/internal/draw"
 	"API-Client/icons"
-	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
-	"slices"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type table_row_widget struct {
@@ -94,151 +95,57 @@ func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *g
 	return gui.HandleInputResult{}
 }
 
-type AttributeTable struct {
+type attribute_table struct {
 	gui.DefaultWidget
-
-	table_rows        []widget.TableRow[struct{}]
-	table             widget.Table[struct{}]
-	checkbox_disabled bool
-
-	panel widget.Panel
+	rows []table_row_widget
 }
 
-func (at *AttributeTable) find_row(key string) int {
-	for i, row := range at.table_rows {
-		row_key := row.Cells[1].Content.(*gui.WidgetWithPadding[*EditableText])
-		if row_key.Widget().Value() == key {
-			return i
-		}
-	}
-	return -1
-}
-
-func (at *AttributeTable) DisableCheckBox(checkbox bool) {
-	at.checkbox_disabled = checkbox
-}
-
-func (at *AttributeTable) delete_row(key string) {
-	i := at.find_row(key)
-	if i < 0 {
-		return
-	}
-	at.table_rows = slices.Delete(at.table_rows, i, i+1)
-}
-
-func (at *AttributeTable) PushRow(attr url_pattern.Attribute, ctx *gui.Context) {
-	cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
-
-	cell1.Widget().widget.SetValue(attr.Key)
-	cell2.Widget().widget.SetValue(attr.Value)
-
-	u := widget.UnitSize(ctx)
-	padding := basic.NewPadding(0, u/3)
-	cell1.SetPadding(padding)
-	cell2.SetPadding(padding)
-
-	line_height := widget.LineHeight(ctx)
-
-	checkbox := widget.Checkbox{}
-	checkbox.SetValue(attr.Checked)
-	ctx.SetEnabled(&checkbox, !at.checkbox_disabled)
-
-	delete_icon := icons.NewIcon("delete", line_height/2)
-
-	at.table_rows = append(at.table_rows, widget.TableRow[struct{}]{
-		Movable: true,
-		Cells: []widget.TableCell{
-			{
-				Content: &checkbox,
-			},
-			{
-				Content: cell1,
-			},
-			{
-				Content: cell2,
-			},
-			{
-				Content: delete_icon,
-			},
-		},
-	})
-
-	delete_icon.OnClick(func() {
-		at.delete_row(cell1.Widget().Value())
-	})
-}
-
-func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	at.table.SetColumns([]widget.TableColumn{
-		{
-			Width: gui.FixedSize(widget.UnitSize(ctx)),
-		},
-		{
-			HeaderText: "Key",
-			Width:      gui.FlexibleSize(1),
-		},
-		{
-			HeaderText: "Value",
-			Width:      gui.FlexibleSize(1),
-		},
-		{
-			Width: gui.FixedSize(widget.UnitSize(ctx)),
-		},
-	})
-
-	no_of_rows := len(at.table_rows)
-	var ok bool
-	if no_of_rows > 0 {
-		last_key_column := at.table_rows[no_of_rows-1].Cells[1].Content.(*gui.WidgetWithPadding[*EditableText])
-		if last_key_column.Widget().widget.Value() != "" {
-			ok = true
-		}
-	}
-
-	if ok || no_of_rows == 0 {
-		at.PushRow(url_pattern.Attribute{
-			Checked: true,
-		}, ctx)
-	}
-
-	at.table.SetItems(at.table_rows)
-	at.table.OnItemsMoved(func(context *gui.Context, from, count, to int) {
-		println("from", from)
-		println("to", to)
-		println()
-	})
-	adder.AddWidget(&at.table)
+func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionHorizontal,
-		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &at.table,
-				Size:   gui.FlexibleSize(1),
-			},
-		},
+		Direction: gui.LayoutDirectionVertical,
+		Items:     make([]gui.LinearLayoutItem, 0, len(at.rows)),
 	}
+
+	for i, _ := range at.rows {
+		layout.Items = append(layout.Items, gui.LinearLayoutItem{
+			Widget: &at.rows[i],
+		})
+	}
+
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (at *AttributeTable) Values() []url_pattern.Attribute {
-	list := make([]url_pattern.Attribute, 0, len(at.table_rows))
-	for _, row := range at.table_rows {
-		is_checked := row.Cells[0].Content.(*widget.Checkbox)
-		key := row.Cells[1].Content.(*gui.WidgetWithPadding[*EditableText]).Widget()
-		value := row.Cells[2].Content.(*gui.WidgetWithPadding[*EditableText]).Widget()
+func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	var point image.Point
 
-		attr := url_pattern.Attribute{
-			Checked: is_checked.Value(),
-
-			Key:   key.Value(),
-			Value: value.Value(),
-		}
-		list = append(list, attr)
+	if w, ok := constraints.FixedWidth(); ok {
+		point.X = w
+	} else {
+		point.X = widget.UnitSize(ctx) * 6
 	}
 
-	return list
+	for i, _ := range at.rows {
+		point.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
+	}
+
+	return point
+}
+
+func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	if len(at.rows) < 2 {
+		return
+	}
+	
+	b := widgetBounds.Bounds()
+	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
+	width := 1 * float32(ctx.Scale())
+	
+	for i, _ := range at.rows {
+		b.Min.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
+		vector.StrokeLine(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Max.X), float32(b.Min.Y), width, line_color, true)
+	}
 }
