@@ -22,7 +22,7 @@ type table_row_widget struct {
 	key_not_editable                   bool
 
 	checkbox                 widget.Checkbox
-	key_column, value_column EditableText
+	key_cell, value_cell EditableText
 	vr                       VerticalLine
 	row_delete_btn           *icons.Icon
 }
@@ -40,11 +40,11 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 		adder.AddWidget(&w.checkbox)
 	}
 
-	w.key_column.SetEditable(!w.key_not_editable)
-	adder.AddWidget(&w.key_column)
+//	w.key_cell.SetEditable(!w.key_not_editable)
+	adder.AddWidget(&w.key_cell)
 	adder.AddWidget(&w.vr)
-	adder.AddWidget(&w.value_column)
-	
+	adder.AddWidget(&w.value_cell)
+
 	if !w.delete_disabled {
 		if w.row_delete_btn == nil {
 			l := widget.LineHeight(ctx)
@@ -70,7 +70,7 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 			Widget: &w.checkbox,
 		},
 		{
-			Widget: &w.key_column,
+			Widget: &w.key_cell,
 			Size:   gui.FlexibleSize(1),
 		},
 	}
@@ -82,7 +82,7 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	right_column_layout.Padding = gui.Padding{}
 	right_column_layout.Items = []gui.LinearLayoutItem{
 		{
-			Widget: &w.value_column,
+			Widget: &w.value_cell,
 			Size:   gui.FlexibleSize(1),
 		},
 	}
@@ -139,8 +139,8 @@ type attribute_table struct {
 func (at *attribute_table) push_row(row url_pattern.Attribute) {
 	row_widget := table_row_widget{}
 	row_widget.checkbox.SetValue(row.Checked)
-	row_widget.key_column.SetValue(row.Key)
-	row_widget.value_column.SetValue(row.Value)
+	row_widget.key_cell.SetValue(row.Key)
+	row_widget.value_cell.SetValue(row.Value)
 	at.rows = append(at.rows, &row_widget)
 }
 
@@ -158,12 +158,12 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	adder.AddWidget(&at.value_header)
 
 	l := len(at.rows)
-	if !at.disable_auto_add && (l == 0 || strings.TrimSpace(at.rows[l-1].key_column.Value()) != "") {
+	if !at.disable_auto_add && (l == 0 || strings.TrimSpace(at.rows[l-1].key_cell.Value()) != "") {
 		at.push_row(url_pattern.Attribute{
 			Checked: true,
 		})
 	}
-	
+
 	for i, _ := range at.rows {
 		adder.AddWidget(at.rows[i])
 	}
@@ -292,8 +292,8 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 		table_row.key_not_editable = t.key_not_editable
 
 		table_row.checkbox.SetValue(row.Checked)
-		table_row.key_column.SetValue(row.Key)
-		table_row.value_column.SetValue(row.Value)
+		table_row.key_cell.SetValue(row.Key)
+		table_row.value_cell.SetValue(row.Value)
 		table_rows = append(table_rows, &table_row)
 	}
 	t.table.Widget().rows = table_rows
@@ -304,12 +304,12 @@ func (t *AttributeTable) Rows() []url_pattern.Attribute {
 	rows := make([]url_pattern.Attribute, 0, len(table_rows))
 
 	for _, table_row := range table_rows {
-		if t.checkbox_disabled || !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_column.Value()) == "" {
+		if t.checkbox_disabled || !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_cell.Value()) == "" {
 			continue
 		}
 		rows = append(rows, url_pattern.Attribute{
-			Key:     table_row.key_column.Value(),
-			Value:   table_row.value_column.Value(),
+			Key:     table_row.key_cell.Value(),
+			Value:   table_row.value_cell.Value(),
 			Checked: table_row.checkbox.Value(),
 		})
 	}
@@ -318,7 +318,7 @@ func (t *AttributeTable) Rows() []url_pattern.Attribute {
 }
 
 func (t *AttributeTable) DisableCheckbox(disable bool) {
-	t.delete_disabled = disable
+	t.checkbox_disabled = disable
 }
 
 func (t *AttributeTable) DisableDelete(disable bool) {

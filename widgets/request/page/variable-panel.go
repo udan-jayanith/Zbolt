@@ -38,6 +38,8 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 	
 	w.public_variables_table.AutoAddRow(false)
 	w.public_variables_table.DisableCheckbox(true)
+	w.public_variables_table.KeyEditable(false)
+	// This should be set if no rows were set
 	w.public_variables_table.SetRows([]url_pattern.Attribute{{}, {Value: "value"}})
 	adder.AddWidget(&w.public_variables_table)
 	
