@@ -241,7 +241,9 @@ type AttributeTable struct {
 
 func (table *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	table.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	table.table.SetPadding(basic.NewPadding(widget.UnitSize(ctx) / 3))
+	padding := basic.NewPadding(widget.UnitSize(ctx) / 3)
+	padding.Top = 0
+	table.table.SetPadding(padding)
 	table.panel.SetContent(&table.table)
 	adder.AddWidget(&table.panel)
 	return nil
@@ -256,7 +258,7 @@ func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) 
 }
 
 func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	border_radius := widget.UnitSize(ctx)/3
+	border_radius := widget.UnitSize(ctx)/4
 	
 	background_clr := basicwidgetdraw.ControlColor(ctx.ColorMode(), ctx.IsEnabled(t))
 	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_clr, border_radius)
@@ -275,4 +277,16 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 		table_rows = append(table_rows, &table_row)
 	}
 	t.table.Widget().rows = table_rows
+}
+
+func (t *AttributeTable) Rows() []url_pattern.Attribute{
+	return []url_pattern.Attribute{}
+}
+
+func (t *AttributeTable) DisableCheckbox(disable bool) {
+	
+}
+
+func (t *AttributeTable) DisableDelete(disable bool) {
+	
 }
