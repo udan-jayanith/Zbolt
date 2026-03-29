@@ -18,10 +18,11 @@ import (
 type table_row_widget struct {
 	gui.DefaultWidget
 
-	checkbox                 widget.Checkbox
-	key_column, value_column EditableText
-	vr                       VerticalLine
-	row_delete_btn           *icons.Icon
+	checkbox_disabled, delete_disabled bool
+	checkbox                           widget.Checkbox
+	key_column, value_column           EditableText
+	vr                                 VerticalLine
+	row_delete_btn                     *icons.Icon
 }
 
 func (w *table_row_widget) padding(ctx *gui.Context) gui.Padding {
@@ -235,7 +236,9 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 type AttributeTable struct {
 	gui.DefaultWidget
 
-	table gui.WidgetWithPadding[*attribute_table]
+	checkbox_disabled, delete_disabled bool
+	table                              gui.WidgetWithPadding[*attribute_table]
+
 	panel widget.Panel
 }
 
@@ -258,11 +261,11 @@ func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) 
 }
 
 func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	border_radius := widget.UnitSize(ctx)/4
-	
+	border_radius := widget.UnitSize(ctx) / 4
+
 	background_clr := basicwidgetdraw.ControlColor(ctx.ColorMode(), ctx.IsEnabled(t))
 	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_clr, border_radius)
-	
+
 	border_clr1, border_clr2 := basicwidgetdraw.BorderColors(ctx.ColorMode(), basicwidgetdraw.RoundedRectBorderTypeInset)
 	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, border_radius, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
 }
@@ -271,6 +274,9 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 	table_rows := make([]*table_row_widget, len(rows))
 	for _, row := range rows {
 		table_row := table_row_widget{}
+		table_row.checkbox_disabled = t.checkbox_disabled
+		table_row.delete_disabled = t.delete_disabled
+		
 		table_row.checkbox.SetValue(row.Checked)
 		table_row.key_column.SetValue(row.Key)
 		table_row.value_column.SetValue(row.Value)
@@ -279,14 +285,28 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 	t.table.Widget().rows = table_rows
 }
 
-func (t *AttributeTable) Rows() []url_pattern.Attribute{
-	return []url_pattern.Attribute{}
+func (t *AttributeTable) Rows() []url_pattern.Attribute {
+	table_rows := t.table.Widget().rows
+	rows := make([]url_pattern.Attribute, 0, len(table_rows))
+
+	for _, table_row := range table_rows {
+		if t.checkbox_disabled || !table_row.checkbox.Value() {
+			continue
+		}
+		rows = append(rows, url_pattern.Attribute{
+			Key:     table_row.key_column.Value(),
+			Value:   table_row.value_column.Value(),
+			Checked: table_row.checkbox.Value(),
+		})
+	}
+
+	return rows
 }
 
 func (t *AttributeTable) DisableCheckbox(disable bool) {
-	
+	t.delete_disabled = disable
 }
 
 func (t *AttributeTable) DisableDelete(disable bool) {
-	
+	t.delete_disabled = disable
 }
