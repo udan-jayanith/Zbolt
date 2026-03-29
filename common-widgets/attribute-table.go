@@ -112,11 +112,11 @@ func (at *AttributeTable) delete_row(key string) {
 	at.table_rows = slices.Delete(at.table_rows, i, i+1)
 }
 
-func (at *AttributeTable) PushRow(cell1_text, cell2_text string, ctx *gui.Context) {
+func (at *AttributeTable) PushRow(attr url_pattern.Attribute, ctx *gui.Context) {
 	cell1, cell2 := &gui.WidgetWithPadding[*EditableText]{}, &gui.WidgetWithPadding[*EditableText]{}
 
-	cell1.Widget().widget.SetValue(cell1_text)
-	cell2.Widget().widget.SetValue(cell2_text)
+	cell1.Widget().widget.SetValue(attr.Key)
+	cell2.Widget().widget.SetValue(attr.Value)
 
 	u := widget.UnitSize(ctx)
 	padding := basic.NewPadding(0, u/3)
@@ -126,7 +126,7 @@ func (at *AttributeTable) PushRow(cell1_text, cell2_text string, ctx *gui.Contex
 	line_height := widget.LineHeight(ctx)
 
 	checkbox := widget.Checkbox{}
-	checkbox.SetValue(true)
+	checkbox.SetValue(attr.Checked)
 	ctx.SetEnabled(&checkbox, !at.checkbox_disabled)
 
 	delete_icon := icons.NewIcon("delete", line_height/2)
@@ -182,7 +182,9 @@ func (at *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	}
 
 	if ok || no_of_rows == 0 {
-		at.PushRow("", "", ctx)
+		at.PushRow(url_pattern.Attribute{
+			Checked: true,
+		}, ctx)
 	}
 
 	at.table.SetItems(at.table_rows)
@@ -209,5 +211,20 @@ func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 }
 
 func (at *AttributeTable) Values() []url_pattern.Attribute {
-	return []url_pattern.Attribute{}
+	list := make([]url_pattern.Attribute, 0, len(at.table_rows))
+	for _, row := range at.table_rows {
+		is_checked := row.Cells[0].Content.(*widget.Checkbox)
+		key := row.Cells[1].Content.(*gui.WidgetWithPadding[*EditableText]).Widget()
+		value := row.Cells[2].Content.(*gui.WidgetWithPadding[*EditableText]).Widget()
+
+		attr := url_pattern.Attribute{
+			Checked: is_checked.Value(),
+
+			Key:   key.Value(),
+			Value: value.Value(),
+		}
+		list = append(list, attr)
+	}
+
+	return list
 }

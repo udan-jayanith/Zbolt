@@ -5,6 +5,8 @@ import (
 )
 
 type Attribute struct {
+	Checked bool
+	
 	Key   string `json:"Key"`
 	Value string `json:"Value"`
 }
