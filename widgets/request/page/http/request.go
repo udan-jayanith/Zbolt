@@ -54,9 +54,7 @@ func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string
 }
 
 func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute, ctx *gui.Context) {
-	for _, param := range parameters {
-		rw.tab_content.params.PushRow(param, ctx)
-	}
+	rw.tab_content.params.SetRows(parameters)
 }
 
 func (rw *request_widget) Parameters() []url_pattern.Attribute {
@@ -64,9 +62,7 @@ func (rw *request_widget) Parameters() []url_pattern.Attribute {
 }
 
 func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute, ctx *gui.Context) {
-	for _, header := range headers {
-		rw.tab_content.header.PushRow(header, ctx)
-	}
+		rw.tab_content.header.SetRows(headers)
 }
 
 func (rw *request_widget) Headers() []url_pattern.Attribute {

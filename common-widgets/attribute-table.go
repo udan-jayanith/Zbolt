@@ -4,7 +4,9 @@ import (
 	"API-Client/basic"
 	draw_color "API-Client/common-widgets/internal/draw"
 	"API-Client/icons"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
+	"strings"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -48,7 +50,7 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       w.gap(ctx),
 		Padding:   w.padding(ctx),
-		Items: []gui.LinearLayoutItem{},
+		Items:     []gui.LinearLayoutItem{},
 	}
 
 	left_column_layout := layout
@@ -78,17 +80,17 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	layout.Items = []gui.LinearLayoutItem{
 		{
 			Layout: left_column_layout,
-			Size: gui.FlexibleSize(1),
+			Size:   gui.FlexibleSize(1),
 		},
 		{
 			Widget: &w.vr,
 		},
 		{
 			Layout: right_column_layout,
-			Size: gui.FlexibleSize(1),
+			Size:   gui.FlexibleSize(1),
 		},
 	}
-	
+
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
@@ -119,7 +121,15 @@ type attribute_table struct {
 	gui.DefaultWidget
 	vr                       VerticalLine
 	key_header, value_header widget.Text
-	rows                     []table_row_widget
+	rows                     []*table_row_widget
+}
+
+func (at *attribute_table) push_row(row url_pattern.Attribute) {
+	row_widget := table_row_widget{}
+	row_widget.checkbox.SetValue(row.Checked)
+	row_widget.key_column.SetValue(row.Key)
+	row_widget.value_column.SetValue(row.Value)
+	at.rows = append(at.rows, &row_widget)
 }
 
 func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -133,10 +143,16 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	at.value_header.SetValue("Value")
 	at.value_header.SetBold(true)
 	at.value_header.SetVerticalAlign(widget.VerticalAlignMiddle)
-	adder.AddWidget(&at.key_header)
+	adder.AddWidget(&at.value_header)
 
+	l := len(at.rows)
+	if l == 0 || strings.TrimSpace(at.rows[l-1].key_column.Value()) != "" {
+		at.push_row(url_pattern.Attribute{
+			Checked: true,
+		})
+	}
 	for i, _ := range at.rows {
-		adder.AddWidget(&at.rows[i])
+		adder.AddWidget(at.rows[i])
 	}
 
 	return nil
@@ -178,7 +194,7 @@ func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 
 	for i, _ := range at.rows {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
-			Widget: &at.rows[i],
+			Widget: at.rows[i],
 		})
 	}
 
@@ -217,14 +233,16 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 
 type AttributeTable struct {
 	gui.DefaultWidget
-	
+
 	table attribute_table
 	panel widget.Panel
 }
 
 func (table *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	table.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
+	table.panel.SetStyle(widget.PanelStyleSide)
 	table.panel.SetContent(&table.table)
+	adder.AddWidget(&table.panel)
 	return nil
 }
 
@@ -234,4 +252,16 @@ func (table *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBo
 
 func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	return image.Pt(12*widget.UnitSize(ctx), 6*widget.UnitSize(ctx))
+}
+
+func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
+	table_rows := make([]*table_row_widget, len(rows))
+	for _, row := range rows {
+		table_row := table_row_widget{}
+		table_row.checkbox.SetValue(row.Checked)
+		table_row.key_column.SetValue(row.Key)
+		table_row.value_column.SetValue(row.Value)
+		table_rows = append(table_rows, &table_row)
+	}
+	t.table.rows = table_rows
 }
