@@ -42,17 +42,8 @@ type http_body_header_widget struct {
 }
 
 func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.ChildAdder) {
-	w.content_type.input.SetMeasureFunc(func(ctx *gui.Context, constraints gui.Constraints) image.Point {
-		line_height := widget.LineHeight(ctx)
-		u := widget.UnitSize(ctx)
-		point := image.Pt(u*2, line_height+(line_height/4))
-		
-		if ctx.AppBounds().Size().X >= 1000 {
-			point.X = u*6
-		}
-		
-		return point
-	})
+	w.content_type.input.SetIntrinsicSize()
+	w.content_type.input.SetFixedWidth(widget.UnitSize(ctx)*5)
 	
 	input_widget := w.content_type.input.Widget()
 	input_widget.SetStyle(widget.TextInputStyleInline)

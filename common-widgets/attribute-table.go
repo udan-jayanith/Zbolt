@@ -10,6 +10,7 @@ import (
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -24,7 +25,7 @@ type table_row_widget struct {
 }
 
 func (w *table_row_widget) padding(ctx *gui.Context) gui.Padding {
-	return basic.NewPadding(widget.UnitSize(ctx) / 3)
+	return basic.NewPadding(widget.UnitSize(ctx) / 8)
 }
 
 func (w *table_row_widget) gap(ctx *gui.Context) int {
@@ -39,7 +40,7 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 	if w.row_delete_btn == nil {
 		l := widget.LineHeight(ctx)
-		w.row_delete_btn = icons.NewIcon("delete", l-(l/3))
+		w.row_delete_btn = icons.NewIcon("delete", l-(l/6))
 	}
 	adder.AddWidget(w.row_delete_btn)
 	return nil
@@ -159,7 +160,7 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 }
 
 func (at *attribute_table) header_height(ctx *gui.Context) int {
-	return widget.LineHeight(ctx) + (widget.UnitSize(ctx)/3)*2
+	return widget.LineHeight(ctx) + (widget.UnitSize(ctx)/8)*2
 }
 
 func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
@@ -172,7 +173,7 @@ func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	header_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       u / 4,
-		Padding:   basic.NewPadding(u / 3),
+		Padding:   basic.NewPadding(u / 8),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &at.key_header,
@@ -234,13 +235,13 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 type AttributeTable struct {
 	gui.DefaultWidget
 
-	table attribute_table
+	table gui.WidgetWithPadding[*attribute_table]
 	panel widget.Panel
 }
 
 func (table *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	table.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	table.panel.SetStyle(widget.PanelStyleSide)
+	table.table.SetPadding(basic.NewPadding(widget.UnitSize(ctx) / 3))
 	table.panel.SetContent(&table.table)
 	adder.AddWidget(&table.panel)
 	return nil
@@ -254,6 +255,16 @@ func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) 
 	return image.Pt(12*widget.UnitSize(ctx), 6*widget.UnitSize(ctx))
 }
 
+func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+	border_radius := widget.UnitSize(ctx)/3
+	
+	background_clr := basicwidgetdraw.ControlColor(ctx.ColorMode(), ctx.IsEnabled(t))
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_clr, border_radius)
+	
+	border_clr1, border_clr2 := basicwidgetdraw.BorderColors(ctx.ColorMode(), basicwidgetdraw.RoundedRectBorderTypeInset)
+	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, border_radius, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
+}
+
 func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 	table_rows := make([]*table_row_widget, len(rows))
 	for _, row := range rows {
@@ -263,5 +274,5 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 		table_row.value_column.SetValue(row.Value)
 		table_rows = append(table_rows, &table_row)
 	}
-	t.table.rows = table_rows
+	t.table.Widget().rows = table_rows
 }
