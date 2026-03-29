@@ -9,6 +9,7 @@ import (
 
 type EditableText struct {
 	gui.DefaultWidget
+	not_editable bool
 	widget widget.Text
 }
 
@@ -17,7 +18,7 @@ func (et *EditableText) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	et.widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	et.widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
 	et.widget.SetSelectable(true)
-	et.widget.SetEditable(true)
+	et.widget.SetEditable(!et.not_editable)
 	adder.AddWidget(&et.widget)
 	return nil
 }
@@ -36,4 +37,8 @@ func (et *EditableText) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 
 func (et *EditableText) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	return et.widget.Measure(ctx, constraints)
+}
+
+func (et *EditableText) SetEditable(editable bool) {
+	et.not_editable = !editable
 }

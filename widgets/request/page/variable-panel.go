@@ -3,6 +3,7 @@ package request_page
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -34,10 +35,14 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 
 	w.private_description.SetDescription(`Only variable names are visible to others.`)
 	adder.AddWidget(&w.private_description)
-		
-	//w.public_variables_table.DisableCheckBox(true)
+	
+	w.public_variables_table.AutoAddRow(false)
+	w.public_variables_table.DisableCheckbox(true)
+	w.public_variables_table.SetRows([]url_pattern.Attribute{{}, {Value: "value"}})
 	adder.AddWidget(&w.public_variables_table)
-	//w.private_variables_table.DisableCheckBox(true)
+	
+	w.private_variables_table.AutoAddRow(false)
+	w.private_variables_table.DisableCheckbox(true)
 	adder.AddWidget(&w.private_variables_table)
 	
 	adder.AddWidget(&w.line)

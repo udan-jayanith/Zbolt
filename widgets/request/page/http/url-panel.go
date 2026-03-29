@@ -47,7 +47,7 @@ type url_panel_widget struct {
 
 	query_header      widget.Text
 	query_description CommonWidgets.Description
-	query             query_table_widget
+	query             query_table_widget // TODO: replace this with new attribute table
 
 	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
