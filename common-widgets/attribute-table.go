@@ -4,49 +4,87 @@ import (
 	"API-Client/basic"
 	"API-Client/icons"
 	url_pattern "API-Client/widgets/request/url-pattern"
-	"image"
 	"slices"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type EditableText struct {
+/*
+type table_row_widget struct {
 	gui.DefaultWidget
-	widget widget.Text
+
+	checkbox                 widget.Checkbox
+	key_column, value_column EditableText
+	row_delete_btn           *icons.Icon
 }
 
-func (et *EditableText) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	et.widget.SetTabular(true)
-	et.widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	et.widget.SetHorizontalAlign(widget.HorizontalAlignLeft)
-	et.widget.SetSelectable(true)
-	et.widget.SetEditable(true)
-	adder.AddWidget(&et.widget)
+func (w *table_row_widget) padding(ctx *gui.Context) gui.Padding {
+	return basic.NewPadding(widget.UnitSize(ctx) / 3)
+}
+
+func (w *table_row_widget) gap(ctx *gui.Context) int {
+	return widget.UnitSize(ctx) / 4
+}
+
+func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	adder.AddWidget(&w.checkbox)
+	adder.AddWidget(&w.key_column)
+	adder.AddWidget(&w.value_column)
+
+	if w.row_delete_btn == nil {
+		w.row_delete_btn = icons.NewIcon("delete", widget.LineHeight(ctx)/2)
+	}
+	adder.AddWidget(w.row_delete_btn)
 	return nil
 }
 
-func (et *EditableText) SetValue(text string) {
-	et.widget.SetValue(text)
+func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Gap:       w.gap(ctx),
+		Padding:   w.padding(ctx),
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &w.checkbox,
+			},
+			{
+				Widget: &w.key_column,
+				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &w.value_column,
+				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: w.row_delete_btn,
+			},
+		},
+	}
+
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (et *EditableText) Value() string {
-	return et.widget.Value()
+func (w *table_row_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	var point image.Point
+	point.Y = widget.LineHeight(ctx)
+
+	return point
 }
 
-func (et *EditableText) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&et.widget, widgetBounds.Bounds())
+func (w *table_row_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
 }
 
-func (et *EditableText) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return et.widget.Measure(ctx, constraints)
+func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	return gui.HandleInputResult{}
 }
+*/
 
 type AttributeTable struct {
 	gui.DefaultWidget
 
-	table_rows []widget.TableRow[struct{}]
-	table      widget.Table[struct{}]
+	table_rows        []widget.TableRow[struct{}]
+	table             widget.Table[struct{}]
 	checkbox_disabled bool
 
 	panel widget.Panel
@@ -170,6 +208,6 @@ func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (at *AttributeTable) Values() []url_pattern.Attribute{
+func (at *AttributeTable) Values() []url_pattern.Attribute {
 	return []url_pattern.Attribute{}
 }
