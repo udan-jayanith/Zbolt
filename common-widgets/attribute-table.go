@@ -3,6 +3,7 @@ package CommonWidgets
 import (
 	"API-Client/basic"
 	"API-Client/icons"
+	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"slices"
 
@@ -167,4 +168,8 @@ func (at *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBound
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (at *AttributeTable) Values() []url_pattern.Attribute{
+	return []url_pattern.Attribute{}
 }
