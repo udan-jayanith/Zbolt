@@ -214,3 +214,24 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 		b.Min.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
 	}
 }
+
+type AttributeTable struct {
+	gui.DefaultWidget
+	
+	table attribute_table
+	panel widget.Panel
+}
+
+func (table *AttributeTable) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	table.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
+	table.panel.SetContent(&table.table)
+	return nil
+}
+
+func (table *AttributeTable) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	layouter.LayoutWidget(&table.panel, widgetBounds.Bounds())
+}
+
+func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	return image.Pt(12*widget.UnitSize(ctx), 6*widget.UnitSize(ctx))
+}
