@@ -31,6 +31,7 @@ func (w *table_row_widget) gap(ctx *gui.Context) int {
 func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&w.checkbox)
 	adder.AddWidget(&w.key_column)
+	adder.AddWidget(&w.vr)
 	adder.AddWidget(&w.value_column)
 
 	if w.row_delete_btn == nil {
@@ -88,17 +89,6 @@ func (row_widget *table_row_widget) Measure(ctx *gui.Context, constraints gui.Co
 
 	return point
 }
-
-/*
-func (w *table_row_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	//clr := draw_color.Color2(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0.9, 0.4)
-	//if !ctx.IsEnabled(w) {
-		//clr = draw_color.Color2(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0.8, 0.3)
-		//	}
-
-	//b := widgetBounds.Bounds()
-}
-*/
 
 func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	return gui.HandleInputResult{}
