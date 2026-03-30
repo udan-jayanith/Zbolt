@@ -18,6 +18,7 @@ import (
 type table_row_widget struct {
 	gui.DefaultWidget
 
+	//TODO: add pointer to attribute table to get values.
 	checkbox_disabled, delete_disabled bool
 	key_not_editable                   bool
 
@@ -40,7 +41,7 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 		adder.AddWidget(&w.checkbox)
 	}
 
-//	w.key_cell.SetEditable(!w.key_not_editable)
+	w.key_cell.SetEditable(!w.key_not_editable)
 	adder.AddWidget(&w.key_cell)
 	adder.AddWidget(&w.vr)
 	adder.AddWidget(&w.value_cell)
@@ -283,6 +284,7 @@ func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 }
 
 func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
+	// TODO: stop creating new widgets every time setting rows.
 	table_rows := make([]*table_row_widget, 0, len(rows))
 	for _, row := range rows {
 		table_row := table_row_widget{}
