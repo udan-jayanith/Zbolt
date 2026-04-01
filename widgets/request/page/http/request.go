@@ -13,14 +13,14 @@ import (
 
 type request_widget struct {
 	gui.DefaultWidget
-	input_bar_widget request_input_bar_widget
+	input_bar_widget          request_input_bar_widget
 	on_input_bar_value_change func(context *gui.Context, text string, committed bool)
-	
-	url_preview      CommonWidgets.URLPreview
+
+	url_preview CommonWidgets.URLPreview
 
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
-		params, header  CommonWidgets.AttributeTable
+		params, header  CommonWidgets.AttributeTable // TODO: use one attribute table for params and headers.
 		body            CommonWidgets.BodyWidget
 		selected_widget gui.Widget
 	}
@@ -62,7 +62,7 @@ func (rw *request_widget) Parameters() []url_pattern.Attribute {
 }
 
 func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute, ctx *gui.Context) {
-		rw.tab_content.header.SetRows(headers)
+	rw.tab_content.header.SetRows(headers)
 }
 
 func (rw *request_widget) Headers() []url_pattern.Attribute {
@@ -83,7 +83,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		//Method: strings.ToUpper(method),
 		//}
 	})
-	
+
 	if rw.on_input_bar_value_change != nil {
 		rw.input_bar_widget.input_widget.OnValueChanged(rw.on_input_bar_value_change)
 	}
