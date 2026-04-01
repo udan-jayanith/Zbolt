@@ -14,9 +14,9 @@ type variable_panel_widget struct {
 	gui.DefaultWidget
 
 	public_table_header, private_table_header       widget.Text
-	public_description, private_description CommonWidgets.Description
+	public_description, private_description         CommonWidgets.Description
 	public_variables_table, private_variables_table CommonWidgets.AttributeTable
-	line CommonWidgets.HorizontalLine
+	line                                            CommonWidgets.HorizontalLine
 }
 
 func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -35,18 +35,16 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 
 	w.private_description.SetDescription(`Only variable names are visible to others.`)
 	adder.AddWidget(&w.private_description)
-	
-	w.public_variables_table.AutoAddRow(false)
+
 	w.public_variables_table.DisableCheckbox(true)
-	w.public_variables_table.KeyEditable(false)
-	// This should be set if no rows were set
-	w.public_variables_table.SetRows([]url_pattern.Attribute{{}, {Value: "value"}})
+	if w.public_variables_table.Count() == 0 {
+		w.public_variables_table.SetRows([]url_pattern.Attribute{{}, {Key: "api-key", Value: "gagj9a8gu2an9gih"}})
+	}
 	adder.AddWidget(&w.public_variables_table)
-	
-	w.private_variables_table.AutoAddRow(false)
+
 	w.private_variables_table.DisableCheckbox(true)
 	adder.AddWidget(&w.private_variables_table)
-	
+
 	adder.AddWidget(&w.line)
 	return nil
 }
@@ -69,7 +67,7 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &w.public_table_header,
-				Size: gui.FixedSize(widget.LineHeight(ctx)),
+				Size:   gui.FixedSize(widget.LineHeight(ctx)),
 			},
 			{
 				Widget: &w.public_description,
@@ -79,7 +77,7 @@ func (w *variable_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 				Widget: &w.public_variables_table,
 				Size:   gui.FlexibleSize(1),
 			},
-			{Size: gui.FixedSize(w.gap(ctx)*2)},
+			{Size: gui.FixedSize(w.gap(ctx) * 2)},
 			{
 				Widget: &w.line,
 			},

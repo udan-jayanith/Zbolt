@@ -360,3 +360,7 @@ func (t *AttributeTable) KeyEditable(editable bool) {
 func (t *AttributeTable) AutoAddRow(auto_add bool) {
 	t.table.Widget().disable_auto_add = !auto_add
 }
+
+func (t *AttributeTable) Count() int {
+	return len(t.table.Widget().rows)
+}
