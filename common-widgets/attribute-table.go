@@ -6,6 +6,7 @@ import (
 	"API-Client/icons"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
+	"slices"
 	"strings"
 
 	gui "github.com/guigui-gui/guigui"
@@ -20,6 +21,7 @@ type table_row_widget struct {
 
 	table *attribute_table
 
+	index                int
 	checkbox             widget.Checkbox
 	key_cell, value_cell EditableText
 	vr                   VerticalLine
@@ -126,6 +128,15 @@ func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *g
 	return gui.HandleInputResult{}
 }
 
+func (row_widget *table_row_widget) on_delete(fn func(index int)) {
+	if row_widget.row_delete_btn == nil {
+		return
+	}
+	row_widget.row_delete_btn.OnClick(func() {
+		fn(row_widget.index)
+	})
+}
+
 type attribute_table struct {
 	gui.DefaultWidget
 	vr                       VerticalLine
@@ -135,15 +146,22 @@ type attribute_table struct {
 	disable_auto_add                   bool
 	checkbox_disabled, delete_disabled bool
 	key_not_editable                   bool
+	rwo_delete_fn                      func(index int)
 }
 
 func (at *attribute_table) push_row(row url_pattern.Attribute) {
 	row_widget := table_row_widget{}
+	row_widget.index = len(at.rows)
 	row_widget.table = at
 	row_widget.checkbox.SetValue(row.Checked)
 	row_widget.key_cell.SetValue(row.Key)
 	row_widget.value_cell.SetValue(row.Value)
 	at.rows = append(at.rows, &row_widget)
+}
+
+func (at *attribute_table) delete_row(index int) {
+	at.rows = slices.Delete(at.rows, index, index+1)
+	gui.RequestRebuild(at)
 }
 
 func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -167,6 +185,11 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	}
 
 	for i, _ := range at.rows {
+		row_widget := at.rows[i]
+		if !at.delete_disabled {
+			row_widget.on_delete(at.delete_row)
+		}
+		row_widget.index = i
 		adder.AddWidget(at.rows[i])
 	}
 
@@ -295,6 +318,7 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 		}
 		table_row := table_rows[i]
 		table_row.table = table
+		table_row.index = i
 
 		table_row.checkbox.SetValue(row.Checked)
 		table_row.key_cell.SetValue(row.Key)
@@ -306,10 +330,9 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 func (t *AttributeTable) Rows() []url_pattern.Attribute {
 	table_rows := t.table.Widget().rows
 	rows := make([]url_pattern.Attribute, 0, len(table_rows))
-	table := t.table.Widget()
 
 	for _, table_row := range table_rows {
-		if table.checkbox_disabled || !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_cell.Value()) == "" {
+		if !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_cell.Value()) == "" {
 			continue
 		}
 		rows = append(rows, url_pattern.Attribute{
