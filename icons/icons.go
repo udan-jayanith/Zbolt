@@ -16,15 +16,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-// TODO: Store icons in the disk
 var store fs.FS = func() fs.FS {
-	_, err := os.Stat("./icons")
+	_, err := os.Stat("./icons/icons")
 	if err == nil {
-		return os.DirFS("./icons")
+		return os.DirFS("./icons/icons")
 	}
 
-	log.Fatal(err.Error())
-	return nil
+	_, err = os.Stat("./icons")
+	if err != nil {
+		log.Fatal(err.Error())
+
+	}
+	return os.DirFS("./icons")
 }()
 
 type cache_store struct {
@@ -38,7 +41,7 @@ func (cs *cache_store) Open(icon_name string) *ebiten.Image {
 	icon_name = icon_name + ".png"
 	ebiten_image := cs.images[icon_name]
 	if ebiten_image == nil || ebiten_image.Value() == nil {
-		file, err := store.Open("icons" + "/" + icon_name)
+		file, err := store.Open(icon_name)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
