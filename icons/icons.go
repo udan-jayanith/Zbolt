@@ -1,11 +1,12 @@
-// icon transparency is ``CF`` if icon is too bright. 
+// icon transparency is “CF“ if icon is too bright.
 package icons
 
 import (
-	"embed"
 	"image"
 	_ "image/png"
+	"io/fs"
 	"log"
+	"os"
 	"sync"
 	"weak"
 
@@ -15,8 +16,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-//go:embed icons/*
-var store embed.FS
+// TODO: Store icons in the disk
+var store fs.FS = func() fs.FS {
+	_, err := os.Stat("./icons")
+	if err == nil {
+		return os.DirFS("./icons")
+	}
+
+	log.Fatal(err.Error())
+	return nil
+}()
 
 type cache_store struct {
 	mutex  sync.Mutex
@@ -66,7 +75,7 @@ type Icon struct {
 	image_widget widget.Image
 	IconName     string
 	Point        *image.Point
-	on_click func()
+	on_click     func()
 }
 
 func (icon *Icon) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -95,7 +104,7 @@ func (icon *Icon) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Widget
 	return gui.HandleInputResult{}
 }
 
-func (icon *Icon) OnClick(fn func()){
+func (icon *Icon) OnClick(fn func()) {
 	icon.on_click = fn
 }
 
