@@ -80,6 +80,7 @@ type Sidebar[T comparable] struct {
 	gui.DefaultWidget
 
 	options struct {
+		search_icon *ebiten.Image
 		search_widget widget.TextInput
 		add           struct {
 			create_request_button, create_folder_button, variable_button widget.Button
@@ -182,6 +183,11 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 	})
 
+	if sd.options.search_icon == nil {
+		sd.options.search_icon = icons.Store.Open("search")
+	}
+	sd.options.search_widget.SetIcon(sd.options.search_icon)
+	sd.options.search_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	adder.AddWidget(&sd.options.search_widget)
 
 	sd.list.widget.SetItems(sd.list.items)
