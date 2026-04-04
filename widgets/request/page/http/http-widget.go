@@ -104,7 +104,7 @@ func (brp *HTTP_Widget) handle_popup() {
 }
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(ebiten.ColorModeDark)
+	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	brp.update()
 	brp.handle_popup()

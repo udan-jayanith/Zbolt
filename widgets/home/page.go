@@ -23,7 +23,7 @@ type HomePage struct {
 }
 
 func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(ebiten.ColorModeDark)
+	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 	adder.AddWidget(&wp.background)
 
 	wp.recently_opened.Widget().SetValue("Recently opened")

@@ -260,7 +260,7 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	b := widgetBounds.Bounds()
 	b.Min.Y += at.header_height(ctx)
 
-	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ResolvedColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
+	line_color := draw_color.ScaleAlpha(draw_color.Color(	ctx.ColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
 	width := 1 * float32(ctx.Scale())
 
 	for i, _ := range at.rows {

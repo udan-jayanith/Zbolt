@@ -112,7 +112,7 @@ func (rp *RequestPage) open_popup(widget gui.Widget, ctx *gui.Context) {
 }
 
 func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	ctx.SetColorMode(ebiten.ColorModeDark)
+	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	adder.AddWidget(&rp.background)
 	padding := basic.NewPadding(widget.UnitSize(ctx)/4, 0)
