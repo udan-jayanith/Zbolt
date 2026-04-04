@@ -305,11 +305,11 @@ func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, border_radius, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
 }
 
-func (t *AttributeTable) SetRows(rows []attr.Attribute){
+func (t *AttributeTable) SetRows(rows []attr.Attribute) {
 	table_rows := t.table.Widget().rows
 	if len(table_rows) > len(rows) {
 		table_rows = table_rows[:len(rows)]
-	}else if len(table_rows) != len(rows) {
+	} else if len(table_rows) != len(rows) {
 		table_rows = make([]*table_row_widget, len(rows))
 	}
 	table := t.table.Widget()
@@ -330,17 +330,20 @@ func (t *AttributeTable) SetRows(rows []attr.Attribute){
 
 func (t *AttributeTable) SetRowsCheck(rows []attr.AttrCheck) {
 	table_rows := t.table.Widget().rows
-	if len(table_rows) > len(rows) {
-		table_rows = table_rows[:len(rows)]
-	}else if len(table_rows) != len(rows) {
-		table_rows = make([]*table_row_widget, len(rows))
-	}
+	//TODO: BUG: optimizations doesn't work figure out what is happening.
+
+	//if len(table_rows) > len(rows) {
+	//table_rows = table_rows[:len(rows)]
+	//} else if len(table_rows) != len(rows) {
+	table_rows = make([]*table_row_widget, len(rows))
+	//}
 	table := t.table.Widget()
 
 	for i, row := range rows {
 		if table_rows[i] == nil {
 			table_rows[i] = &table_row_widget{}
 		}
+
 		table_row := table_rows[i]
 		table_row.table = table
 		table_row.index = i
@@ -357,7 +360,7 @@ func (t *AttributeTable) RowsCheck() []attr.AttrCheck {
 	rows := make([]attr.AttrCheck, 0, len(table_rows))
 
 	for _, table_row := range table_rows {
-		if !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_cell.Value()) == "" {
+		if strings.TrimSpace(table_row.key_cell.Value()) == "" {
 			continue
 		}
 		rows = append(rows, attr.AttrCheck{
@@ -370,7 +373,7 @@ func (t *AttributeTable) RowsCheck() []attr.AttrCheck {
 	return rows
 }
 
-func (t *AttributeTable) Rows() []attr.Attribute{
+func (t *AttributeTable) Rows() []attr.Attribute {
 	table_rows := t.table.Widget().rows
 	rows := make([]attr.Attribute, 0, len(table_rows))
 
@@ -379,8 +382,8 @@ func (t *AttributeTable) Rows() []attr.Attribute{
 			continue
 		}
 		rows = append(rows, attr.Attribute{
-			Key:     table_row.key_cell.Value(),
-			Value:   table_row.value_cell.Value(),
+			Key:   table_row.key_cell.Value(),
+			Value: table_row.value_cell.Value(),
 		})
 	}
 

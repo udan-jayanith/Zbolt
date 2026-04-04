@@ -95,37 +95,43 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	{
 		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
 			{
-				Text: "Parameters",
+				Text:  "Parameters",
+				Value: "parameters",
 			},
 			{
-				Text: "Headers",
+				Text:  "Headers",
+				Value: "headers",
 			},
 			{
-				Text: "Body",
+				Text:  "Body",
+				Value: "body",
 			},
 		})
 
-		switch rw.tab.GetSelectedIndex() {
-		case 0:
+		rw.tab.OnSwitch(func(from, to *CommonWidgets.TabItem[string]) {
+			if from.Value == "parameters" && to.Value == "headers" {
+				rw.tab_content.params = rw.tab_content.table.RowsCheck()
+			} else if from.Value == "headers" && to.Value == "parameters" {
+				rw.tab_content.header = rw.tab_content.table.RowsCheck()
+			}
+
+			if to.Value == "parameters" {
+				rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
+			} else if to.Value == "headers" {
+				rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
+			}
+		})
+
+		_, selected_tab_value := rw.tab.GetSelectedTab()
+		switch selected_tab_value {
+		case "parameters", "headers":
 			rw.tab_content.selected_widget = &rw.tab_content.table
-		case 1:
-			rw.tab_content.selected_widget = &rw.tab_content.table
-		case 2:
+		case "body":
 			rw.tab_content.selected_widget = &rw.tab_content.body
 			rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
 		default:
 			panic("Unknown tab was selected")
 		}
-
-		rw.tab.OnSelect(func(_ *CommonWidgets.TabItem[string], index int) {
-			if index == 0 {
-				rw.tab_content.header = rw.tab_content.table.RowsCheck()
-				rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
-			} else if index == 1 {
-				rw.tab_content.params = rw.tab_content.table.RowsCheck()
-				rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
-			}
-		})
 
 		adder.AddWidget(rw.tab_content.selected_widget)
 		adder.AddWidget(&rw.tab)

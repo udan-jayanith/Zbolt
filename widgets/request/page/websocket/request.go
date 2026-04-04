@@ -51,16 +51,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.content.selected = &rw.content.params
 	}
 
-	rw.tab_widget.OnSelect(func(tab_item *CommonWidgets.TabItem[struct{}], index int) {
-		switch tab_item.Text {
-		case "Parameters":
-			rw.content.selected = &rw.content.params
-		case "Body":
-			rw.content.selected = &rw.content.body
-		case "Headers":
-			rw.content.selected = &rw.content.headers
-		}
-	})
+
 
 	adder.AddWidget(&rw.tab_widget)
 	adder.AddWidget(rw.content.selected)

@@ -159,6 +159,7 @@ func (item *tab_item[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui
 	item.is_hovering = widgetBounds.IsHitAtCursor()
 
 	if item.is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		item.tab_widget.on_select_fn(item.tab_widget.tab_items[item.tab_widget.selected_item_index].tab_item, item.tab_item)
 		item.tab_widget.selected_item_index = item.index
 	} else if item.is_hovering && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && item.tab_widget.holding_tab_item == nil {
 		item.tab_widget.holding_tab_item = item
@@ -225,7 +226,7 @@ type tab[T any] struct {
 	swap             *Swap
 
 	selected_item_index int
-	on_select_fn        func(tab_item *TabItem[T], index int)
+	on_select_fn        func(from, to *TabItem[T])
 	on_swap             func(ctx *gui.Context, swap Swap)
 }
 
@@ -310,17 +311,20 @@ type Tab[T any] struct {
 }
 
 func (tab *Tab[T]) SetTabItems(tab_items []TabItem[T]) {
-	tab.tab.tab_items = make([]*tab_item[T], 0, len(tab_items))
+	if len(tab_items) != len(tab.tab.tab_items) {
+		tab.tab.tab_items = make([]*tab_item[T], len(tab_items))
+	}
+
 	for i, item := range tab_items {
-		tab.tab.tab_items = append(tab.tab.tab_items, &tab_item[T]{
+		tab.tab.tab_items[i] = &tab_item[T]{
 			tab_item:   &item,
 			tab_widget: &tab.tab,
 			index:      i,
-		})
+		}
 	}
 }
 
-func (tab *Tab[T]) OnSelect(fn func(tab_item *TabItem[T], index int)) {
+func (tab *Tab[T]) OnSwitch(fn func(from, to *TabItem[T])) {
 	tab.tab.on_select_fn = fn
 }
 
@@ -338,10 +342,10 @@ func (tab *Tab[T]) GetTabByIndex(index int) (text string, value T) {
 }
 
 func (tab *Tab[T]) SelectTabItemByIndex(index int) {
-	tab.tab.selected_item_index = index
 	if tab.tab.on_select_fn != nil {
-		tab.tab.on_select_fn(tab.tab.tab_items[index].tab_item, index)
+		tab.tab.on_select_fn(tab.tab.tab_items[tab.tab.selected_item_index].tab_item, tab.tab.tab_items[index].tab_item)
 	}
+	tab.tab.selected_item_index = index
 }
 
 func (tab *Tab[T]) OnSwap(fn func(ctx *gui.Context, swap Swap)) {
