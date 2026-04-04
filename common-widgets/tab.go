@@ -159,7 +159,9 @@ func (item *tab_item[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui
 	item.is_hovering = widgetBounds.IsHitAtCursor()
 
 	if item.is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
-		item.tab_widget.on_select_fn(item.tab_widget.tab_items[item.tab_widget.selected_item_index].tab_item, item.tab_item)
+		if item.tab_widget.on_select_fn != nil {
+			item.tab_widget.on_select_fn(item.tab_widget.tab_items[item.tab_widget.selected_item_index].tab_item, item.tab_item)
+		}
 		item.tab_widget.selected_item_index = item.index
 	} else if item.is_hovering && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && item.tab_widget.holding_tab_item == nil {
 		item.tab_widget.holding_tab_item = item
