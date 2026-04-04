@@ -24,7 +24,7 @@ type http_body_header_widget struct {
 		content_type def.ContentType
 		text         widget.Text
 
-		input gui.WidgetWithSize[*widget.TextInput]
+		input gui.WidgetWithSize[*widget.Combobox]
 	}
 
 	options struct {
@@ -43,12 +43,11 @@ type http_body_header_widget struct {
 
 func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.ChildAdder) {
 	w.content_type.input.SetIntrinsicSize()
-	w.content_type.input.SetFixedWidth(widget.UnitSize(ctx)*5)
+	w.content_type.input.SetFixedWidth(widget.UnitSize(ctx) * 5)
 	
 	input_widget := w.content_type.input.Widget()
-	input_widget.SetStyle(widget.TextInputStyleInline)
-	input_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
-	
+	input_widget.SetAllowFreeInput(true)
+	input_widget.SetItems([]string{"application/json", "application/octet-stream", "text/html", "text/plain", "image/png", "image/jpeg"})
 	w.content_type.content_type = def.ContentType(input_widget.Value())
 	adder.AddWidget(&w.content_type.input)
 }
