@@ -107,10 +107,10 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		switch rw.tab.GetSelectedIndex() {
 		case 0:
-			rw.tab_content.table.SetRows(rw.tab_content.params)
+			rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
 			rw.tab_content.selected_widget = &rw.tab_content.table
 		case 1:
-			rw.tab_content.table.SetRows(rw.tab_content.header)
+			rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
 			rw.tab_content.selected_widget = &rw.tab_content.table
 		case 2:
 			rw.tab_content.selected_widget = &rw.tab_content.body

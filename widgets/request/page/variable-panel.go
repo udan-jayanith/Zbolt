@@ -38,7 +38,7 @@ func (w *variable_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 
 	w.public_variables_table.DisableCheckbox(true)
 	if w.public_variables_table.Count() == 0 {
-		w.public_variables_table.SetRows([]attr.AttrCheck{{}, {Key: "api-key", Value: "gagj9a8gu2an9gih"}})
+		w.public_variables_table.SetRows([]attr.Attribute{{}, {Key: "api-key", Value: "gagj9a8gu2an9gih"}})
 	}
 	adder.AddWidget(&w.public_variables_table)
 
