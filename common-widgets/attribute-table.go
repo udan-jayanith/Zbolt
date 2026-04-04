@@ -406,3 +406,7 @@ func (t *AttributeTable) AutoAddRow(auto_add bool) {
 func (t *AttributeTable) Count() int {
 	return len(t.table.Widget().rows)
 }
+
+func (t *AttributeTable) PushRow(row attr.AttrCheck) {
+	t.table.Widget().push_row(row)
+}

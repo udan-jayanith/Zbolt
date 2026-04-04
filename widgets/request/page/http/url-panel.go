@@ -3,6 +3,7 @@ package http_widget
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	attr "API-Client/widgets/request"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
@@ -47,7 +48,7 @@ type url_panel_widget struct {
 
 	query_header      widget.Text
 	query_description CommonWidgets.Description
-	query             query_table_widget // TODO: replace this with new attribute table
+	query             CommonWidgets.AttributeTable
 
 	hr1, hr2   CommonWidgets.HorizontalLine
 	pseudo_url CommonWidgets.Description
@@ -60,7 +61,7 @@ type url_panel_widget struct {
 
 func (w *url_panel_widget) generate_url() *url.URL {
 	pattern, _ := url_pattern.ParsePattern(w.path.Value())
-	list := w.query.GetValues()
+	list := w.query.Rows()
 
 	for _, attr := range list {
 		pattern.Set(attr.Key, attr.Value)
@@ -83,11 +84,8 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.path_text.SetValue("Path")
 
 	w.path.OnValueChanged(func(context *gui.Context, text string, committed bool) {
-		w.query.Empty()
 		pattern, _ := url_pattern.ParsePattern(text)
-		for _, attr := range pattern.List {
-			w.query.push_row(attr.Key, attr.Value)
-		}
+		w.query.SetRows(pattern.List)
 	})
 
 	w.form.SetItems([]widget.FormItem{
@@ -112,6 +110,10 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.query_description.SetDescription("Attributes enclosed by {} in path.")
 	adder.AddWidget(&w.query_description)
 
+	w.query.AutoAddRow(false)
+	w.query.DisableCheckbox(true)
+	w.query.DisableDelete(true)
+	w.query.KeyEditable(false)
 	adder.AddWidget(&w.query)
 
 	w.pseudo_url.SetDescription("The general form of the URL is:\n``[scheme:][//[host][/]path[?query]``")
@@ -123,7 +125,7 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
 
-	if time.Now().Sub(w.t).Seconds() > 1 {
+	if time.Now().Sub(w.t).Seconds() > 2 {
 		u := w.generate_url()
 		w.url_preview.SetURL(u.String())
 
@@ -200,8 +202,11 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	w.path.SetValue(u.Path)
 
 	pattern, _ := url_pattern.ParsePattern(u.Path)
-	for _, attr := range pattern.List {
-		w.query.push_row(attr.Key, attr.Value)
+	for _, att := range pattern.List {
+		w.query.PushRow(attr.AttrCheck{
+			Key: att.Key,
+			Value: att.Value,
+		})
 	}
 }
 

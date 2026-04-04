@@ -3,6 +3,7 @@ package http_widget
 import (
 	CommonWidgets "API-Client/common-widgets"
 	messages "API-Client/massages"
+	attr "API-Client/widgets/request"
 	"API-Client/widgets/request/def"
 	"image"
 	"net/url"
@@ -76,7 +77,6 @@ func (brp *HTTP_Widget) handle_popup() {
 
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
-		url_panel.content.query.Empty()
 		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
 		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value())
 		if err != nil {
@@ -98,6 +98,7 @@ func (brp *HTTP_Widget) handle_popup() {
 		u1.RawQuery = u2.RawQuery
 
 		brp.request_widget.url_preview.SetURL(u1.String())
+		get_url_panel(ctx).content.query.SetRows([]attr.Attribute{})
 		brp.popup_widget.OnClose(func(_ *gui.Context, _ widget.PopupCloseReason) {})
 	})
 }
