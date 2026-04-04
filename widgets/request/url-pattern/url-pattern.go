@@ -1,20 +1,14 @@
 package url_pattern
 
 import (
+	attr "API-Client/widgets/request"
 	"strings"
 )
-
-type Attribute struct {
-	Checked bool
-	
-	Key   string `json:"Key"`
-	Value string `json:"Value"`
-}
 
 type Pattern struct {
 	raw_path string
 	Values   map[string]int
-	List     []Attribute
+	List     []attr.Attribute
 }
 
 func (r *Pattern) Path() string {
@@ -30,12 +24,12 @@ func (r *Pattern) Set(key, value string) {
 }
 
 func ParsePattern(pattern string) (Pattern, error) {
-	list := make([]Attribute, 0, 4)
+	list := make([]attr.Attribute, 0, 4)
 	value := make(map[string]int, 4)
 	
 	i := -1
 	var idx int
-	var attr Attribute
+	var attr attr.Attribute
 	
 	for j, char := range pattern {
 		if char == '{' && i == -1 {

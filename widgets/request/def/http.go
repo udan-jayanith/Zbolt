@@ -1,6 +1,7 @@
 package def
 
 import (
+	attr "API-Client/widgets/request"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"net/url"
 	"os"
@@ -9,11 +10,11 @@ import (
 )
 
 type HTTP_Request_Body struct {
-	FilePath string `json:"filepath"`
+	FilePath   string `json:"filepath"`
 	IsFileOpen bool
 
 	ContentType ContentType `json:"content-type"`
-	Content     string `json:"content"`
+	Content     string      `json:"content"`
 }
 
 type HTTP_Data struct {
@@ -25,15 +26,15 @@ type HTTP_Data struct {
 		Path struct {
 			RawPath string `json:"raw-path"`
 			Pattern struct {
-				Pattern    string                  `json:"pattern"`
-				Attributes []url_pattern.Attribute `json:"attributes"`
+				Pattern    string           `json:"pattern"`
+				Attributes []attr.Attribute `json:"attributes"`
 			} `json:"pattern"`
 		} `json:"path"` // Both path and pattern can't exists at once.
 	} `json:"url"`
 
-	Parameters []url_pattern.Attribute `json:"parameters"`
-	Headers    []url_pattern.Attribute `json:"headers"`
-	Body       HTTP_Request_Body       `json:"body"` // Filepath of Content
+	Parameters []attr.AttrCheck  `json:"parameters"`
+	Headers    []attr.AttrCheck  `json:"headers"`
+	Body       HTTP_Request_Body `json:"body"` // Filepath of Content
 
 	ResponseConfig struct {
 		AutoWrap bool `json:"auto-wrap"`
@@ -57,7 +58,7 @@ func (data *HTTP_Data) path() string {
 
 /*
 Adapted from Golang net/http package.
- */
+*/
 func (data *HTTP_Data) EncodedParameters() string {
 
 	parameters := data.Parameters
@@ -66,8 +67,8 @@ func (data *HTTP_Data) EncodedParameters() string {
 	}
 	var buf strings.Builder
 	// This assumes key and values is about length of 5 each.
-	buf.Grow(len(parameters)*10)
-	
+	buf.Grow(len(parameters) * 10)
+
 	for _, attr := range parameters {
 		key := url.QueryEscape(attr.Key)
 		value := url.QueryEscape(attr.Value)
@@ -103,10 +104,10 @@ func (data *HTTP_Data) UpdateResponseData() {
 }
 
 type HTTP_Response_Body struct {
-	File        *os.File
-	Path string
+	File         *os.File
+	Path         string
 	IsFileClosed bool
-	
+
 	ContentType ContentType
 	Content     string
 }
@@ -118,6 +119,6 @@ type HTTP_Response_Data struct {
 	Version      struct {
 		Major, Minor int
 	}
-	Headers     []url_pattern.Attribute
-	Body        HTTP_Response_Body
+	Headers []attr.AttrCheck
+	Body    HTTP_Response_Body
 }

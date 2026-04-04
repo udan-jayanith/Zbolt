@@ -4,7 +4,7 @@ import (
 	"API-Client/basic"
 	draw_color "API-Client/common-widgets/internal/draw"
 	"API-Client/icons"
-	url_pattern "API-Client/widgets/request/url-pattern"
+	attr "API-Client/widgets/request"
 	"image"
 	"slices"
 	"strings"
@@ -149,7 +149,7 @@ type attribute_table struct {
 	rwo_delete_fn                      func(index int)
 }
 
-func (at *attribute_table) push_row(row url_pattern.Attribute) {
+func (at *attribute_table) push_row(row attr.AttrCheck) {
 	row_widget := table_row_widget{}
 	row_widget.index = len(at.rows)
 	row_widget.table = at
@@ -179,7 +179,7 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 
 	l := len(at.rows)
 	if !at.disable_auto_add && (l == 0 || strings.TrimSpace(at.rows[l-1].key_cell.Value()) != "") {
-		at.push_row(url_pattern.Attribute{
+		at.push_row(attr.AttrCheck{
 			Checked: true,
 		})
 	}
@@ -305,7 +305,7 @@ func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, border_radius, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
 }
 
-func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
+func (t *AttributeTable) SetRows(rows []attr.AttrCheck) {
 	table_rows := t.table.Widget().rows
 	if len(table_rows) != len(rows) {
 		table_rows = make([]*table_row_widget, len(rows))
@@ -327,15 +327,15 @@ func (t *AttributeTable) SetRows(rows []url_pattern.Attribute) {
 	t.table.Widget().rows = table_rows
 }
 
-func (t *AttributeTable) Rows() []url_pattern.Attribute {
+func (t *AttributeTable) Rows() []attr.AttrCheck {
 	table_rows := t.table.Widget().rows
-	rows := make([]url_pattern.Attribute, 0, len(table_rows))
+	rows := make([]attr.AttrCheck, 0, len(table_rows))
 
 	for _, table_row := range table_rows {
 		if !table_row.checkbox.Value() || strings.TrimSpace(table_row.key_cell.Value()) == "" {
 			continue
 		}
-		rows = append(rows, url_pattern.Attribute{
+		rows = append(rows, attr.AttrCheck{
 			Key:     table_row.key_cell.Value(),
 			Value:   table_row.value_cell.Value(),
 			Checked: table_row.checkbox.Value(),

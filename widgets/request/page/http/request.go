@@ -2,8 +2,8 @@ package http_widget
 
 import (
 	CommonWidgets "API-Client/common-widgets"
+	attr "API-Client/widgets/request"
 	"API-Client/widgets/request/def"
-	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
 
@@ -20,7 +20,8 @@ type request_widget struct {
 
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
-		params, header  CommonWidgets.AttributeTable // TODO: use one attribute table for params and headers.
+		params, header  []attr.AttrCheck
+		table           CommonWidgets.AttributeTable // TODO: use one attribute table for params and headers.
 		body            CommonWidgets.BodyWidget
 		selected_widget gui.Widget
 	}
@@ -53,20 +54,20 @@ func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string
 	rw.on_input_bar_value_change = fn
 }
 
-func (rw *request_widget) SetParameters(parameters []url_pattern.Attribute, ctx *gui.Context) {
-	rw.tab_content.params.SetRows(parameters)
+func (rw *request_widget) SetParameters(parameters []attr.AttrCheck, ctx *gui.Context) {
+	rw.tab_content.params = parameters
 }
 
-func (rw *request_widget) Parameters() []url_pattern.Attribute {
-	return []url_pattern.Attribute{}
+func (rw *request_widget) Parameters() []attr.AttrCheck {
+	return []attr.AttrCheck{}
 }
 
-func (rw *request_widget) SetHeaders(headers []url_pattern.Attribute, ctx *gui.Context) {
-	rw.tab_content.header.SetRows(headers)
+func (rw *request_widget) SetHeaders(headers []attr.AttrCheck, ctx *gui.Context) {
+	rw.tab_content.header = headers
 }
 
-func (rw *request_widget) Headers() []url_pattern.Attribute {
-	return []url_pattern.Attribute{}
+func (rw *request_widget) Headers() []attr.AttrCheck {
+	return []attr.AttrCheck{}
 }
 
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
@@ -106,9 +107,11 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		switch rw.tab.GetSelectedIndex() {
 		case 0:
-			rw.tab_content.selected_widget = &rw.tab_content.params
+			rw.tab_content.table.SetRows(rw.tab_content.params)
+			rw.tab_content.selected_widget = &rw.tab_content.table
 		case 1:
-			rw.tab_content.selected_widget = &rw.tab_content.header
+			rw.tab_content.table.SetRows(rw.tab_content.header)
+			rw.tab_content.selected_widget = &rw.tab_content.table
 		case 2:
 			rw.tab_content.selected_widget = &rw.tab_content.body
 			rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
