@@ -1,7 +1,8 @@
-package draw_color
-
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2024 The Guigui Authors
+
+package draw_color
+
 import (
 	"fmt"
 	"image/color"
@@ -25,7 +26,7 @@ func EqualColor(c0, c1 color.Color) bool {
 var (
 	blue   = iro.ColorFromSRGB(0x00/255.0, 0x5a/255.0, 0xff/255.0, 1)
 	green  = iro.ColorFromSRGB(0x03/255.0, 0xaf/255.0, 0x7a/255.0, 1)
-	yellow = iro.ColorFromSRGB(0xff/255.0, 0xf1/255.0, 0x00/255.0, 1)
+	orange = iro.ColorFromSRGB(0xf6/255.0, 0xaa/255.0, 0x00/255.0, 1)
 	red    = iro.ColorFromSRGB(0xff/255.0, 0x4b/255.0, 0x00/255.0, 1)
 )
 
@@ -35,38 +36,38 @@ var (
 	gray  = iro.ColorFromOKLch(0.6, 0, 0, 1)
 )
 
-type ColorType int
+type SemanticColor int
 
 const (
-	ColorTypeBase ColorType = iota
-	ColorTypeAccent
-	ColorTypeInfo
-	ColorTypeSuccess
-	ColorTypeWarning
-	ColorTypeDanger
+	SemanticColorBase SemanticColor = iota
+	SemanticColorAccent
+	SemanticColorInfo
+	SemanticColorSuccess
+	SemanticColorWarning
+	SemanticColorDanger
 )
 
-func Color(colorMode ebiten.ColorMode, typ ColorType, lightnessInLightMode float64) color.Color {
-	return Color2(colorMode, typ, lightnessInLightMode, 1-lightnessInLightMode)
+func Color(colorMode ebiten.ColorMode, semanticColor SemanticColor, lightnessInLightMode float64) color.Color {
+	return Color2(colorMode, semanticColor, lightnessInLightMode, 1-lightnessInLightMode)
 }
 
-func Color2(colorMode ebiten.ColorMode, typ ColorType, lightnessInLightMode, lightnessInDarkMode float64) color.Color {
+func Color2(colorMode ebiten.ColorMode, semanticColor SemanticColor, lightnessInLightMode, lightnessInDarkMode float64) color.Color {
 	var base iro.Color
-	switch typ {
-	case ColorTypeBase:
+	switch semanticColor {
+	case SemanticColorBase:
 		base = gray
-	case ColorTypeAccent:
+	case SemanticColorAccent:
 		base = blue
-	case ColorTypeInfo:
+	case SemanticColorInfo:
 		base = blue
-	case ColorTypeSuccess:
+	case SemanticColorSuccess:
 		base = green
-	case ColorTypeWarning:
-		base = yellow
-	case ColorTypeDanger:
+	case SemanticColorWarning:
+		base = orange
+	case SemanticColorDanger:
 		base = red
 	default:
-		panic(fmt.Sprintf("draw: invalid color type: %d", typ))
+		panic(fmt.Sprintf("draw: invalid color type: %d", semanticColor))
 	}
 	switch colorMode {
 	case ebiten.ColorModeLight:
