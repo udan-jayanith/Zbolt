@@ -18,7 +18,7 @@ type HTTP_Widget struct {
 	gui.DefaultWidget
 
 	request_widget  request_widget
-	vr CommonWidgets.VerticalLine
+	vr              CommonWidgets.VerticalLine
 	response_widget response_widget
 
 	popup_widget *widget.Popup
@@ -46,12 +46,16 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	data, ok := req.Data().(*def.HTTP_Data)
 	if !ok {
 		panic("Invalid data type")
+	} else if data == brp.data {
+		return
 	}
-	brp.data = data
 
-	brp.response_widget.SetHeaders(data.Headers)
+	brp.data = data
+	brp.request_widget.SetHeaders(data.Headers)
+	brp.request_widget.SetParameters(data.Parameters)
 
 	temp := data.ResponseData()
+	brp.response_widget.SetHeaders(temp.Headers)
 	brp.response_widget.SetResponseBody(&temp.Body)
 }
 
@@ -61,13 +65,19 @@ func (brp *HTTP_Widget) update() {
 	brp.response_widget.OnAutowrapToggle(func(ctx *gui.Context, value bool) {
 		d.ResponseConfig.AutoWrap = value
 	})
-	
+
 	brp.response_widget.SetFormat(d.ResponseConfig.Formate)
 	brp.response_widget.OnFormatToggle(func(ctx *gui.Context, value bool) {
 		d.ResponseConfig.Formate = value
 	})
-	
+
 	brp.response_widget.SetResponseData(brp.data.ResponseData())
+}
+
+// sync syncs input data to data
+func (brp *HTTP_Widget) sync() {
+	brp.data.Headers = brp.request_widget.Headers()
+	brp.data.Parameters = brp.request_widget.Parameters()
 }
 
 func (brp *HTTP_Widget) handle_popup() {
@@ -107,6 +117,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	brp.update()
+	brp.sync() // TODO: only run sync every second
 	brp.handle_popup()
 
 	adder.AddWidget(&brp.request_widget)

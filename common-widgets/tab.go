@@ -335,6 +335,10 @@ func (tab *Tab[T]) GetSelectedIndex() int {
 }
 
 func (tab *Tab[T]) GetSelectedTab() (index int, value T) {
+	if len(tab.tab.tab_items) == 0 {
+		var t T
+		return 0, t 
+	}
 	return tab.tab.selected_item_index, tab.tab.tab_items[tab.tab.selected_item_index].tab_item.Value
 }
 

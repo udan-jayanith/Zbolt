@@ -54,20 +54,37 @@ func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string
 	rw.on_input_bar_value_change = fn
 }
 
-func (rw *request_widget) SetParameters(parameters []attr.AttrCheck, ctx *gui.Context) {
+func (rw *request_widget) SetParameters(parameters []attr.AttrCheck) {
+	_, selected_tab_value := rw.tab.GetSelectedTab()
+	if selected_tab_value == "parameters" {
+		rw.tab_content.table.SetRowsCheck(parameters)
+	}
+
 	rw.tab_content.params = parameters
 }
 
 func (rw *request_widget) Parameters() []attr.AttrCheck {
-	return []attr.AttrCheck{}
+	_, selected_tab_value := rw.tab.GetSelectedTab()
+	if selected_tab_value == "parameters" {
+		rw.tab_content.params = rw.tab_content.table.RowsCheck()
+	}
+	return rw.tab_content.params
 }
 
-func (rw *request_widget) SetHeaders(headers []attr.AttrCheck, ctx *gui.Context) {
+func (rw *request_widget) SetHeaders(headers []attr.AttrCheck) {
+	_, selected_tab_value := rw.tab.GetSelectedTab()
+	if selected_tab_value == "headers" {
+		rw.tab_content.table.SetRowsCheck(headers)
+	}
 	rw.tab_content.header = headers
 }
 
 func (rw *request_widget) Headers() []attr.AttrCheck {
-	return []attr.AttrCheck{}
+	_, selected_tab_value := rw.tab.GetSelectedTab()
+	if selected_tab_value == "headers" {
+		rw.tab_content.header = rw.tab_content.table.RowsCheck()
+	}
+	return rw.tab_content.header
 }
 
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {

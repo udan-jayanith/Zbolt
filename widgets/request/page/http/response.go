@@ -39,6 +39,7 @@ func (rw *response_widget) SetFormat(format bool) {
 	rw.tab_content.response_body.SetFormat(format)
 }
 
+// This sets http response status, http version, response time and response size.
 func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
 	res_status := fmt.Sprintf("%v %s", res_data.Status_code, http.StatusText(res_data.Status_code))
 	rw.header_widget.status.SetValue(res_status)

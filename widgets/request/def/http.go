@@ -41,6 +41,7 @@ type HTTP_Data struct {
 		Formate  bool `json:"formate"`
 	} `json:"response-config"`
 
+	selected_request_tab string
 	response_data HTTP_Response_Data
 }
 
