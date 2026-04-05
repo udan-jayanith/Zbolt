@@ -584,15 +584,6 @@ func (t *Text) SetMultiline(multiline bool) {
 	guigui.RequestRebuild(t)
 }
 
-func (t *Text) SetAutoWrap(autoWrap bool) {
-	if t.autoWrap == autoWrap {
-		return
-	}
-
-	t.autoWrap = autoWrap
-	guigui.RequestRebuild(t)
-}
-
 // SetCursorBlinking sets whether the cursor blinks.
 // The default value is true.
 func (t *Text) SetCursorBlinking(cursorBlinking bool) {
