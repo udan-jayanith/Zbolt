@@ -80,7 +80,7 @@ type Sidebar[T comparable] struct {
 	gui.DefaultWidget
 
 	options struct {
-		search_icon *ebiten.Image
+		search_icon   *ebiten.Image
 		search_widget widget.TextInput
 		add           struct {
 			create_request_button, create_folder_button, variable_button widget.Button
@@ -138,7 +138,7 @@ func (sd *Sidebar[T]) OnItemClicked(fn func(item T)) {
 	sd.list.on_item_clicked = fn
 }
 
-func (sd *Sidebar[T]) OnVariableClicked(fn func(ctx *gui.Context)){
+func (sd *Sidebar[T]) OnVariableClicked(fn func(ctx *gui.Context)) {
 	sd.options.add.on_variable_clicked = fn
 }
 
