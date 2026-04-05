@@ -1,8 +1,8 @@
 package def
 
 import (
-	attr "API-Client/widgets/request"
-	url_pattern "API-Client/widgets/request/url-pattern"
+	attr "github.com/udan-jayanith/Zbolt/widgets/request"
+	url_pattern "github.com/udan-jayanith/Zbolt/widgets/request/url-pattern"
 	"net/url"
 	"os"
 	"strings"

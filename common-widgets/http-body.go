@@ -1,7 +1,7 @@
 package CommonWidgets
 
 import (
-	"API-Client/widgets/request/def"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
 	"image"
 	"strings"
 

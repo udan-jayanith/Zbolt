@@ -4,7 +4,7 @@
 package text_test
 
 import (
-	"API-Client/common-widgets/internal/text"
+	"github.com/udan-jayanith/Zbolt/common-widgets/internal/text"
 	"fmt"
 	"testing"
 )

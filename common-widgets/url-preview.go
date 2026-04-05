@@ -1,7 +1,7 @@
 package CommonWidgets
 
 import (
-	"API-Client/icons"
+	"github.com/udan-jayanith/Zbolt/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"

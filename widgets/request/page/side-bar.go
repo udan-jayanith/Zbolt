@@ -1,8 +1,8 @@
 package request_page
 
 import (
-	CommonWidgets "API-Client/common-widgets"
-	"API-Client/icons"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	"github.com/udan-jayanith/Zbolt/icons"
 	"fmt"
 	"image"
 

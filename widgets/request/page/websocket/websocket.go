@@ -1,8 +1,8 @@
 package websocket_widget
 
 import (
-	"API-Client/basic"
-	"API-Client/widgets/request/def"
+	"github.com/udan-jayanith/Zbolt/basic"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"

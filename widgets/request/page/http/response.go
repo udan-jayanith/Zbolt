@@ -1,9 +1,9 @@
 package http_widget
 
 import (
-	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
-	"API-Client/widgets/request/def"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	attr "github.com/udan-jayanith/Zbolt/widgets/request"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
 	"fmt"
 	"net/http"
 	"strconv"

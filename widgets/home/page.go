@@ -1,8 +1,8 @@
 package home
 
 import (
-	"API-Client/basic"
-	"API-Client/icons"
+	"github.com/udan-jayanith/Zbolt/basic"
+	"github.com/udan-jayanith/Zbolt/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"

@@ -1,12 +1,12 @@
 package request_page
 
 import (
-	"API-Client/basic"
-	CommonWidgets "API-Client/common-widgets"
-	"API-Client/icons"
-	"API-Client/widgets/request/def"
-	http_widget "API-Client/widgets/request/page/http"
-	websocket_widget "API-Client/widgets/request/page/websocket"
+	"github.com/udan-jayanith/Zbolt/basic"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	"github.com/udan-jayanith/Zbolt/icons"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
+	http_widget "github.com/udan-jayanith/Zbolt/widgets/request/page/http"
+	websocket_widget "github.com/udan-jayanith/Zbolt/widgets/request/page/websocket"
 	"fmt"
 
 	"image"

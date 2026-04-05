@@ -1,7 +1,7 @@
 package url_pattern_test
 
 import (
-	url_pattern "API-Client/widgets/request/url-pattern"
+	url_pattern "github.com/udan-jayanith/Zbolt/widgets/request/url-pattern"
 	"testing"
 )
 

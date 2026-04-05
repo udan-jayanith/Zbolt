@@ -2,7 +2,7 @@ package def_test
 
 import (
 	"testing"
-	"API-Client/widgets/request/def"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
 )
 
 var content_type_testcases = []struct {

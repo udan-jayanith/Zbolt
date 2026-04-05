@@ -1,7 +1,7 @@
 package text
 
 import (
-	"API-Client/common-widgets/internal/text/internal/textutil"
+	"github.com/udan-jayanith/Zbolt/common-widgets/internal/text/internal/textutil"
 	"bytes"
 	"io"
 	"math"

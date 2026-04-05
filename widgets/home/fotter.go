@@ -1,8 +1,8 @@
 package home
 
 import (
-	"API-Client/basic"
-	"API-Client/icons"
+	"github.com/udan-jayanith/Zbolt/basic"
+	"github.com/udan-jayanith/Zbolt/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -43,7 +43,7 @@ func (fw *footer_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	fw.repo_link.IconName = "github"
 	fw.repo_link.Point = icon_point
 	fw.repo_link.OnClick(func() {
-		browser.OpenURL("https://github.com/udan-jayanith/API-Client")
+		browser.OpenURL("https://github.com/udan-jayanith/github.com/udan-jayanith/Zbolt")
 	})
 	adder.AddWidget(&fw.repo_link)
 

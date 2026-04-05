@@ -13,9 +13,9 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	messages "API-Client/massages"
-	home "API-Client/widgets/home"
-	request_page "API-Client/widgets/request/page"
+	messages "github.com/udan-jayanith/Zbolt/massages"
+	home "github.com/udan-jayanith/Zbolt/widgets/home"
+	request_page "github.com/udan-jayanith/Zbolt/widgets/request/page"
 )
 
 type Root struct {

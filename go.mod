@@ -1,4 +1,4 @@
-module API-Client
+module github.com/udan-jayanith/Zbolt
 
 go 1.26.0
 

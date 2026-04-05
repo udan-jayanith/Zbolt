@@ -1,10 +1,10 @@
 package http_widget
 
 import (
-	"API-Client/basic"
-	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
-	url_pattern "API-Client/widgets/request/url-pattern"
+	"github.com/udan-jayanith/Zbolt/basic"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	attr "github.com/udan-jayanith/Zbolt/widgets/request"
+	url_pattern "github.com/udan-jayanith/Zbolt/widgets/request/url-pattern"
 	"image"
 	"net/url"
 	"time"

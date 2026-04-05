@@ -17,10 +17,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/text/language"
 
-	draw "API-Client/common-widgets/internal/draw"
-	"API-Client/common-widgets/internal/text/internal/textutil"
+	draw "github.com/udan-jayanith/Zbolt/common-widgets/internal/draw"
+	"github.com/udan-jayanith/Zbolt/common-widgets/internal/text/internal/textutil"
 
-	"API-Client/common-widgets/internal/text/internal/clipboard"
+	"github.com/udan-jayanith/Zbolt/common-widgets/internal/text/internal/clipboard"
 
 	"github.com/guigui-gui/guigui"
 	"github.com/guigui-gui/guigui/basicwidget"

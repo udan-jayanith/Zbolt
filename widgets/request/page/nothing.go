@@ -1,7 +1,7 @@
 package request_page
 
 import (
-	"API-Client/icons"
+	"github.com/udan-jayanith/Zbolt/icons"
 
 	"image"
 

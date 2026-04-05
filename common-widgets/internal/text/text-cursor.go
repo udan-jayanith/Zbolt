@@ -1,9 +1,9 @@
 package text
 
 import (
-	"API-Client/common-widgets/internal/text/internal/textutil"
+	"github.com/udan-jayanith/Zbolt/common-widgets/internal/text/internal/textutil"
 
-	draw "API-Client/common-widgets/internal/draw"
+	draw "github.com/udan-jayanith/Zbolt/common-widgets/internal/draw"
 
 	"github.com/guigui-gui/guigui"
 	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"

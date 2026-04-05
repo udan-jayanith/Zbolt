@@ -1,8 +1,8 @@
 package websocket_widget
 
 import (
-	"API-Client/basic"
-	CommonWidgets "API-Client/common-widgets"
+	"github.com/udan-jayanith/Zbolt/basic"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"

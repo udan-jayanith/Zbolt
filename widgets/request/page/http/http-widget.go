@@ -1,10 +1,10 @@
 package http_widget
 
 import (
-	CommonWidgets "API-Client/common-widgets"
-	messages "API-Client/massages"
-	attr "API-Client/widgets/request"
-	"API-Client/widgets/request/def"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	messages "github.com/udan-jayanith/Zbolt/massages"
+	attr "github.com/udan-jayanith/Zbolt/widgets/request"
+	"github.com/udan-jayanith/Zbolt/widgets/request/def"
 	"image"
 	"net/url"
 

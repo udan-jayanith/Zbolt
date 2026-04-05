@@ -1,9 +1,9 @@
 package request_page
 
 import (
-	"API-Client/basic"
-	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
+	"github.com/udan-jayanith/Zbolt/basic"
+	CommonWidgets "github.com/udan-jayanith/Zbolt/common-widgets"
+	attr "github.com/udan-jayanith/Zbolt/widgets/request"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"

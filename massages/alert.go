@@ -1,7 +1,7 @@
 package messages
 
 import (
-	"API-Client/basic"
+	"github.com/udan-jayanith/Zbolt/basic"
 	"image"
 
 	queue "github.com/golang-ds/queue/slicequeue"

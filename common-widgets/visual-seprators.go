@@ -1,10 +1,10 @@
 package CommonWidgets
 
 import (
-	"API-Client/basic"
+	"github.com/udan-jayanith/Zbolt/basic"
 	"image"
 
-	draw_color "API-Client/common-widgets/internal/draw"
+	draw_color "github.com/udan-jayanith/Zbolt/common-widgets/internal/draw"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
