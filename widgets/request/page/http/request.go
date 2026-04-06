@@ -13,8 +13,9 @@ import (
 
 type request_widget struct {
 	gui.DefaultWidget
+	user_url_input            bool
 	input_bar_widget          request_input_bar_widget
-	on_input_bar_value_change func(context *gui.Context, text string, committed bool)
+	on_input_bar_value_change func(ctx *gui.Context, text string, committed bool, by_user bool)
 
 	url_preview CommonWidgets.URLPreview
 
@@ -50,7 +51,12 @@ func (rw *request_widget) URL() *url.URL {
 	return u
 }
 
-func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string, committed bool)) {
+func (rw *request_widget) SetURL_InputValue(url string) {
+	rw.user_url_input = false
+	rw.input_bar_widget.input_widget.SetValue(url)
+}
+
+func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string, committed bool, by_user bool)) {
 	rw.on_input_bar_value_change = fn
 }
 
@@ -111,9 +117,14 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		//}
 	})
 
-	if rw.on_input_bar_value_change != nil {
-		rw.input_bar_widget.input_widget.OnValueChanged(rw.on_input_bar_value_change)
-	}
+	rw.input_bar_widget.input_widget.OnValueChanged(func(ctx *gui.Context, text string, committed bool) {
+		if rw.on_input_bar_value_change == nil {
+			return
+		}
+
+		rw.on_input_bar_value_change(ctx, text, committed, rw.user_url_input)
+		rw.user_url_input = true
+	})
 	adder.AddWidget(&rw.input_bar_widget)
 
 	adder.AddWidget(&rw.url_preview)

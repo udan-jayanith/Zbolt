@@ -3,7 +3,6 @@ package http_widget
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
@@ -204,12 +203,7 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	w.path.SetValue(u.Path)
 
 	pattern, _ := url_pattern.ParsePattern(u.Path)
-	for _, att := range pattern.List {
-		w.query.PushRow(attr.AttrCheck{
-			Key:   att.Key,
-			Value: att.Value,
-		})
-	}
+	w.query.SetRows(pattern.List)
 }
 
 type url_panel_widget_scrollable struct {

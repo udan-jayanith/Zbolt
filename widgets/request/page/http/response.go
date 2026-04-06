@@ -65,7 +65,8 @@ func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {
 		})
 	}
 
-	rw.tab_content.response_header.SetItems(header_items)}
+	rw.tab_content.response_header.SetItems(header_items)
+}
 
 func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
 	if body.File == nil {

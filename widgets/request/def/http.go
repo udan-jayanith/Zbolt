@@ -33,6 +33,18 @@ func (u *URL) IsPattern() bool {
 	return len(u.Path.Pattern.Attributes) > 0
 }
 
+func (u *URL)  GetPath() string {
+	if u.Path.RawPath != "" {
+		return u.Path.RawPath
+	}
+
+	pattern, _ := url_pattern.ParsePattern(u.Path.Pattern.Pattern)
+	for _, attr := range u.Path.Pattern.Attributes {
+		pattern.Set(attr.Key, attr.Value)
+	}
+	return pattern.Path()
+}
+
 type HTTP_Data struct {
 	Method string `json:"method"` // HTTP method
 
@@ -57,18 +69,6 @@ func (data *HTTP_Data) SetSelectedRequestTab(index int) {
 
 func (data *HTTP_Data) SelectedRequestTab() int {
 	return data.selected_request_tab
-}
-
-func (data *HTTP_Data) path() string {
-	if data.URL.Path.RawPath != "" {
-		return data.URL.Path.RawPath
-	}
-
-	pattern, _ := url_pattern.ParsePattern(data.URL.Path.Pattern.Pattern)
-	for _, attr := range data.URL.Path.Pattern.Attributes {
-		pattern.Set(attr.Key, attr.Value)
-	}
-	return pattern.Path()
 }
 
 /*
@@ -101,7 +101,7 @@ func (data *HTTP_Data) EncodedParameters() string {
 
 func (data *HTTP_Data) GetUrl() *url.URL {
 	u, _ := url.Parse(data.URL.BaseURL)
-	u.RawPath = data.path()
+	u.RawPath = data.URL.GetPath()
 	u.RawQuery = data.EncodedParameters()
 	return u
 }

@@ -60,7 +60,13 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		data.Method = "Get"
 	}
 	brp.request_widget.SetMethod(data.Method)
-	// TODO: Set url
+
+	u, err := url.Parse(brp.data.URL.BaseURL)
+	u.Path = data.URL.GetPath()
+	if err != nil {
+		messages.Alerts.Push(err.Error())
+	}
+	brp.request_widget.SetURL_InputValue(u.String())
 
 	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
 	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
@@ -82,7 +88,12 @@ func (brp *HTTP_Widget) update() {
 
 	brp.response_widget.SetResponseData(brp.data.ResponseData())
 
-	brp.request_widget.OnURLInputChange(func(ctx *gui.Context, text string, committed bool) {
+	brp.request_widget.OnURLInputChange(func(ctx *gui.Context, text string, committed bool, by_user bool) {
+		if !by_user {
+			return
+		}
+		// TODO: ask user to clear before cleaning the pattern
+
 		brp.data.URL.Path.Pattern.Pattern = ""
 		brp.data.URL.Path.Pattern.Attributes = []attr.Attribute{}
 		u, err := url.Parse(text)
@@ -92,7 +103,7 @@ func (brp *HTTP_Widget) update() {
 
 		brp.data.URL.Path.RawPath = u.Path
 		u.Path = ""
-		//TODO:handle raw query
+		//TODO:handle raw query if commited
 		u.RawQuery = ""
 		brp.data.URL.BaseURL = u.String()
 	})
@@ -123,21 +134,14 @@ func (brp *HTTP_Widget) handle_popup() {
 		url_panel := get_url_panel(ctx)
 		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
 
-		var u *url.URL
-		var err error
-		if brp.data.URL.IsPattern() {
-			u, err = url.Parse(brp.data.URL.BaseURL)
-			u.Path = brp.data.URL.Path.Pattern.Pattern
-		} else {
-			u, err = url.Parse(brp.data.URL.BaseURL)
-			u.Path = brp.data.URL.Path.RawPath
-		}
+		u, err := url.Parse(brp.data.URL.BaseURL)
 		if err != nil {
 			messages.Alerts.Push(err.Error())
 		}
-
+		u.Path = brp.data.URL.GetPath()
 		url_panel.SetURL(u, ctx)
 		url_panel.content.query.SetRows(brp.data.URL.Path.Pattern.Attributes)
+		
 		brp.popup_widget.SetContent(url_panel)
 		brp.popup_widget.SetOpen(true)
 	})
@@ -146,7 +150,7 @@ func (brp *HTTP_Widget) handle_popup() {
 		url_panel_content := get_url_panel(ctx).content
 
 		u, is_pattern := url_panel_content.generate_url()
-		brp.request_widget.input_bar_widget.input_widget.SetValue(u.String())
+		brp.request_widget.SetURL_InputValue(u.String())
 		path := u.Path
 		u.Path = ""
 		brp.data.URL.BaseURL = u.String()
