@@ -103,7 +103,7 @@ func (brp *HTTP_Widget) update() {
 
 		brp.data.URL.Path.RawPath = u.Path
 		u.Path = ""
-		//TODO:handle raw query if commited
+		//TODO:handle raw query if committed
 		u.RawQuery = ""
 		brp.data.URL.BaseURL = u.String()
 	})
@@ -138,10 +138,14 @@ func (brp *HTTP_Widget) handle_popup() {
 		if err != nil {
 			messages.Alerts.Push(err.Error())
 		}
-		u.Path = brp.data.URL.GetPath()
+		if brp.data.URL.IsPattern() {
+			u.Path = brp.data.URL.Path.Pattern.Pattern
+		} else {
+			u.Path = brp.data.URL.Path.RawPath
+		}
 		url_panel.SetURL(u, ctx)
 		url_panel.content.query.SetRows(brp.data.URL.Path.Pattern.Attributes)
-		
+
 		brp.popup_widget.SetContent(url_panel)
 		brp.popup_widget.SetOpen(true)
 	})

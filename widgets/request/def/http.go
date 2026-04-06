@@ -33,6 +33,7 @@ func (u *URL) IsPattern() bool {
 	return len(u.Path.Pattern.Attributes) > 0
 }
 
+// GetPath returns the encoded path if the path is a pattern
 func (u *URL)  GetPath() string {
 	if u.Path.RawPath != "" {
 		return u.Path.RawPath

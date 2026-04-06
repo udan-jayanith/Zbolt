@@ -59,7 +59,7 @@ type url_panel_widget struct {
 }
 
 // generate_url returns the url from the url panel. It only include up to path of the URL
-// and also returns whether the url path is a pattern or not 
+// and also returns whether the url path is a pattern or not
 func (w *url_panel_widget) generate_url() (*url.URL, bool) {
 	pattern, _ := url_pattern.ParsePattern(w.path.Value())
 	list := w.query.Rows()
