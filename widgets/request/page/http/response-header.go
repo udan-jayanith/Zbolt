@@ -16,6 +16,7 @@ type response_header_widget struct {
 }
 
 func (rhw *response_header_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	// TODO: solve this
 	rhw.status.SetTabular(true)
 	rhw.status.SetValue("200 Ok")
 	adder.AddWidget(&rhw.status)
