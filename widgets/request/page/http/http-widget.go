@@ -106,10 +106,14 @@ func (brp *HTTP_Widget) handle_popup() {
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
 		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
+		
+		// TODO: only parse the url from the url input if there is no pattern
+		// otherwise use the pattern 
 		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value()) // Gets the url from the url input bar 
 		if err != nil {
 			messages.Alerts.Push(err.Error())
 		}
+		
 		url_panel.SetURL(u, ctx)
 		brp.popup_widget.SetContent(url_panel)
 		brp.popup_widget.SetOpen(true)
