@@ -61,6 +61,9 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	}
 	brp.request_widget.SetMethod(data.Method)
 
+	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
+	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
+	
 	temp := data.ResponseData()
 	brp.response_widget.SetHeaders(temp.Headers)
 	brp.response_widget.SetResponseBody(&temp.Body)
@@ -68,12 +71,10 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 
 func (brp *HTTP_Widget) update() {
 	d := brp.data
-	brp.response_widget.SetAutowrap(d.ResponseConfig.AutoWrap)
 	brp.response_widget.OnAutowrapToggle(func(ctx *gui.Context, value bool) {
 		d.ResponseConfig.AutoWrap = value
 	})
 
-	brp.response_widget.SetFormat(d.ResponseConfig.Formate)
 	brp.response_widget.OnFormatToggle(func(ctx *gui.Context, value bool) {
 		d.ResponseConfig.Formate = value
 	})
@@ -84,6 +85,7 @@ func (brp *HTTP_Widget) update() {
 		return
 	}
 	brp.t = time.Now()
+	brp.SyncData()
 }
 
 // TODO: run SyncData before switching tabs
