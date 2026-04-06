@@ -7,6 +7,7 @@ import (
 	"API-Client/widgets/request/def"
 	"image"
 	"net/url"
+	"time"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -26,6 +27,7 @@ type HTTP_Widget struct {
 
 	req  *def.Request
 	data *def.HTTP_Data
+	t    time.Time
 }
 
 func (brp *HTTP_Widget) RequestType() def.RequestType {
@@ -53,6 +55,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.data = data
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
+	brp.request_widget.SetTab(data.SelectedRequestTab())
 
 	temp := data.ResponseData()
 	brp.response_widget.SetHeaders(temp.Headers)
@@ -72,12 +75,15 @@ func (brp *HTTP_Widget) update() {
 	})
 
 	brp.response_widget.SetResponseData(brp.data.ResponseData())
-}
 
-// sync syncs input data to data
-func (brp *HTTP_Widget) sync() {
+	if time.Now().Sub(brp.t).Seconds() < 1 {
+		return
+	}
+	brp.t = time.Now()
+
 	brp.data.Headers = brp.request_widget.Headers()
 	brp.data.Parameters = brp.request_widget.Parameters()
+	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
 }
 
 func (brp *HTTP_Widget) handle_popup() {
@@ -117,7 +123,6 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	brp.update()
-	brp.sync() // TODO: only run sync every second
 	brp.handle_popup()
 
 	adder.AddWidget(&brp.request_widget)

@@ -95,6 +95,15 @@ func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 	// If file exists send it's content with the request. This is not a priority for now.
 }
 
+func (rw *request_widget) SelectedTab() int {
+	i, _ := rw.tab.GetSelectedTab()
+	return i
+}
+
+func (rw *request_widget) SetTab(index int) {
+	rw.tab.SelectTabItemByIndex(index)
+}
+
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rw.input_bar_widget.OnRequest(func(ctx *gui.Context, url, method string) {
 		//http.Request{

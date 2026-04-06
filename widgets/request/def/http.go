@@ -41,8 +41,16 @@ type HTTP_Data struct {
 		Formate  bool `json:"formate"`
 	} `json:"response-config"`
 
-	selected_request_tab string
-	response_data HTTP_Response_Data
+	selected_request_tab int
+	response_data        HTTP_Response_Data
+}
+
+func (data *HTTP_Data) SetSelectedRequestTab(index int) {
+	data.selected_request_tab = index
+}
+
+func (data *HTTP_Data) SelectedRequestTab() int {
+	return data.selected_request_tab
 }
 
 func (data *HTTP_Data) path() string {
@@ -122,4 +130,6 @@ type HTTP_Response_Data struct {
 	}
 	Headers []attr.AttrCheck
 	Body    HTTP_Response_Body
+
+	selected_response_tab int
 }
