@@ -150,15 +150,17 @@ type HTTP_Response_Body struct {
 	Content     string
 }
 
+type Version struct {
+	Major, Minor int
+}
+
 type HTTP_Response_Data struct {
 	Status_code  int
 	ResponseTime time.Duration
 	ResponseSize int // In bytes
-	Version      struct {
-		Major, Minor int
-	}
-	Headers []attr.AttrCheck
-	Body    HTTP_Response_Body
+	Version      Version
+	Headers      []attr.AttrCheck
+	Body         HTTP_Response_Body
 
 	selected_response_tab int
 }

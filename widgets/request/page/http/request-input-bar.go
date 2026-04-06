@@ -95,6 +95,7 @@ func (rib *request_input_bar_widget) set_request_button_value(value string) {
 }
 
 func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	rib.init_methods()
 	rib.method_select_widget.SetItemsByStrings(rib.method_list)
 	rib.method_select_widget.OnItemSelected(func(_ *gui.Context, index int) {
 		rib.selected_method_index = index

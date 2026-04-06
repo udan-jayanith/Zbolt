@@ -6,7 +6,7 @@ import (
 	"API-Client/widgets/request/def"
 	"fmt"
 	"net/http"
-	"strconv"
+	"time"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -39,14 +39,19 @@ func (rw *response_widget) SetFormat(format bool) {
 	rw.tab_content.response_body.SetFormat(format)
 }
 
-// This sets http response status, http version, response time and response size.
-func (rw *response_widget) SetResponseData(res_data *def.HTTP_Response_Data) {
-	res_status := fmt.Sprintf("%v %s", res_data.Status_code, http.StatusText(res_data.Status_code))
-	rw.header_widget.status.SetValue(res_status)
+// SetStatus sets the http status code
+func (rw *response_widget) SetStatus(status_code int) {
+	status := fmt.Sprintf("%v %s", status_code, http.StatusText(status_code))
+	rw.header_widget.status.SetValue(status)
+}
 
-	rw.header_widget.response_time.SetValue(res_data.ResponseTime.String())
-	rw.header_widget.size.SetValue(strconv.Itoa(res_data.ResponseSize))
-	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", res_data.Version.Major, res_data.Version.Minor))
+// SetResponseTime sets the http response time
+func (rw *response_widget) SetResponseTime(response_time time.Duration) {
+	rw.header_widget.response_time.SetValue(response_time.String())
+}
+
+func (rw *response_widget) SetHTTPVersion(version def.Version) {
+	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", version.Major, version.Minor))
 }
 
 func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {
@@ -76,6 +81,22 @@ func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
 
 	// If file is not nil and the content type is jpg, png or a text format show it in the response body widget.
 	// Other wise show not unable to open and close the file. User should be able to click the open with button to view it.
+}
+
+func (rw *response_widget) SetSelectedTab(index int) {
+	rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
+		{
+			Text: "Body",
+		},
+		{
+			Text: "Header",
+		},
+	})
+	rw.tab.SelectTabItemByIndex(index)
+}
+
+func (rw *response_widget) SelectedTab() int {
+	return rw.tab.GetSelectedIndex()
 }
 
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
