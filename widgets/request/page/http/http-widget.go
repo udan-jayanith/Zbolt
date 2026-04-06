@@ -63,7 +63,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 
 	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
 	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
-	
+
 	temp := data.ResponseData()
 	brp.response_widget.SetHeaders(temp.Headers)
 	brp.response_widget.SetResponseBody(&temp.Body)
@@ -85,6 +85,8 @@ func (brp *HTTP_Widget) update() {
 		return
 	}
 	brp.t = time.Now()
+
+	//TODO: update url preview every second
 	brp.SyncData()
 }
 
@@ -104,7 +106,7 @@ func (brp *HTTP_Widget) handle_popup() {
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
 		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
-		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value())
+		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value()) // Gets the url from the url input bar 
 		if err != nil {
 			messages.Alerts.Push(err.Error())
 		}
@@ -114,17 +116,24 @@ func (brp *HTTP_Widget) handle_popup() {
 	})
 
 	brp.popup_widget.OnClose(func(ctx *gui.Context, reason widget.PopupCloseReason) {
-		u1 := get_url_panel(ctx).content.generate_url()
-		brp.request_widget.input_bar_widget.input_widget.SetValue(u1.String())
+		url_panel_content := get_url_panel(ctx).content
 
-		u2, err := url.Parse(brp.request_widget.url_preview.URL())
-		if err != nil {
-			messages.Alerts.Push(err.Error())
+		u, is_pattern := url_panel_content.generate_url()
+		brp.request_widget.input_bar_widget.input_widget.SetValue(u.String())
+		path := u.Path
+		u.Path = ""
+		brp.data.URL.BaseURL = u.String()
+		if is_pattern {
+			brp.data.URL.Path.RawPath = ""
+			brp.data.URL.Path.Pattern.Pattern = url_panel_content.path.Value()
+			brp.data.URL.Path.Pattern.Attributes = url_panel_content.query.Rows()
+		} else {
+			brp.data.URL.Path.Pattern.Pattern = ""
+			brp.data.URL.Path.Pattern.Attributes = []attr.Attribute{}
+			brp.data.URL.Path.RawPath = path
 		}
-		u1.RawQuery = u2.RawQuery
 
-		brp.request_widget.url_preview.SetURL(u1.String())
-		get_url_panel(ctx).content.query.SetRows([]attr.Attribute{})
+		url_panel_content.query.SetRows([]attr.Attribute{})
 		brp.popup_widget.OnClose(func(_ *gui.Context, _ widget.PopupCloseReason) {})
 	})
 }

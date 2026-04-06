@@ -62,6 +62,7 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	rib.method_select_widget.SelectItemByIndex(rib.selected_method_index)
 	adder.AddWidget(&rib.method_select_widget)
 
+	// Set input bar editable or not based on url pattern
 	rib.input_widget.SetEditable(true)
 	adder.AddWidget(&rib.input_widget)
 

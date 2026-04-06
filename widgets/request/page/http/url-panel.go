@@ -59,7 +59,9 @@ type url_panel_widget struct {
 	t time.Time
 }
 
-func (w *url_panel_widget) generate_url() *url.URL {
+// generate_url returns the url from the url panel. It only include up to path of the URL
+// and also returns whether the url path is a pattern or not 
+func (w *url_panel_widget) generate_url() (*url.URL, bool) {
 	pattern, _ := url_pattern.ParsePattern(w.path.Value())
 	list := w.query.Rows()
 
@@ -72,7 +74,7 @@ func (w *url_panel_widget) generate_url() *url.URL {
 		Host:   w.host.Value(),
 		Path:   pattern.Path(),
 	}
-	return u
+	return u, len(pattern.List) > 0
 }
 
 func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -126,7 +128,7 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	adder.AddWidget(&w.url_preview_header)
 
 	if time.Now().Sub(w.t).Seconds() > 2 {
-		u := w.generate_url()
+		u, _ := w.generate_url()
 		w.url_preview.SetURL(u.String())
 
 		w.t = time.Now()
@@ -204,7 +206,7 @@ func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
 	pattern, _ := url_pattern.ParsePattern(u.Path)
 	for _, att := range pattern.List {
 		w.query.PushRow(attr.AttrCheck{
-			Key: att.Key,
+			Key:   att.Key,
 			Value: att.Value,
 		})
 	}
