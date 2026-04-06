@@ -140,11 +140,11 @@ func (brp *HTTP_Widget) handle_popup() {
 		}
 		if brp.data.URL.IsPattern() {
 			u.Path = brp.data.URL.Path.Pattern.Pattern
+			url_panel.content.query.SetRows(brp.data.URL.Path.Pattern.Attributes)
 		} else {
 			u.Path = brp.data.URL.Path.RawPath
 		}
 		url_panel.SetURL(u, ctx)
-		url_panel.content.query.SetRows(brp.data.URL.Path.Pattern.Attributes)
 
 		brp.popup_widget.SetContent(url_panel)
 		brp.popup_widget.SetOpen(true)
