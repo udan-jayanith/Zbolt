@@ -122,9 +122,9 @@ func (data *HTTP_Data) EncodedParameters() string {
 }
 
 // GetUrl return the full url.
-func (data *HTTP_Data) GetUrl() *url.URL {
+func (data *HTTP_Data) FullURL() *url.URL {
 	u, _ := url.Parse(data.URL.BaseURL)
-	u.RawPath = data.URL.GetPath()
+	u.RawPath = data.URL.EncodedPath()
 	u.RawQuery = data.EncodedParameters()
 	return u
 }
