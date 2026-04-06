@@ -11,34 +11,36 @@ import (
 
 type request_input_bar_widget struct {
 	gui.DefaultWidget
-	
-	method_select_widget widget.Select[string]
-	method_list          []string
+
+	method_select_widget  widget.Select[string]
+	method_list           []string
 	selected_method_index int
-	
-	input_widget         widget.TextInput
-	request_btn_widget   widget.Button
-	open_in_icon         *ebiten.Image
-	open_in              widget.Button
-	on_request           func(ctx *gui.Context, url, method string)
+
+	input_widget       widget.TextInput
+	request_btn_widget widget.Button
+	open_in_icon       *ebiten.Image
+	open_in            widget.Button
+	on_request         func(ctx *gui.Context, url, method string)
 }
 
 func (rib *request_input_bar_widget) SelectMethod(method string) {
-	for i, v := range rib.method_list{
+	rib.init_methods()
+	for i, v := range rib.method_list {
 		if v != method {
 			continue
 		}
-		
+
 		rib.selected_method_index = i
 		break
 	}
 }
 
 func (rib *request_input_bar_widget) Method() string {
+	rib.init_methods()
 	return rib.method_list[rib.selected_method_index]
 }
 
-func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (rib *request_input_bar_widget) init_methods() {
 	if len(rib.method_list) == 0 {
 		rib.method_list = []string{
 			"Get",
@@ -50,6 +52,9 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 			"Head",
 		}
 	}
+}
+
+func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rib.method_select_widget.SetItemsByStrings(rib.method_list)
 	rib.method_select_widget.OnItemSelected(func(_ *gui.Context, index int) {
 		rib.selected_method_index = index

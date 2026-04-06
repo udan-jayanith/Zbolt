@@ -56,6 +56,10 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
 	brp.request_widget.SetTab(data.SelectedRequestTab())
+	if data.Method == "" {
+		data.Method = "Get"
+	}
+	brp.request_widget.SetMethod(data.Method)
 
 	temp := data.ResponseData()
 	brp.response_widget.SetHeaders(temp.Headers)
@@ -80,10 +84,14 @@ func (brp *HTTP_Widget) update() {
 		return
 	}
 	brp.t = time.Now()
+}
 
+// TODO: run SyncData before switching tabs
+func (brp *HTTP_Widget) SyncData() {
 	brp.data.Headers = brp.request_widget.Headers()
 	brp.data.Parameters = brp.request_widget.Parameters()
 	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
+	brp.data.Method = brp.request_widget.Method()
 }
 
 func (brp *HTTP_Widget) handle_popup() {
