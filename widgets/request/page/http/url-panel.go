@@ -127,7 +127,7 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
 
-	if time.Now().Sub(w.t).Seconds() > 2 {
+	if time.Now().Sub(w.t).Seconds() >= 1 {
 		u, _ := w.generate_url()
 		w.url_preview.SetURL(u.String())
 

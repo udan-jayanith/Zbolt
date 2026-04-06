@@ -60,6 +60,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		data.Method = "Get"
 	}
 	brp.request_widget.SetMethod(data.Method)
+	// TODO: Set url
 
 	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
 	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
@@ -80,6 +81,21 @@ func (brp *HTTP_Widget) update() {
 	})
 
 	brp.response_widget.SetResponseData(brp.data.ResponseData())
+
+	brp.request_widget.OnURLInputChange(func(ctx *gui.Context, text string, committed bool) {
+		brp.data.URL.Path.Pattern.Pattern = ""
+		brp.data.URL.Path.Pattern.Attributes = []attr.Attribute{}
+		u, err := url.Parse(text)
+		if err != nil {
+			messages.Alerts.Push(err.Error())
+		}
+
+		brp.data.URL.Path.RawPath = u.Path
+		u.Path = ""
+		//TODO:handle raw query
+		u.RawQuery = ""
+		brp.data.URL.BaseURL = u.String()
+	})
 
 	if time.Now().Sub(brp.t).Seconds() < 1 {
 		return
@@ -106,15 +122,22 @@ func (brp *HTTP_Widget) handle_popup() {
 	brp.request_widget.input_bar_widget.OnOpenIn(func(ctx *gui.Context) {
 		url_panel := get_url_panel(ctx)
 		*brp.popup_size = url_panel.Measure(ctx, gui.Constraints{})
-		
-		// TODO: only parse the url from the url input if there is no pattern
-		// otherwise use the pattern 
-		u, err := url.Parse(brp.request_widget.input_bar_widget.input_widget.Value()) // Gets the url from the url input bar 
+
+		var u *url.URL
+		var err error
+		if brp.data.URL.IsPattern() {
+			u, err = url.Parse(brp.data.URL.BaseURL)
+			u.Path = brp.data.URL.Path.Pattern.Pattern
+		} else {
+			u, err = url.Parse(brp.data.URL.BaseURL)
+			u.Path = brp.data.URL.Path.RawPath
+		}
 		if err != nil {
 			messages.Alerts.Push(err.Error())
 		}
-		
+
 		url_panel.SetURL(u, ctx)
+		url_panel.content.query.SetRows(brp.data.URL.Path.Pattern.Attributes)
 		brp.popup_widget.SetContent(url_panel)
 		brp.popup_widget.SetOpen(true)
 	})

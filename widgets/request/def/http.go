@@ -17,20 +17,26 @@ type HTTP_Request_Body struct {
 	Content     string      `json:"content"`
 }
 
+type URL struct {
+	BaseURL string `json:"base-url"` // Everything before the path.
+
+	Path struct {
+		RawPath string `json:"raw-path"`
+		Pattern struct {
+			Pattern    string           `json:"pattern"`
+			Attributes []attr.Attribute `json:"attributes"`
+		} `json:"pattern"`
+	} `json:"path"` // Both path and pattern can't exists at once.
+}
+
+func (u *URL) IsPattern() bool {
+	return len(u.Path.Pattern.Attributes) > 0
+}
+
 type HTTP_Data struct {
 	Method string `json:"method"` // HTTP method
 
-	URL struct {
-		BaseURL string `json:"base-url"` // Everything before the path.
-
-		Path struct {
-			RawPath string `json:"raw-path"`
-			Pattern struct {
-				Pattern    string           `json:"pattern"`
-				Attributes []attr.Attribute `json:"attributes"`
-			} `json:"pattern"`
-		} `json:"path"` // Both path and pattern can't exists at once.
-	} `json:"url"`
+	URL URL `json:"url"`
 
 	Parameters []attr.AttrCheck  `json:"parameters"`
 	Headers    []attr.AttrCheck  `json:"headers"`
