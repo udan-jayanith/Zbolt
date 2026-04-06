@@ -33,9 +33,9 @@ func (u *URL) IsPattern() bool {
 	return len(u.Path.Pattern.Attributes) > 0
 }
 
-// GetPath returns the encoded path if the path is a pattern
-func (u *URL)  GetPath() string {
-	if u.Path.RawPath != "" {
+// EncodedPath returns the encoded path
+func (u *URL) EncodedPath() string {
+	if !u.IsPattern() {
 		return u.Path.RawPath
 	}
 
@@ -44,6 +44,26 @@ func (u *URL)  GetPath() string {
 		pattern.Set(attr.Key, attr.Value)
 	}
 	return pattern.Path()
+}
+
+// RawPath returns the raw-path if exists otherwise returns the raw-path-pattern without being encoded.
+func (u *URL) RawPath() string {
+	if u.IsPattern() {
+		return u.Path.Pattern.Pattern
+	}
+	return u.Path.RawPath
+}
+
+func (u *URL) SetPattern(pattern string, attributes []attr.Attribute) {
+	u.Path.RawPath = ""
+	u.Path.Pattern.Pattern = pattern
+	u.Path.Pattern.Attributes = attributes
+}
+
+func (u *URL) SetPath(path string) {
+	u.Path.RawPath = ""
+	u.Path.Pattern.Pattern = ""
+	u.Path.Pattern.Attributes = []attr.Attribute{}
 }
 
 type HTTP_Data struct {
@@ -74,6 +94,7 @@ func (data *HTTP_Data) SelectedRequestTab() int {
 
 /*
 Adapted from Golang net/http package.
+example: username=edger&age=20
 */
 func (data *HTTP_Data) EncodedParameters() string {
 
@@ -100,6 +121,7 @@ func (data *HTTP_Data) EncodedParameters() string {
 	return buf.String()
 }
 
+// GetUrl return the full url.
 func (data *HTTP_Data) GetUrl() *url.URL {
 	u, _ := url.Parse(data.URL.BaseURL)
 	u.RawPath = data.URL.GetPath()
