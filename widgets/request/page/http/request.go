@@ -30,34 +30,45 @@ type request_widget struct {
 
 // sets the http method
 func (rw *request_widget) SetMethod(method string) {
-	rw.input_bar_widget.SelectMethod(method)
+	rw.input_bar_widget.select_method(method)
 }
 
 func (rw *request_widget) Method() string {
-	return rw.input_bar_widget.Method()
+	return rw.input_bar_widget.method()
+}
+
+// This should be only used to set the url base
+func (rw *request_widget) SetURL_str(url string) {
+	rw.input_bar_widget.set_url_input_value(url)
 }
 
 func (rw *request_widget) SetURL(u *url.URL) {
 	raw_query := u.RawQuery
 	u.RawQuery = ""
-	rw.input_bar_widget.input_widget.SetValue(u.String())
+	// TODO: process the query and merge it with the parameter table.
+	rw.input_bar_widget.set_url_input_value(u.String())
 
+	// TODO: encode the parameter table and join it with the url base.
 	u.RawQuery = raw_query
+	// TODO: remove this once update_url_preview is finished implemented and url preview get updated every second.
 	rw.url_preview.SetURL(u.String())
 }
 
-func (rw *request_widget) URL() *url.URL {
-	u, _ := url.Parse(rw.input_bar_widget.input_widget.Value())
-	return u
+func (rw *request_widget) update_url_preview() {
+
 }
 
-func (rw *request_widget) SetURL_InputValue(url string) {
-	rw.user_url_input = false
-	rw.input_bar_widget.input_widget.SetValue(url)
+func (rw *request_widget) OnRequestButtonClicked(fn func(ctx *gui.Context, value string)) {
+	rw.input_bar_widget.on_request_button_clicked(fn)
 }
 
-func (rw *request_widget) OnURLInputChange(fn func(ctx *gui.Context, text string, committed bool, by_user bool)) {
-	rw.on_input_bar_value_change = fn
+func (rw *request_widget) DisableURLInput(disabled bool) {
+	// TODO: fix this
+	rw.input_bar_widget.set_url_input_editable(disabled)
+}
+
+func (rw *request_widget) OnURLInputChanged(fn func(context *gui.Context, text string, committed bool)) {
+	rw.input_bar_widget.on_url_input_value_changed(fn)
 }
 
 func (rw *request_widget) SetParameters(parameters []attr.AttrCheck) {
@@ -98,7 +109,7 @@ func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 		rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
 	}
 
-	// If file exists send it's content with the request. This is not a priority for now.
+	// TODO: If file exists send it's content with the request. This is not a priority for now.
 }
 
 func (rw *request_widget) SelectedTab() int {
@@ -111,68 +122,51 @@ func (rw *request_widget) SetTab(index int) {
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	rw.input_bar_widget.OnRequest(func(ctx *gui.Context, url, method string) {
-		//http.Request{
-		//Method: strings.ToUpper(method),
-		//}
-	})
-
-	rw.input_bar_widget.input_widget.OnValueChanged(func(ctx *gui.Context, text string, committed bool) {
-		if rw.on_input_bar_value_change == nil {
-			return
-		}
-
-		rw.on_input_bar_value_change(ctx, text, committed, rw.user_url_input)
-		rw.user_url_input = true
-	})
 	adder.AddWidget(&rw.input_bar_widget)
-
 	adder.AddWidget(&rw.url_preview)
 
-	{
-		rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
-			{
-				Text:  "Parameters",
-				Value: "parameters",
-			},
-			{
-				Text:  "Headers",
-				Value: "headers",
-			},
-			{
-				Text:  "Body",
-				Value: "body",
-			},
-		})
+	rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
+		{
+			Text:  "Parameters",
+			Value: "parameters",
+		},
+		{
+			Text:  "Headers",
+			Value: "headers",
+		},
+		{
+			Text:  "Body",
+			Value: "body",
+		},
+	})
 
-		rw.tab.OnSwitch(func(from, to *CommonWidgets.TabItem[string]) {
-			if from.Value == "parameters" && to.Value == "headers" {
-				rw.tab_content.params = rw.tab_content.table.RowsCheck()
-			} else if from.Value == "headers" && to.Value == "parameters" {
-				rw.tab_content.header = rw.tab_content.table.RowsCheck()
-			}
-
-			if to.Value == "parameters" {
-				rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
-			} else if to.Value == "headers" {
-				rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
-			}
-		})
-
-		_, selected_tab_value := rw.tab.GetSelectedTab()
-		switch selected_tab_value {
-		case "parameters", "headers":
-			rw.tab_content.selected_widget = &rw.tab_content.table
-		case "body":
-			rw.tab_content.selected_widget = &rw.tab_content.body
-			rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
-		default:
-			panic("Unknown tab was selected")
+	rw.tab.OnSwitch(func(from, to *CommonWidgets.TabItem[string]) {
+		if from.Value == "parameters" && to.Value == "headers" {
+			rw.tab_content.params = rw.tab_content.table.RowsCheck()
+		} else if from.Value == "headers" && to.Value == "parameters" {
+			rw.tab_content.header = rw.tab_content.table.RowsCheck()
 		}
 
-		adder.AddWidget(rw.tab_content.selected_widget)
-		adder.AddWidget(&rw.tab)
+		if to.Value == "parameters" {
+			rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
+		} else if to.Value == "headers" {
+			rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
+		}
+	})
+
+	_, selected_tab_value := rw.tab.GetSelectedTab()
+	switch selected_tab_value {
+	case "parameters", "headers":
+		rw.tab_content.selected_widget = &rw.tab_content.table
+	case "body":
+		rw.tab_content.selected_widget = &rw.tab_content.body
+		rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
+	default:
+		panic("Unknown tab was selected")
 	}
+
+	adder.AddWidget(rw.tab_content.selected_widget)
+	adder.AddWidget(&rw.tab)
 	return nil
 }
 

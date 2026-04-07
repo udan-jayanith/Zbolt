@@ -96,6 +96,7 @@ func (data *HTTP_Data) SelectedRequestTab() int {
 Adapted from Golang net/http package.
 example: username=edger&age=20
 */
+// TODO: Make this a separate public function
 func (data *HTTP_Data) EncodedParameters() string {
 
 	parameters := data.Parameters

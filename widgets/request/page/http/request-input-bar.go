@@ -68,6 +68,7 @@ func (rib *request_input_bar_widget) set_url_input_value(value string) {
 	rib.url_input.SetValue(value)
 }
 
+// TODO: use disable instead
 func (rib *request_input_bar_widget) set_url_input_editable(editable bool) {
 	rib.url_input_not_editable = !editable
 }
