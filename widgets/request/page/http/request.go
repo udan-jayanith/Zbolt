@@ -104,6 +104,9 @@ func (rw *request_widget) Headers() []attr.AttrCheck {
 	return rw.tab_content.header
 }
 
+// TODO: implement a function to receive body widget toggles values.
+
+// SetBody set the http request body
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 	if body.FilePath == "" {
 		rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
