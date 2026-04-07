@@ -144,7 +144,7 @@ func (w *url_panel_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 	w.query.KeyEditable(false)
 	adder.AddWidget(&w.query)
 
-	w.pseudo_url.SetDescription("The general form of the URL is:\n``[scheme:][//[host][/]path[?query]``")
+	w.pseudo_url.SetDescription("The general form of the URL is:\n``[scheme:][//[host][/]path``")
 	adder.AddWidget(&w.pseudo_url)
 	adder.AddWidget(&w.hr1)
 
