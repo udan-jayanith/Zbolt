@@ -3,6 +3,7 @@ package http_widget
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
+	attr "API-Client/widgets/request"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
@@ -12,20 +13,6 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-var url_panel *url_panel_widget_scrollable
-
-func get_url_panel(ctx *gui.Context) *url_panel_widget_scrollable {
-	if url_panel == nil {
-		w := &url_panel_widget{}
-		u, _ := url.Parse("")
-		w.set_url(u, ctx)
-		url_panel = &url_panel_widget_scrollable{
-			content: w,
-		}
-	}
-	return url_panel
-}
 
 type long_text_input_widget struct {
 	widget.TextInput
@@ -38,12 +25,13 @@ func (w *long_text_input_widget) Measure(ctx *gui.Context, constraints gui.Const
 	return point
 }
 
-type url_panel_widget struct {
+type url_panel_content struct {
 	gui.DefaultWidget
 
 	form                              widget.Form
 	scheme_text, host_text, path_text widget.Text
 	scheme, host, path                long_text_input_widget
+	// TODO: make the scheme a select to select between http and https
 
 	query_header      widget.Text
 	query_description CommonWidgets.Description
@@ -55,28 +43,61 @@ type url_panel_widget struct {
 	url_preview_header widget.Text
 	url_preview        CommonWidgets.URLPreview
 
-	t time.Time
+	table_updates_left                   bool
+	url_preview_update_t, table_update_t time.Time
 }
 
-// generate_url returns the url from the url panel. It only include up to path of the URL
-// and also returns whether the url path is a pattern or not
-func (w *url_panel_widget) generate_url() (*url.URL, bool) {
-	pattern, _ := url_pattern.ParsePattern(w.path.Value())
-	list := w.query.Rows()
+// update_query_table updates the query table based on the path input
+func (w *url_panel_content) update_query_table() {
+	query_mapped := make(map[string]string, w.query.Count())
+	for _, attr := range w.query.Rows() {
+		query_mapped[attr.Key] = attr.Value
+	}
 
-	for _, attr := range list {
+	pattern, _ := url_pattern.ParsePattern(w.path.Value())
+	for i, attr := range pattern.List {
+		val, ok := query_mapped[attr.Key]
+		if ok {
+			attr.Value = val
+			pattern.List[i] = attr
+		}
+	}
+
+	w.query.SetRows(pattern.List)
+}
+
+// url returns the url for preview.
+// For safety update_query_table must be run before this.
+func (w *url_panel_content) url() string {
+	pattern, _ := url_pattern.ParsePattern(w.path.Value())
+	for _, attr := range w.query.Rows() {
 		pattern.Set(attr.Key, attr.Value)
 	}
 
-	u := &url.URL{
-		Scheme: "http",
-		Host:   w.host.Value(),
-		Path:   pattern.Path(),
-	}
-	return u, len(pattern.List) > 0
+	u, _ := url.Parse(w.host.Value())
+	u.Scheme = "http"
+	u.Path = pattern.Path()
+	return u.String()
 }
 
-func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (w *url_panel_content) safe_url() string {
+	w.update_query_table()
+	return w.url()
+}
+
+// clear clears the table rows for now
+func (w *url_panel_content) clear() {
+	w.query.SetRows([]attr.Attribute{})
+}
+
+func (w *url_panel_content) set(shceme, host, path string) {
+	w.scheme.SetValue(shceme)
+	w.host.SetValue(host)
+	w.path.SetValue(path)
+	w.update_query_table()
+}
+
+func (w *url_panel_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	w.scheme.SetValue("http")
 	ctx.SetEnabled(&w.scheme, false)
 
@@ -85,9 +106,15 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.path_text.SetValue("Path")
 
 	w.path.OnValueChanged(func(context *gui.Context, text string, committed bool) {
-		pattern, _ := url_pattern.ParsePattern(text)
-		w.query.SetRows(pattern.List)
+		w.table_updates_left = true
 	})
+
+	if time.Since(w.table_update_t).Seconds() >= 1 && w.table_updates_left {
+		w.update_query_table()
+
+		w.table_update_t = time.Now()
+		w.table_updates_left = false
+	}
 
 	w.form.SetItems([]widget.FormItem{
 		{
@@ -126,17 +153,15 @@ func (w *url_panel_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.url_preview_header.SetValue("URL preview")
 	adder.AddWidget(&w.url_preview_header)
 
-	if time.Now().Sub(w.t).Seconds() >= 1 {
-		u, _ := w.generate_url()
-		w.url_preview.SetURL(u.String())
-
-		w.t = time.Now()
+	if time.Now().Sub(w.url_preview_update_t).Seconds() >= 1 && !w.table_updates_left {
+		w.url_preview.SetURL(w.url())
+		w.url_preview_update_t = time.Now()
 	}
 	adder.AddWidget(&w.url_preview)
 	return nil
 }
 
-func (w *url_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (w *url_panel_content) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
 	gap := gui.LinearLayoutItem{
 		Size: gui.FixedSize(u / 3),
@@ -185,7 +210,7 @@ func (w *url_panel_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (w *url_panel_content) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
 	u := widget.UnitSize(ctx)
 	point.X = u * 36
@@ -198,33 +223,38 @@ func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints
 	return point
 }
 
-func (w *url_panel_widget) set_url(u *url.URL, ctx *gui.Context) {
-	w.host.SetValue(u.Host)
-	w.path.SetValue(u.Path)
-
-	pattern, _ := url_pattern.ParsePattern(u.Path)
-	w.query.SetRows(pattern.List)
-}
-
-type url_panel_widget_scrollable struct {
+type url_panel_widget struct {
 	gui.DefaultWidget
 
-	content *url_panel_widget
+	content *url_panel_content
 	panel   widget.Panel
 }
 
-func (w *url_panel_widget_scrollable) Build(context *gui.Context, adder *gui.ChildAdder) error {
+// URL returns the url up to the path anything beyond the path of the url get excluded.
+func (w *url_panel_widget) URL() string {
+	return w.content.safe_url()
+}
+
+func (w *url_panel_widget) Clear() {
+	w.content.clear()
+}
+
+func (w *url_panel_widget) Set(shceme, host, path string) {
+	w.content.set(shceme, host, path)
+}
+
+func (w *url_panel_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	w.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
 	w.panel.SetContent(w.content)
 	adder.AddWidget(&w.panel)
 	return nil
 }
 
-func (w *url_panel_widget_scrollable) Layout(context *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (w *url_panel_widget) Layout(context *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&w.panel, widgetBounds.Bounds())
 }
 
-func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (w *url_panel_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := w.content.Measure(ctx, gui.Constraints{})
 	u := widget.UnitSize(ctx)
 
@@ -234,8 +264,4 @@ func (w *url_panel_widget_scrollable) Measure(ctx *gui.Context, constraints gui.
 		point.Y = u * 18
 	}
 	return point
-}
-
-func (w *url_panel_widget_scrollable) SetURL(u *url.URL, ctx *gui.Context) {
-	w.content.set_url(u, ctx)
 }
