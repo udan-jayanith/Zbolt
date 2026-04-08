@@ -50,8 +50,7 @@ func (rw *request_widget) SetURL(u *url.URL) {
 
 	// TODO: encode the parameter table and join it with the url base.
 	u.RawQuery = raw_query
-	// TODO: remove this once update_url_preview is finished implemented and url preview get updated every second.
-	rw.url_preview.SetURL(u.String())
+	rw.url_preview.SetURL(u.String()) // TODO: remove this once update_url_preview is finished implemented and url preview get updated every second.
 }
 
 func (rw *request_widget) update_url_preview() {
