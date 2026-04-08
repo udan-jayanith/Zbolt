@@ -95,6 +95,10 @@ func (rib *request_input_bar_widget) set_request_button_value(value string) {
 	log.Fatalln("Unknown request button text:", value)
 }
 
+func (rib *request_input_bar_widget) on_open_in_clicked(fn func(context *gui.Context)) {
+	rib.open_in.OnUp(fn)
+}
+
 func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rib.init_methods()
 	rib.method_select_widget.SetItemsByStrings(rib.method_list)
