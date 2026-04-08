@@ -1,11 +1,9 @@
 package def
 
 import (
-	"image"
 	"path/filepath"
 
 	gui "github.com/guigui-gui/guigui"
-	"github.com/guigui-gui/guigui/basicwidget"
 )
 
 type RequestType uint8
@@ -72,8 +70,8 @@ func NewRequest(t RequestType, path string) Request {
 type RequestWidget interface {
 	gui.Widget
 	RequestType() RequestType
-	SetPopupWidget(popup *basicwidget.Popup, popup_size *image.Point)
 	SetReq(req *Request)
+	SyncData()
 }
 
 type Folder struct {

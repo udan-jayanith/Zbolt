@@ -3,10 +3,8 @@ package websocket_widget
 import (
 	"API-Client/basic"
 	"API-Client/widgets/request/def"
-	"image"
 
 	gui "github.com/guigui-gui/guigui"
-	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
 type WebsocketWidget struct {
@@ -45,7 +43,6 @@ func (ww *WebsocketWidget) RequestType() def.RequestType {
 	return def.Websocket
 }
 
-func (ww *WebsocketWidget) SetPopupWidget(w *widget.Popup, popup_size *image.Point) {
-}
-
 func (ww *WebsocketWidget) SetReq(req *def.Request) {}
+
+func (ww *WebsocketWidget) SyncData() {}

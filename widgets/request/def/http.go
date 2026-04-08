@@ -75,6 +75,8 @@ type HTTP_Data struct {
 	Headers    []attr.AttrCheck  `json:"headers"`
 	Body       HTTP_Request_Body `json:"body"` // Filepath of Content
 
+	// TODO: add request config
+
 	ResponseConfig struct {
 		AutoWrap bool `json:"auto-wrap"`
 		Formate  bool `json:"formate"`
@@ -163,5 +165,5 @@ type HTTP_Response_Data struct {
 	Headers      []attr.AttrCheck
 	Body         HTTP_Response_Body
 
-	selected_response_tab int
+	SelectedResponseTab int
 }

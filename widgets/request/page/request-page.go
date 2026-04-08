@@ -159,7 +159,6 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		default:
 			panic("request type not handled")
 		}
-		rp.request_widget.Widget().SetPopupWidget(&rp.popup_widget, &rp.popup_size)
 
 		rp.request_widget.SetPadding(padding)
 		adder.AddWidget(&rp.request_widget)

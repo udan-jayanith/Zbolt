@@ -20,7 +20,8 @@ type HTTP_Widget struct {
 	vr              CommonWidgets.VerticalLine
 	response_widget response_widget
 
-	// TODO: add a popup and a url_panel_widget widget here.
+	url_panel_widget url_panel_widget
+	popup_widget     widget.Popup
 
 	req  *def.Request
 	data *def.HTTP_Data
@@ -45,53 +46,71 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		return
 	}
 
+	// Setup request widget
 	brp.data = data
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
+	brp.request_widget.SetBody(&data.Body)
 	brp.request_widget.SetTab(data.SelectedRequestTab())
+
 	if data.Method == "" {
 		data.Method = "Get"
 	}
 	brp.request_widget.SetMethod(data.Method)
 
-	u, err := url.Parse(brp.data.URL.BaseURL)
-	u.Path = data.URL.GetPath()
+	u, err := url.Parse(data.URL.BaseURL)
 	if err != nil {
 		messages.Alerts.Push(err.Error())
 	}
-	brp.request_widget.SetURL_InputValue(u.String())
+	u.Path = data.URL.EncodedPath()
+	brp.request_widget.SetURL_str(u.String())
+
+	// Setup response widget
+	res_data := data.ResponseData()
+	brp.response_widget.SetHeaders(res_data.Headers)
 
 	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
 	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
+	brp.response_widget.SetResponseBody(&res_data.Body)
+	brp.response_widget.SetSelectedTab(res_data.SelectedResponseTab)
 
-	temp := data.ResponseData()
-	brp.response_widget.SetHeaders(temp.Headers)
-	brp.response_widget.SetResponseBody(&temp.Body)
+	brp.response_widget.SetHTTPVersion(res_data.Version)
+	brp.response_widget.SetResponseTime(res_data.ResponseTime)
+	brp.response_widget.SetStatus(res_data.Status_code)
+	gui.RequestRebuild(brp)
 }
 
 // TODO: SyncData should be run to save data before switching tabs, closing tabs or closing the app.
 func (brp *HTTP_Widget) SyncData() {
-	brp.data.Headers = brp.request_widget.Headers()
-	brp.data.Parameters = brp.request_widget.Parameters()
-	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
 	brp.data.Method = brp.request_widget.Method()
-	// TODO: sync the request.
+	// TODO: url sync should be handled in the build in real time
+
+	brp.data.Parameters = brp.request_widget.Parameters()
+	brp.data.Headers = brp.request_widget.Headers()
+	//TODO: implement a method in the request widget to retrieve request body content.
+	//brp.data.Body = brp.request_widget.
+	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
+
+	// TODO: Response widget body config should sync at build time.
+	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
+	brp.data.ResponseData().SelectedResponseTab = brp.response_widget.SelectedTab()
+	// TODO: HTTP response data is synced in when request is finished
+}
+
+// TODO: finish this
+func (brp *HTTP_Widget) url_panel_popup_size() image.Rectangle {
+	return image.Rectangle{}
 }
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	// TODO: handle the url panel popup here
-	 
+
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.vr)
 	adder.AddWidget(&brp.response_widget)
 	return nil
-}
-
-// TODO: finish this
-func (brp *HTTP_Widget) url_panel_popup_size() image.Rectangle {
-	return image.Rectangle{}
 }
 
 func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {

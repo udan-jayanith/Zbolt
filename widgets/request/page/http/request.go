@@ -37,12 +37,8 @@ func (rw *request_widget) Method() string {
 	return rw.input_bar_widget.method()
 }
 
-func (rw *request_widget) OnOpenIn(fn func (ctx *gui.Context)){
+func (rw *request_widget) OnOpenIn(fn func(ctx *gui.Context)) {
 	rw.input_bar_widget.on_open_in_clicked(fn)
-}
-
-func (rw *request_widget) OnURLChanged(fn func (context *gui.Context, text string, committed bool)) {
-	rw.input_bar_widget.on_url_input_value_changed(fn)
 }
 
 // This should be only used to set the url base
