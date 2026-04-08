@@ -226,7 +226,7 @@ func (w *url_panel_content) Measure(ctx *gui.Context, constraints gui.Constraint
 type url_panel_widget struct {
 	gui.DefaultWidget
 
-	content *url_panel_content
+	content url_panel_content
 	panel   widget.Panel
 }
 
@@ -245,7 +245,7 @@ func (w *url_panel_widget) Set(shceme, host, path string) {
 
 func (w *url_panel_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	w.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
-	w.panel.SetContent(w.content)
+	w.panel.SetContent(&w.content)
 	adder.AddWidget(&w.panel)
 	return nil
 }

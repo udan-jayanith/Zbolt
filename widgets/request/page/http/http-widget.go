@@ -97,15 +97,44 @@ func (brp *HTTP_Widget) SyncData() {
 	// TODO: HTTP response data is synced in when request is finished
 }
 
-// TODO: finish this
-func (brp *HTTP_Widget) url_panel_popup_size() image.Rectangle {
-	return image.Rectangle{}
+func (brp *HTTP_Widget) url_panel_popup_size(ctx *gui.Context, widgetBounds *gui.WidgetBounds) image.Rectangle {
+	url_measurements := brp.url_panel_widget.Measure(ctx, gui.Constraints{})
+	b := widgetBounds.Bounds()
+
+	b.Min.X += (b.Dx() / 2) - (url_measurements.X / 2)
+	b.Min.Y += (b.Dy() / 2) - (url_measurements.Y / 2)
+
+	b.Max.X = b.Min.X + url_measurements.X
+	b.Max.Y = b.Min.Y + url_measurements.Y
+
+	return b
+}
+
+func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
+	brp.url_panel_widget.Set("http", "", "")
+	brp.popup_widget.SetOpen(true)
+}
+
+func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.PopupCloseReason) {
+	brp.request_widget.SetURL_str(brp.url_panel_widget.URL())
+	// TODO: Implement methods to retrieve url path and query list.
+	// TODO: Set the url into the data.
+	//brp.url_panel_widget.URL()
+	brp.url_panel_widget.Clear()
 }
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
-	// TODO: handle the url panel popup here
+	brp.request_widget.OnOpenIn(brp.on_url_panel_open)
+	adder.AddWidget(&brp.popup_widget)
+	if brp.popup_widget.IsOpen() {
+		brp.popup_widget.SetAnimated(true)
+		brp.popup_widget.SetBackgroundDark(true)
+		brp.popup_widget.SetCloseByClickingOutside(true)
+		brp.popup_widget.SetContent(&brp.url_panel_widget)
+		brp.popup_widget.OnClose(brp.on_url_panel_close)
+	}
 
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.vr)
@@ -114,6 +143,11 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 }
 
 func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	if brp.popup_widget.IsOpen() {
+		brp.popup_widget.SetBackgroundBounds(widgetBounds.Bounds())
+		layouter.LayoutWidget(&brp.popup_widget, brp.url_panel_popup_size(ctx, widgetBounds))
+	}
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       widget.UnitSize(ctx) / 4,
