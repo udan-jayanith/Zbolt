@@ -18,8 +18,8 @@ type request_input_bar_widget struct {
 	on_method_changed_fn  func(method string)
 	selected_method_index int
 
-	url_input              widget.TextInput
-	url_input_not_editable bool
+	url_input          widget.TextInput
+	url_input_disabled bool
 
 	request_button_text          string
 	request_btn_widget           widget.Button
@@ -73,9 +73,8 @@ func (rib *request_input_bar_widget) set_url_input_value(value string) {
 	rib.url_input.SetValue(value)
 }
 
-// TODO: use disable instead
-func (rib *request_input_bar_widget) set_url_input_editable(editable bool) {
-	rib.url_input_not_editable = !editable
+func (rib *request_input_bar_widget) disable_url_input(disabled bool) {
+	rib.url_input_disabled = disabled
 }
 
 func (rib *request_input_bar_widget) on_url_input_value_changed(fn func(context *gui.Context, text string, committed bool)) {
@@ -116,8 +115,7 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	rib.method_select_widget.SelectItemByIndex(rib.selected_method_index)
 	adder.AddWidget(&rib.method_select_widget)
 
-	// Set input bar editable or not based on url pattern
-	rib.url_input.SetEditable(!rib.url_input_not_editable)
+	ctx.SetEnabled(&rib.url_input, !rib.url_input_disabled)
 	adder.AddWidget(&rib.url_input)
 
 	if rib.open_in_icon == nil {

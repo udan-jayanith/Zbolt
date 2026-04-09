@@ -13,7 +13,6 @@ import (
 
 type request_widget struct {
 	gui.DefaultWidget
-	user_url_input            bool
 	input_bar_widget          request_input_bar_widget
 	on_input_bar_value_change func(ctx *gui.Context, text string, committed bool, by_user bool)
 
@@ -66,8 +65,7 @@ func (rw *request_widget) OnRequestButtonClicked(fn func(ctx *gui.Context, value
 }
 
 func (rw *request_widget) DisableURLInput(disabled bool) {
-	// TODO: fix this
-	rw.input_bar_widget.set_url_input_editable(disabled)
+	rw.input_bar_widget.disable_url_input(disabled)
 }
 
 func (rw *request_widget) OnURLInputChanged(fn func(context *gui.Context, text string, committed bool)) {
@@ -112,8 +110,6 @@ func (rw *request_widget) Headers() []attr.AttrCheck {
 // SetBody set the http request body
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 	rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
-
-	// TODO: If file exists send it's content with the request. This is not a priority for now.
 }
 
 func (rw *request_widget) SelectedTab() int {
