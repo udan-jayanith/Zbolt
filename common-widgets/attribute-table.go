@@ -4,7 +4,7 @@ import (
 	"API-Client/basic"
 	draw_color "API-Client/common-widgets/internal/draw"
 	"API-Client/icons"
-	attr "API-Client/widgets/request"
+	attr "API-Client/widgets/request/attributes"
 	"image"
 	"slices"
 	"strings"

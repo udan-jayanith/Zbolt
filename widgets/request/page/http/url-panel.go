@@ -3,7 +3,7 @@ package http_widget
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
+	attr "API-Client/widgets/request/attributes"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"

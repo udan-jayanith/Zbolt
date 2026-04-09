@@ -1,7 +1,7 @@
 package def
 
 import (
-	attr "API-Client/widgets/request"
+	attr "API-Client/widgets/request/attributes"
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"net/url"
 	"os"

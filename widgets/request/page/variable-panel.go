@@ -3,7 +3,7 @@ package request_page
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	attr "API-Client/widgets/request"
+	attr "API-Client/widgets/request/attributes"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"

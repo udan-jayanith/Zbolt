@@ -1,7 +1,7 @@
 package url_pattern
 
 import (
-	attr "API-Client/widgets/request"
+	attr "API-Client/widgets/request/attributes"
 	"strings"
 )
 
