@@ -10,9 +10,6 @@ import (
 )
 
 type HTTP_Request_Body struct {
-	FilePath   string `json:"filepath"`
-	IsFileOpen bool
-
 	ContentType ContentType `json:"content-type"`
 	Content     string      `json:"content"`
 }
@@ -75,7 +72,10 @@ type HTTP_Data struct {
 	Headers    []attr.AttrCheck  `json:"headers"`
 	Body       HTTP_Request_Body `json:"body"` // Filepath of Content
 
-	// TODO: add request config
+	RequestConfig struct {
+		AutoWrap bool `json:"auto-wrap"`
+		Formate  bool `json:"formate"`
+	} `json:"request-config"`
 
 	ResponseConfig struct {
 		AutoWrap bool `json:"auto-wrap"`

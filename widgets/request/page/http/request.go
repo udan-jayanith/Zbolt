@@ -111,9 +111,7 @@ func (rw *request_widget) Headers() []attr.AttrCheck {
 
 // SetBody set the http request body
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
-	if body.FilePath == "" {
-		rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
-	}
+	rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
 
 	// TODO: If file exists send it's content with the request. This is not a priority for now.
 }
