@@ -34,6 +34,7 @@ func ParseParametersAsCheck(encoded_parameters string) ([]attr.AttrCheck, error)
 		}
 
 		list = append(list, attr.AttrCheck{
+			Checked: true,
 			Key:   key,
 			Value: value,
 		})

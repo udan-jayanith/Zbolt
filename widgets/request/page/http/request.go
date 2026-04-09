@@ -57,11 +57,6 @@ func (rw *request_widget) ContentType() def.ContentType {
 	return rw.tab_content.body.ContentType()
 }
 
-// This should be only used to set the url base including the path
-func (rw *request_widget) SetURL_str(url string) {
-	rw.input_bar_widget.set_url_input_value(url)
-}
-
 func (rw *request_widget) SetURL(u *url.URL) {
 	raw_query := u.RawQuery
 	u.RawQuery = ""
@@ -69,7 +64,8 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	u.Fragment = ""
 	
 	parameters, _ := url_utils.ParseParametersAsCheck(raw_query)
-	rw.SetParameters(attr.MergeAttrCheckList(parameters, rw.Parameters()))
+	// TODO: use bidirectional merge
+	rw.SetParameters(parameters)
 	rw.input_bar_widget.set_url_input_value(u.String())
 
 	// TODO: encode the parameter table and join it with the url base.

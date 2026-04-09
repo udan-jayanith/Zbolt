@@ -65,7 +65,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		messages.Alerts.Push(err.Error())
 	}
 	u.Path = data.URL.EncodedPath()
-	brp.request_widget.SetURL_str(u.String())
+	brp.request_widget.SetURL(u)
 
 	// Setup response widget
 	res_data := data.ResponseData()
@@ -115,8 +115,12 @@ func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
 }
 
 func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.PopupCloseReason) {
-	brp.request_widget.SetURL_str(brp.url_panel_widget.URL())
-	// TODO: Implement methods to retrieve url path and query list.
+	u, err := url.Parse(brp.url_panel_widget.URL())
+	if err != nil {
+		messages.Alerts.Push(err.Error())
+	}
+	brp.request_widget.SetURL(u)
+	// TODO: Implement methods to retrieve url path and query list from url panel.
 	// TODO: Set the url into the data.
 	//brp.url_panel_widget.URL()
 	brp.url_panel_widget.Clear()
@@ -137,6 +141,18 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	brp.request_widget.OnMethodChanged(func(method string) {
 		brp.data.Method = method
+	})
+
+	brp.request_widget.OnURLInputChanged(func(context *gui.Context, text string, committed bool) {
+		if !committed || brp.data.URL.IsPattern() {
+			return
+		}
+		u, err := url.Parse(text)
+		if err != nil {
+			messages.Alerts.Push(err.Error())
+		}
+		brp.request_widget.SetURL(u)
+		// TODO: save the url into data
 	})
 
 	brp.request_widget.OnAutowrap(func(ctx *gui.Context, value bool) {
