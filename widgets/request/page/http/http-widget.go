@@ -135,6 +135,10 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		brp.popup_widget.SetContent(&brp.url_panel_widget)
 		brp.popup_widget.OnClose(brp.on_url_panel_close)
 	}
+	
+	brp.request_widget.OnMethodChanged(func(method string) {
+		brp.data.Method = method
+	})
 
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.vr)
