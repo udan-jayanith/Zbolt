@@ -4,6 +4,7 @@ import (
 	CommonWidgets "API-Client/common-widgets"
 	attr "API-Client/widgets/request/attributes"
 	"API-Client/widgets/request/def"
+	url_utils "API-Client/widgets/request/url-utils"
 	"image"
 	"net/url"
 
@@ -64,7 +65,11 @@ func (rw *request_widget) SetURL_str(url string) {
 func (rw *request_widget) SetURL(u *url.URL) {
 	raw_query := u.RawQuery
 	u.RawQuery = ""
-	// TODO: process the query and merge it with the parameter table.
+	u.RawFragment = ""
+	u.Fragment = ""
+	
+	parameters, _ := url_utils.ParseParametersAsCheck(raw_query)
+	rw.SetParameters(attr.MergeAttrCheckList(parameters, rw.Parameters()))
 	rw.input_bar_widget.set_url_input_value(u.String())
 
 	// TODO: encode the parameter table and join it with the url base.
