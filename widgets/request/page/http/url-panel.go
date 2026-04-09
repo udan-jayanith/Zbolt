@@ -7,6 +7,7 @@ import (
 	url_pattern "API-Client/widgets/request/url-pattern"
 	"image"
 	"net/url"
+	"strings"
 	"time"
 
 	gui "github.com/guigui-gui/guigui"
@@ -30,7 +31,8 @@ type url_panel_content struct {
 
 	form                              widget.Form
 	scheme_text, host_text, path_text widget.Text
-	scheme, host, path                long_text_input_widget
+	scheme                            widget.Select[struct{}]
+	host, path                        long_text_input_widget
 	// TODO: make the scheme a select to select between http and https
 
 	query_header      widget.Text
@@ -75,13 +77,18 @@ func (w *url_panel_content) url() string {
 	}
 
 	u, _ := url.Parse(w.host.Value())
-	u.Scheme = "http"
+	w.init_scheme()
+	selected_item, _ := w.scheme.SelectedItem()
+	u.Scheme = strings.ToLower(selected_item.Text)
+	u.Host = w.host.Value()
 	u.Path = pattern.Path()
 	return u.String()
 }
 
 func (w *url_panel_content) safe_url() string {
 	w.update_query_table()
+	w.table_update_t = time.Now()
+	w.table_updates_left = false
 	return w.url()
 }
 
@@ -90,16 +97,26 @@ func (w *url_panel_content) clear() {
 	w.query.SetRows([]attr.Attribute{})
 }
 
+func (w *url_panel_content) init_scheme() {
+	if w.scheme.SelectedItemIndex() == -1 {
+		w.scheme.SetItemsByStrings([]string{"HTTP", "HTTPS"})
+		w.scheme.SelectItemByIndex(0)
+	}
+}
+
 func (w *url_panel_content) set(shceme, host, path string) {
-	w.scheme.SetValue(shceme)
+	if shceme == "https" || shceme == "HTTPS" {
+		w.scheme.SelectItemByIndex(1)
+	} else {
+		w.scheme.SelectItemByIndex(0)
+	}
 	w.host.SetValue(host)
 	w.path.SetValue(path)
 	w.update_query_table()
 }
 
 func (w *url_panel_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	w.scheme.SetValue("http")
-	ctx.SetEnabled(&w.scheme, false)
+	w.init_scheme()
 
 	w.scheme_text.SetValue("Scheme")
 	w.host_text.SetValue("Host")
