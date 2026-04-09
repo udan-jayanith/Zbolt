@@ -33,8 +33,8 @@ func (rw *request_widget) SetMethod(method string) {
 	rw.input_bar_widget.select_method(method)
 }
 
-func (rw *request_widget) Method() string {
-	return rw.input_bar_widget.method()
+func (rw *request_widget) OnMethodChanged(fn func(method string)){
+	rw.input_bar_widget.on_method_changed(fn)
 }
 
 func (rw *request_widget) OnOpenIn(fn func(ctx *gui.Context)) {

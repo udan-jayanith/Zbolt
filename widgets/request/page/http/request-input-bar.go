@@ -15,6 +15,7 @@ type request_input_bar_widget struct {
 
 	method_select_widget  widget.Select[string]
 	method_list           []string
+	on_method_changed_fn  func(method string)
 	selected_method_index int
 
 	url_input              widget.TextInput
@@ -53,6 +54,10 @@ func (rib *request_input_bar_widget) select_method(method string) {
 		rib.selected_method_index = i
 		break
 	}
+}
+
+func (rib *request_input_bar_widget) on_method_changed(fn func(method string)) {
+	rib.on_method_changed_fn = fn
 }
 
 func (rib *request_input_bar_widget) method() string {
@@ -104,6 +109,9 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	rib.method_select_widget.SetItemsByStrings(rib.method_list)
 	rib.method_select_widget.OnItemSelected(func(_ *gui.Context, index int) {
 		rib.selected_method_index = index
+		if rib.on_method_changed_fn != nil {
+			rib.on_method_changed_fn(rib.method_list[rib.selected_method_index])
+		}
 	})
 	rib.method_select_widget.SelectItemByIndex(rib.selected_method_index)
 	adder.AddWidget(&rib.method_select_widget)

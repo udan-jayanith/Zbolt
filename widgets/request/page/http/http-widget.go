@@ -82,14 +82,14 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 
 // TODO: SyncData should be run to save data before switching tabs, closing tabs or closing the app.
 func (brp *HTTP_Widget) SyncData() {
-	brp.data.Method = brp.request_widget.Method()
+	// TODO: http method should synced in the build
+	//brp.data.Method = brp.request_widget.Method()
 	// TODO: url sync should be handled in the build in real time
 
 	brp.data.Parameters = brp.request_widget.Parameters()
 	brp.data.Headers = brp.request_widget.Headers()
 	//TODO: implement a method in the request widget to retrieve request body content.
 	//brp.data.Body = brp.request_widget.
-	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
 
 	// TODO: Response widget body config should sync at build time.
 	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
