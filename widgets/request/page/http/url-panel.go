@@ -51,21 +51,9 @@ type url_panel_content struct {
 
 // update_query_table updates the query table based on the path input
 func (w *url_panel_content) update_query_table() {
-	query_mapped := make(map[string]string, w.query.Count())
-	for _, attr := range w.query.Rows() {
-		query_mapped[attr.Key] = attr.Value
-	}
-
 	pattern, _ := url_pattern.ParsePattern(w.path.Value())
-	for i, attr := range pattern.List {
-		val, ok := query_mapped[attr.Key]
-		if ok {
-			attr.Value = val
-			pattern.List[i] = attr
-		}
-	}
-
-	w.query.SetRows(pattern.List)
+	merged_list := attr.MergeAttrList(w.query.Rows(), pattern.List)
+	w.query.SetRows(merged_list)
 }
 
 // url returns the url for preview.
