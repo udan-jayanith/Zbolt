@@ -1,12 +1,12 @@
-package url_pattern_test
+package url_utils_test
 
 import (
-	url_pattern "API-Client/widgets/request/url-pattern"
+	url_utils "API-Client/widgets/request/url-utils"
 	"testing"
 )
 
 func TestParse_url_path_query(t *testing.T){
-	pattern, _ := url_pattern.ParsePattern("/{user}/{repo}")
+	pattern, _ := url_utils.ParsePattern("/{user}/{repo}")
 	
 	_, ok := pattern.Values["user"]
 	if !ok {

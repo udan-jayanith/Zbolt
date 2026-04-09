@@ -2,7 +2,7 @@ package def
 
 import (
 	attr "API-Client/widgets/request/attributes"
-	url_pattern "API-Client/widgets/request/url-pattern"
+	url_utils "API-Client/widgets/request/url-utils"
 	"net/url"
 	"os"
 	"strings"
@@ -36,7 +36,7 @@ func (u *URL) EncodedPath() string {
 		return u.Path.RawPath
 	}
 
-	pattern, _ := url_pattern.ParsePattern(u.Path.Pattern.Pattern)
+	pattern, _ := url_utils.ParsePattern(u.Path.Pattern.Pattern)
 	for _, attr := range u.Path.Pattern.Attributes {
 		pattern.Set(attr.Key, attr.Value)
 	}

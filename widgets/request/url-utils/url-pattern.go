@@ -1,4 +1,4 @@
-package url_pattern
+package url_utils
 
 import (
 	attr "API-Client/widgets/request/attributes"

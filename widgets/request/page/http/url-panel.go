@@ -4,7 +4,7 @@ import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 	attr "API-Client/widgets/request/attributes"
-	url_pattern "API-Client/widgets/request/url-pattern"
+	url_utils "API-Client/widgets/request/url-utils"
 	"image"
 	"net/url"
 	"strings"
@@ -51,7 +51,7 @@ type url_panel_content struct {
 
 // update_query_table updates the query table based on the path input
 func (w *url_panel_content) update_query_table() {
-	pattern, _ := url_pattern.ParsePattern(w.path.Value())
+	pattern, _ := url_utils.ParsePattern(w.path.Value())
 	merged_list := attr.MergeAttrList(w.query.Rows(), pattern.List)
 	w.query.SetRows(merged_list)
 }
@@ -59,7 +59,7 @@ func (w *url_panel_content) update_query_table() {
 // url returns the url for preview.
 // For safety update_query_table must be run before this.
 func (w *url_panel_content) url() string {
-	pattern, _ := url_pattern.ParsePattern(w.path.Value())
+	pattern, _ := url_utils.ParsePattern(w.path.Value())
 	for _, attr := range w.query.Rows() {
 		pattern.Set(attr.Key, attr.Value)
 	}
