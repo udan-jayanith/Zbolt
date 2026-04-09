@@ -1,0 +1,43 @@
+package url_utils
+
+import (
+	attr "API-Client/widgets/request/attributes"
+	"fmt"
+	"net/url"
+	"strings"
+)
+
+// Adapted from Golangs net/url package
+func ParseParametersAsCheck(encoded_parameters string) ([]attr.AttrCheck, error) {
+	var err error
+	list := make([]attr.AttrCheck, 0, 2)
+	for encoded_parameters != "" {
+		var key string
+		key, encoded_parameters, _ = strings.Cut(encoded_parameters, "&")
+		if strings.Contains(key, ";") {
+			err = fmt.Errorf("invalid semicolon separator in query")
+			continue
+		}
+		if key == "" {
+			continue
+		}
+
+		key, value, _ := strings.Cut(key, "=")
+		key, err = url.QueryUnescape(key)
+		if err != nil {
+			continue
+		}
+
+		value, err = url.QueryUnescape(value)
+		if err != nil {
+			continue
+		}
+
+		list = append(list, attr.AttrCheck{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	return list, err
+}
