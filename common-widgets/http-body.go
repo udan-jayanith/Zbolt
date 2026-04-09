@@ -44,7 +44,7 @@ type http_body_header_widget struct {
 func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.ChildAdder) {
 	w.content_type.input.SetIntrinsicSize()
 	w.content_type.input.SetFixedWidth(widget.UnitSize(ctx) * 5)
-	
+
 	input_widget := w.content_type.input.Widget()
 	input_widget.SetAllowFreeInput(true)
 	input_widget.SetItems([]string{"application/json", "application/octet-stream", "text/html", "text/plain", "image/png", "image/jpeg"})
@@ -252,6 +252,10 @@ func (body *BodyWidget) SetContentType(content_type def.ContentType) {
 	if body.t == HTTP_Response {
 		body.header.content_type.content_type = content_type
 	}
+}
+
+func (body *BodyWidget) Body() string {
+	return body.view.Value()
 }
 
 func (body *BodyWidget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {

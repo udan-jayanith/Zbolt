@@ -48,7 +48,13 @@ func (rw *request_widget) OnFormat(fn func(ctx *gui.Context, value bool)) {
 	rw.tab_content.body.OnFormatToggle(fn)
 }
 
-// TODO: implement a method to retrieve request body
+func (rw *request_widget) Body() string {
+	return rw.tab_content.body.Body()
+}
+
+func (rw *request_widget) ContentType() def.ContentType {
+	return rw.tab_content.body.ContentType()
+}
 
 // This should be only used to set the url base including the path
 func (rw *request_widget) SetURL_str(url string) {
@@ -114,8 +120,6 @@ func (rw *request_widget) Headers() []attr.AttrCheck {
 	}
 	return rw.tab_content.header
 }
-
-// TODO: implement a function to receive body widget toggles values.
 
 // SetBody set the http request body
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {

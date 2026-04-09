@@ -85,10 +85,11 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 // TODO: SyncData should be run to save data before switching tabs, closing tabs or closing the app.
 func (brp *HTTP_Widget) SyncData() {
 	// TODO: sync url
-	// TODO: sync request body data
 
 	brp.data.Parameters = brp.request_widget.Parameters()
 	brp.data.Headers = brp.request_widget.Headers()
+	brp.data.Body.ContentType = brp.request_widget.ContentType()
+	brp.data.Body.Content = brp.request_widget.Body()
 
 	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
 	brp.data.ResponseData().SelectedResponseTab = brp.response_widget.SelectedTab()
@@ -138,7 +139,12 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		brp.data.Method = method
 	})
 
-	// TODO: sync request config
+	brp.request_widget.OnAutowrap(func(ctx *gui.Context, value bool) {
+		brp.data.RequestConfig.AutoWrap = value
+	})
+	brp.request_widget.OnFormat(func(ctx *gui.Context, value bool) {
+		brp.data.RequestConfig.Formate = value
+	})
 
 	brp.response_widget.OnAutowrapToggle(func(ctx *gui.Context, value bool) {
 		brp.data.ResponseConfig.AutoWrap = value
