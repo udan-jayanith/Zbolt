@@ -32,7 +32,7 @@ func (rw *request_widget) SetMethod(method string) {
 	rw.input_bar_widget.select_method(method)
 }
 
-func (rw *request_widget) OnMethodChanged(fn func(method string)){
+func (rw *request_widget) OnMethodChanged(fn func(method string)) {
 	rw.input_bar_widget.on_method_changed(fn)
 }
 
@@ -40,8 +40,15 @@ func (rw *request_widget) OnOpenIn(fn func(ctx *gui.Context)) {
 	rw.input_bar_widget.on_open_in_clicked(fn)
 }
 
-// TODO: implement method to listen autowrap and format toggle change.
-// TODO: implement a method to retrieve request body   
+func (rw *request_widget) OnAutowrap(fn func(ctx *gui.Context, value bool)) {
+	rw.tab_content.body.OnAutowrapToggle(fn)
+}
+
+func (rw *request_widget) OnFormat(fn func(ctx *gui.Context, value bool)) {
+	rw.tab_content.body.OnFormatToggle(fn)
+}
+
+// TODO: implement a method to retrieve request body
 
 // This should be only used to set the url base including the path
 func (rw *request_widget) SetURL_str(url string) {
