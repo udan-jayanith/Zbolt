@@ -62,10 +62,10 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	u.RawQuery = ""
 	u.RawFragment = ""
 	u.Fragment = ""
-	
+
 	parameters, _ := url_utils.ParseParametersAsCheck(raw_query)
-	// TODO: use bidirectional merge
-	rw.SetParameters(parameters)
+	merged_parameters := attr.MergeAttrCheckList(rw.Parameters(), parameters, true)
+	rw.SetParameters(merged_parameters)
 	rw.input_bar_widget.set_url_input_value(u.String())
 
 	// TODO: encode the parameter table and join it with the url base.

@@ -29,11 +29,37 @@ func MergeAttrList(a []Attribute, b []Attribute) []Attribute {
 	return b
 }
 
+type attr_check struct {
+	val     string
+	checked bool
+}
+
+func bidirectional_attr_check_merge(a []AttrCheck, b []AttrCheck) []AttrCheck {
+	merged := make([]AttrCheck, 0, len(a)+len(b))
+	mapped := make(map[string]int, len(a)+len(b))
+
+	for i, attr := range a {
+		mapped[attr.Key] = i
+	}
+	merged = append(merged, a...)
+
+	for _, attr := range b {
+		i, ok := mapped[attr.Key]
+		if ok {
+			merged[i] = attr
+		} else {
+			mapped[attr.Key] = len(merged)
+			merged = append(merged, attr)
+		}
+	}
+
+	return merged
+}
+
 // MergeAttrCheckList merges a into b
-func MergeAttrCheckList(a []AttrCheck, b []AttrCheck) []AttrCheck {
-	type attr_check struct {
-		val     string
-		checked bool
+func MergeAttrCheckList(a []AttrCheck, b []AttrCheck, bidirectional bool) []AttrCheck {
+	if bidirectional {
+		return bidirectional_attr_check_merge(a, b)
 	}
 
 	query_mapped := make(map[string]attr_check, len(a))
