@@ -53,7 +53,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	// TODO: set request config
 	brp.request_widget.SetBody(&data.Body)
 	brp.request_widget.SetTab(data.SelectedRequestTab())
-	brp.request_widget.DisableURLInput(data.URL.IsPattern())
 
 	if data.Method == "" {
 		data.Method = "Get"
@@ -66,6 +65,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	}
 	u.Path = data.URL.EncodedPath()
 	brp.request_widget.SetURL(u)
+	brp.request_widget.DisableURLInput(data.URL.IsPattern())
 
 	// Setup response widget
 	res_data := data.ResponseData()

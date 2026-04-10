@@ -49,6 +49,16 @@ func (rw *request_widget) OnFormat(fn func(ctx *gui.Context, value bool)) {
 	rw.tab_content.body.OnFormatToggle(fn)
 }
 
+// TODO: implement this
+func (rw *request_widget) SetFormat(value bool) {
+
+}
+
+// TODO: implement this
+func (rw *request_widget) SetAutowrap(value bool) {
+
+}
+
 func (rw *request_widget) Body() string {
 	return rw.tab_content.body.Body()
 }
