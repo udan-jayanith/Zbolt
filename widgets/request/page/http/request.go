@@ -22,7 +22,7 @@ type request_widget struct {
 	tab         CommonWidgets.Tab[string]
 	tab_content struct {
 		params, header  []attr.AttrCheck
-		table           CommonWidgets.AttributeTable // TODO: use one attribute table for params and headers.
+		table           CommonWidgets.AttributeTable
 		body            CommonWidgets.BodyWidget
 		selected_widget gui.Widget
 	}
