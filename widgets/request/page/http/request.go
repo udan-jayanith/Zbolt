@@ -70,6 +70,7 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	u.RawQuery = ""
 	u.RawFragment = ""
 	u.Fragment = ""
+	u.ForceQuery = false
 
 	parameters, _ := url_utils.ParseParametersAsCheck(raw_query)
 	merged_parameters := attr.MergeAttrCheckList(rw.Parameters(), parameters, true)

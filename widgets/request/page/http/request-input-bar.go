@@ -70,7 +70,7 @@ func (rib *request_input_bar_widget) url_input_value() string {
 }
 
 func (rib *request_input_bar_widget) set_url_input_value(value string) {
-	rib.url_input.SetValue(value)
+	rib.url_input.ForceSetValue(value)
 }
 
 func (rib *request_input_bar_widget) disable_url_input(disabled bool) {
