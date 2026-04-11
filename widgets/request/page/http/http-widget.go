@@ -50,7 +50,8 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.data = data
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
-	// TODO: set request config
+	brp.request_widget.SetAutowrap(data.RequestConfig.AutoWrap)
+	brp.request_widget.SetFormat(data.RequestConfig.Formate)
 	brp.request_widget.SetBody(&data.Body)
 	brp.request_widget.SetTab(data.SelectedRequestTab())
 
