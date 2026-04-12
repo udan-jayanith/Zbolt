@@ -247,7 +247,7 @@ func (w *url_panel_widget) URL() string {
 }
 
 // Pattern if pattern exists length of query_list is greater then 0
-func (w *url_panel_widget) Pattern() (pattern string, query_list[]attr.Attribute) {
+func (w *url_panel_widget) Pattern() (pattern string, query_list []attr.Attribute) {
 	return w.content.pattern()
 }
 

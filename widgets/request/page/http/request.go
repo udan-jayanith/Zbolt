@@ -75,6 +75,7 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	merged_parameters := attr.MergeAttrCheckList(rw.Parameters(), parameters, true)
 	rw.SetParameters(merged_parameters)
 	rw.input_bar_widget.set_url_input_value(u.String())
+	rw.update_url_preview()
 }
 
 func (rw *request_widget) FullURL() string {

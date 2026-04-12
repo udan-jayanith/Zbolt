@@ -55,7 +55,7 @@ func EncodeParameters(params []attr.AttrCheck) string {
 		if !attr.Checked {
 			continue
 		}
-		
+
 		key := url.QueryEscape(attr.Key)
 		value := url.QueryEscape(attr.Value)
 
