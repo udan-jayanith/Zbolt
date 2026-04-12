@@ -69,10 +69,7 @@ func (rw *request_widget) ContentType() def.ContentType {
 
 func (rw *request_widget) SetURL(u *url.URL) {
 	raw_query := u.RawQuery
-	u.RawQuery = ""
-	u.RawFragment = ""
-	u.Fragment = ""
-	u.ForceQuery = false
+	url_utils.CleanURL(u)
 
 	parameters, _ := url_utils.ParseParametersAsCheck(raw_query)
 	merged_parameters := attr.MergeAttrCheckList(rw.Parameters(), parameters, true)
@@ -94,9 +91,7 @@ func (rw *request_widget) update_url_preview() string {
 	}
 
 	u, _ := url.Parse(rw.input_bar_widget.url_input_value())
-	u.ForceQuery = false
-	u.Fragment = ""
-	u.RawFragment = ""
+	url_utils.CleanURL(u)
 	u.RawQuery = url_utils.EncodeParameters(parameters)
 
 	u_str := u.String()

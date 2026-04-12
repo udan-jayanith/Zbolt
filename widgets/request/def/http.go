@@ -57,7 +57,7 @@ func (u *URL) SetPattern(pattern string, attributes []attr.Attribute) {
 }
 
 func (u *URL) SetPath(path string) {
-	u.Path.RawPath = ""
+	u.Path.RawPath = path
 	u.Path.Pattern.Pattern = ""
 	u.Path.Pattern.Attributes = []attr.Attribute{}
 }

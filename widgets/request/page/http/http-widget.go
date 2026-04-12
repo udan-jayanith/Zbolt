@@ -4,6 +4,7 @@ import (
 	CommonWidgets "API-Client/common-widgets"
 	messages "API-Client/massages"
 	"API-Client/widgets/request/def"
+	url_utils "API-Client/widgets/request/url-utils"
 	"image"
 	"net/url"
 	"time"
@@ -153,7 +154,11 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			messages.Alerts.Push(err.Error())
 		}
 		brp.request_widget.SetURL(u)
-		// TODO: save the url into data
+
+		url_utils.CleanURL(u)
+		brp.data.URL.SetPath(u.Path)
+		u.Path = ""
+		brp.data.URL.BaseURL = u.String()
 	})
 
 	brp.request_widget.OnAutowrap(func(ctx *gui.Context, value bool) {
