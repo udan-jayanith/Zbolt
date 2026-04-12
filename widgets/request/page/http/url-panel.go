@@ -80,6 +80,11 @@ func (w *url_panel_content) safe_url() string {
 	return w.url()
 }
 
+func (w *url_panel_content) pattern() (string, []attr.Attribute) {
+	w.update_query_table()
+	return w.path.Value(), w.query.Rows()
+}
+
 // clear clears the table rows for now
 func (w *url_panel_content) clear() {
 	w.query.SetRows([]attr.Attribute{})
@@ -238,6 +243,11 @@ type url_panel_widget struct {
 // URL returns the url up to the path anything beyond the path of the url get excluded.
 func (w *url_panel_widget) URL() string {
 	return w.content.safe_url()
+}
+
+// Pattern if pattern exists length of query_list is greater then 0
+func (w *url_panel_widget) Pattern() (pattern string, query_list[]attr.Attribute) {
+	return w.content.pattern()
 }
 
 func (w *url_panel_widget) Clear() {

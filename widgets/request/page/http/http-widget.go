@@ -112,6 +112,7 @@ func (brp *HTTP_Widget) url_panel_popup_size(ctx *gui.Context, widgetBounds *gui
 }
 
 func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
+	// Set url data
 	brp.url_panel_widget.Set("http", "", "")
 	brp.popup_widget.SetOpen(true)
 }
@@ -122,9 +123,19 @@ func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.Popup
 		messages.Alerts.Push(err.Error())
 	}
 	brp.request_widget.SetURL(u)
-	// TODO: Implement methods to retrieve url path and query list from url panel.
-	// TODO: Set the url into the data.
-	//brp.url_panel_widget.URL()
+
+	pattern, query_list := brp.url_panel_widget.Pattern()
+	if len(query_list) > 0 {
+		brp.data.URL.SetPattern(pattern, query_list)
+		brp.request_widget.DisableURLInput(true)
+	}else{
+		brp.data.URL.SetPath(u.Path)
+		brp.request_widget.DisableURLInput(false)
+	}
+	u.Path = ""
+	url_utils.CleanURL(u)
+	brp.data.URL.BaseURL = u.String() 
+	
 	brp.url_panel_widget.Clear()
 }
 
