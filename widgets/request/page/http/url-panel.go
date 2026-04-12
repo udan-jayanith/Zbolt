@@ -98,6 +98,7 @@ func (w *url_panel_content) init_scheme() {
 }
 
 func (w *url_panel_content) set(shceme, host, path string) {
+	w.init_scheme()
 	if shceme == "https" || shceme == "HTTPS" {
 		w.scheme.SelectItemByIndex(1)
 	} else {

@@ -86,8 +86,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 
 // TODO: SyncData should be run to save data before switching tabs, closing tabs or closing the app.
 func (brp *HTTP_Widget) SyncData() {
-	// TODO: sync url
-
 	brp.data.Parameters = brp.request_widget.Parameters()
 	brp.data.Headers = brp.request_widget.Headers()
 	brp.data.Body.ContentType = brp.request_widget.ContentType()
@@ -112,8 +110,8 @@ func (brp *HTTP_Widget) url_panel_popup_size(ctx *gui.Context, widgetBounds *gui
 }
 
 func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
-	// Set url data
-	brp.url_panel_widget.Set("http", "", "")
+	u, _ := url.Parse(brp.data.URL.BaseURL)
+	brp.url_panel_widget.Set(u.Scheme, u.Host, brp.data.URL.RawPath())
 	brp.popup_widget.SetOpen(true)
 }
 
