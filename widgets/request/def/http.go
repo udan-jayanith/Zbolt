@@ -5,7 +5,6 @@ import (
 	url_utils "API-Client/widgets/request/url-utils"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -100,28 +99,7 @@ example: username=edger&age=20
 */
 // TODO: Make this a separate public function
 func (data *HTTP_Data) EncodedParameters() string {
-
-	parameters := data.Parameters
-	if len(parameters) == 0 {
-		return ""
-	}
-	var buf strings.Builder
-	// This assumes key and values is about length of 5 each.
-	buf.Grow(len(parameters) * 10)
-
-	for _, attr := range parameters {
-		key := url.QueryEscape(attr.Key)
-		value := url.QueryEscape(attr.Value)
-
-		if buf.Len() > 0 {
-			buf.WriteByte('&')
-		}
-
-		buf.WriteString(key)
-		buf.WriteByte('=')
-		buf.WriteString(value)
-	}
-	return buf.String()
+	return url_utils.EncodeParameters(data.Parameters)
 }
 
 // GetUrl return the full url.

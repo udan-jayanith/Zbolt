@@ -7,6 +7,7 @@ import (
 	url_utils "API-Client/widgets/request/url-utils"
 	"image"
 	"net/url"
+	"time"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -17,6 +18,7 @@ type request_widget struct {
 	input_bar_widget          request_input_bar_widget
 	on_input_bar_value_change func(ctx *gui.Context, text string, committed bool, by_user bool)
 
+	t           time.Time
 	url_preview CommonWidgets.URLPreview
 
 	tab         CommonWidgets.Tab[string]
@@ -76,14 +78,30 @@ func (rw *request_widget) SetURL(u *url.URL) {
 	merged_parameters := attr.MergeAttrCheckList(rw.Parameters(), parameters, true)
 	rw.SetParameters(merged_parameters)
 	rw.input_bar_widget.set_url_input_value(u.String())
-
-	// TODO: encode the parameter table and join it with the url base.
-	u.RawQuery = raw_query
-	rw.url_preview.SetURL(u.String()) // TODO: remove this once update_url_preview is finished implemented and url preview get updated every second.
 }
 
-func (rw *request_widget) update_url_preview() {
+func (rw *request_widget) FullURL() string {
+	return rw.update_url_preview()
+}
 
+func (rw *request_widget) update_url_preview() string {
+	var parameters []attr.AttrCheck
+	_, tab := rw.tab.GetSelectedTab()
+	if tab == "parameters" {
+		parameters = rw.tab_content.table.RowsCheck()
+	} else {
+		parameters = rw.tab_content.params
+	}
+
+	u, _ := url.Parse(rw.input_bar_widget.url_input_value())
+	u.ForceQuery = false
+	u.Fragment = ""
+	u.RawFragment = ""
+	u.RawQuery = url_utils.EncodeParameters(parameters)
+
+	u_str := u.String()
+	rw.url_preview.SetURL(u_str)
+	return u_str
 }
 
 func (rw *request_widget) OnRequestButtonClicked(fn func(ctx *gui.Context, value string)) {
@@ -191,6 +209,12 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	adder.AddWidget(rw.tab_content.selected_widget)
 	adder.AddWidget(&rw.tab)
+
+	// TODO: implement a method on the input bar widget which returns whether the input bar widget is focused or not.
+	if time.Since(rw.t).Seconds() >= 1 && !ctx.IsFocused(&rw.input_bar_widget) {
+		rw.update_url_preview()
+		rw.t = time.Now()
+	}
 	return nil
 }
 
