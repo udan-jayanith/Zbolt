@@ -28,6 +28,12 @@ type request_input_bar_widget struct {
 	open_in_icon *ebiten.Image
 	open_in      widget.Button
 	on_request   func(ctx *gui.Context, url, method string)
+
+	tooltip struct {
+		widget widget.TooltipArea
+		open   bool
+		bounds image.Rectangle
+	}
 }
 
 func (rib *request_input_bar_widget) init_methods() {
@@ -139,40 +145,82 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	})
 	adder.AddWidget(&rib.request_btn_widget)
 
+	if rib.tooltip.open {
+		adder.AddWidget(&rib.tooltip.widget)
+	}
 	return nil
 }
 
+func (rib *request_input_bar_widget) open_tooltip(open bool, text string, bounds image.Rectangle) {
+	rib.tooltip.open = open
+	rib.tooltip.widget.SetText(text)
+	rib.tooltip.bounds = bounds
+}
+
+func (rib *request_input_bar_widget) gap(ctx *gui.Context) int {
+	return widget.UnitSize(ctx) / 4
+}
+
 func (rib *request_input_bar_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	u := widget.UnitSize(ctx)
+	if rib.tooltip.open {
+		layouter.LayoutWidget(&rib.tooltip.widget, rib.tooltip.bounds)
+	}
+
 	layout := gui.LinearLayout{
-		Direction: gui.LayoutDirectionVertical,
+		Direction: gui.LayoutDirectionHorizontal,
+		Gap:       rib.gap(ctx),
 		Items: []gui.LinearLayoutItem{
 			{
-				Size: gui.FixedSize(u),
-				Layout: gui.LinearLayout{
-					Direction: gui.LayoutDirectionHorizontal,
-					Gap:       u / 4,
-					Items: []gui.LinearLayoutItem{
-						{
-							Widget: &rib.method_select_widget,
-						},
-						{
-							Widget: &rib.url_input,
-							Size:   gui.FlexibleSize(1),
-						},
-						{
-							Widget: &rib.open_in,
-						},
-						{
-							Widget: &rib.request_btn_widget,
-						},
-					},
-				},
+				Widget: &rib.method_select_widget,
+			},
+			{
+				Widget: &rib.url_input,
+				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &rib.open_in,
+			},
+			{
+				Widget: &rib.request_btn_widget,
 			},
 		},
 	}
-
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (rib *request_input_bar_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if !widgetBounds.IsHitAtCursor() {
+		return gui.HandleInputResult{}
+	}
+
+	gap := rib.gap(ctx)
+	cursor_x, _ := ebiten.CursorPosition()
+	b := widgetBounds.Bounds()
+	tooltip_bounds := image.Rect(0, b.Min.Y, 0, b.Max.Y)
+	left_x, right_x := b.Min.X, b.Max.X
+
+	w := rib.method_select_widget.Measure(ctx, gui.Constraints{}).X
+	if cursor_x >= left_x && cursor_x <= w+left_x {
+		tooltip_bounds.Min.X = left_x
+		tooltip_bounds.Max.X = w + left_x
+		rib.open_tooltip(true, "HTTP method", tooltip_bounds)
+		return gui.HandleInputResult{}
+	}
+	left_x += gap
+
+	right_x -= rib.request_btn_widget.Measure(ctx, gui.Constraints{}).X
+	right_x -= gap
+
+	w = rib.open_in.Measure(ctx, gui.Constraints{}).X
+	if cursor_x <= right_x && cursor_x >= right_x-w {
+		tooltip_bounds.Min.X = right_x - w
+		tooltip_bounds.Max.X = right_x
+		rib.open_tooltip(true, "Open in URL panel", tooltip_bounds)
+		return gui.HandleInputResult{}
+	}
+
+	rib.open_tooltip(false, "", image.Rectangle{})
+	return gui.HandleInputResult{}
 }
 
 func (rib *request_input_bar_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
