@@ -132,6 +132,9 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	}
 	rib.request_btn_widget.SetText(rib.request_button_text)
 	rib.request_btn_widget.OnDown(func(ctx *gui.Context) {
+		if rib.on_request_button_clicked_fn == nil {
+			return
+		}
 		rib.on_request_button_clicked_fn(ctx, rib.request_button_text)
 	})
 	adder.AddWidget(&rib.request_btn_widget)
