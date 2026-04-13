@@ -82,6 +82,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.response_widget.SetHTTPVersion(res_data.Version)
 	brp.response_widget.SetResponseTime(res_data.ResponseTime)
 	brp.response_widget.SetStatus(res_data.Status_code)
+	// TODO: set response time
 	gui.RequestRebuild(brp)
 }
 
