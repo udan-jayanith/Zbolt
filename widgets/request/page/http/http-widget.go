@@ -17,6 +17,7 @@ import (
 type HTTP_Widget struct {
 	gui.DefaultWidget
 
+	loading_bar     CommonWidgets.LoadingBar
 	request_widget  request_widget
 	vr              CommonWidgets.VerticalLine
 	response_widget response_widget
@@ -141,6 +142,9 @@ func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.Popup
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
+	brp.loading_bar.ShowPercentage(true)
+	adder.AddWidget(&brp.loading_bar)
+	
 	brp.request_widget.OnOpenIn(brp.on_url_panel_open)
 	adder.AddWidget(&brp.popup_widget)
 	if brp.popup_widget.IsOpen() {
@@ -197,7 +201,7 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 		layouter.LayoutWidget(&brp.popup_widget, brp.url_panel_popup_size(ctx, widgetBounds))
 	}
 
-	layout := gui.LinearLayout{
+	horizontal_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Gap:       widget.UnitSize(ctx) / 4,
 		Items: []gui.LinearLayoutItem{
@@ -210,6 +214,19 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 			},
 			{
 				Widget: &brp.response_widget,
+				Size:   gui.FlexibleSize(1),
+			},
+		},
+	}
+
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &brp.loading_bar,
+			},
+			{
+				Layout: horizontal_layout,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
