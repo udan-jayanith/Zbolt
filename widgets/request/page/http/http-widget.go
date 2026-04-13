@@ -144,7 +144,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	brp.loading_bar.ShowPercentage(true)
 	adder.AddWidget(&brp.loading_bar)
-	
+
 	brp.request_widget.OnOpenIn(brp.on_url_panel_open)
 	adder.AddWidget(&brp.popup_widget)
 	if brp.popup_widget.IsOpen() {
@@ -201,9 +201,10 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 		layouter.LayoutWidget(&brp.popup_widget, brp.url_panel_popup_size(ctx, widgetBounds))
 	}
 
+	gap := widget.UnitSize(ctx) / 4
 	horizontal_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap:       widget.UnitSize(ctx) / 4,
+		Gap:       gap,
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &brp.request_widget,
@@ -221,13 +222,14 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
+		Gap: gap,
 		Items: []gui.LinearLayoutItem{
-			{
-				Widget: &brp.loading_bar,
-			},
 			{
 				Layout: horizontal_layout,
 				Size:   gui.FlexibleSize(1),
+			},
+			{
+				Widget: &brp.loading_bar,
 			},
 		},
 	}
