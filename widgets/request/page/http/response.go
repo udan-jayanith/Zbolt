@@ -131,7 +131,6 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 		switch rw.tab.GetSelectedIndex() {
 		case 0:
 			rw.tab_content.response_body.SetType(CommonWidgets.HTTP_Response)
-			rw.tab_content.response_body.SetContentType(def.ContentType("application/json"))
 			rw.tab_content.selected_content = &rw.tab_content.response_body
 		case 1:
 			rw.tab_content.selected_content = &rw.tab_content.response_header
