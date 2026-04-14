@@ -1,11 +1,13 @@
 package CommonWidgets
 
 import (
+	"API-Client/basic"
 	"API-Client/icons"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type URLPreview struct {
@@ -13,6 +15,7 @@ type URLPreview struct {
 
 	url_preview widget.TextInput
 	copy_button widget.Button
+	tooltip     basic.TooltipHelper
 }
 
 func (up *URLPreview) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -24,13 +27,25 @@ func (up *URLPreview) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	up.copy_button.SetIcon(icons.Store.Open("copy-all"))
 	adder.AddWidget(&up.copy_button)
+
+	if up.tooltip.IsOpen {
+		adder.AddWidget(&up.tooltip.Widget)
+	}
 	return nil
 }
 
+func (up *URLPreview) gap(ctx *gui.Context) int {
+	return widget.UnitSize(ctx) / 4
+}
+
 func (up *URLPreview) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	if up.tooltip.IsOpen {
+		layouter.LayoutWidget(&up.tooltip.Widget, up.tooltip.Bounds)
+	}
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Gap:       widget.UnitSize(ctx) / 4,
+		Gap:       up.gap(ctx),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &up.url_preview,
@@ -42,6 +57,38 @@ func (up *URLPreview) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		},
 	}
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
+}
+
+func (up *URLPreview) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if !widgetBounds.IsHitAtCursor() {
+		return gui.HandleInputResult{}
+	}
+
+	gap := up.gap(ctx)
+	b := widgetBounds.Bounds()
+	tooltip_bounds := b
+	tooltip_bounds.Min.X = 0
+	tooltip_bounds.Max.X = 0
+	cursor_x, _ := ebiten.CursorPosition()
+
+	w := up.copy_button.Measure(ctx, gui.Constraints{}).X
+	if cursor_x <= b.Max.X && cursor_x >= b.Max.X-w {
+		tooltip_bounds.Max.X = b.Max.X
+		tooltip_bounds.Min.X = b.Max.X - w
+		up.tooltip.Open(true, "Copy URL", tooltip_bounds)
+		return gui.HandleInputResult{}
+	}
+
+	w += gap
+	if cursor_x >= b.Min.X && cursor_x <= b.Max.X-w {
+		tooltip_bounds.Max.X = b.Max.X - w
+		tooltip_bounds.Min.X = b.Min.X
+		up.tooltip.Open(true, "URL preview", tooltip_bounds)
+		return gui.HandleInputResult{}
+	}
+
+	up.tooltip.Open(false, "", tooltip_bounds)
+	return gui.HandleInputResult{}
 }
 
 func (up *URLPreview) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
