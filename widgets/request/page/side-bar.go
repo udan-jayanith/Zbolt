@@ -1,6 +1,7 @@
 package request_page
 
 import (
+	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
 	"fmt"
@@ -80,11 +81,12 @@ type Sidebar[T comparable] struct {
 	gui.DefaultWidget
 
 	options struct {
-		search_icon *ebiten.Image
+		search_icon   *ebiten.Image
 		search_widget widget.TextInput
 		add           struct {
 			create_request_button, create_folder_button, variable_button widget.Button
 			create_request_icon, create_folder_icon, variable_icon       *ebiten.Image
+			tooltip                                                      basic.TooltipHelper
 
 			on_variable_clicked func(ctx *gui.Context)
 			on_request_create   func(ctx *gui.Context)
@@ -138,7 +140,7 @@ func (sd *Sidebar[T]) OnItemClicked(fn func(item T)) {
 	sd.list.on_item_clicked = fn
 }
 
-func (sd *Sidebar[T]) OnVariableClicked(fn func(ctx *gui.Context)){
+func (sd *Sidebar[T]) OnVariableClicked(fn func(ctx *gui.Context)) {
 	sd.options.add.on_variable_clicked = fn
 }
 
@@ -217,7 +219,15 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&sd.list.contextmenu.rename_popup_widget)
 	adder.AddWidget(&sd.list.contextmenu.menu)
 	adder.AddWidget(&sd.options.add.folder_popup)
+
+	if sd.options.add.tooltip.IsOpen {
+		adder.AddWidget(&sd.options.add.tooltip.Widget)
+	}
 	return nil
+}
+
+func (sd *Sidebar[T]) gap(ctx *gui.Context) int {
+	return widget.UnitSize(ctx) / 4
 }
 
 func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
@@ -237,10 +247,13 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Max: sd.list.contextmenu.position.Add(rename_measurements),
 	})
 
-	u := widget.UnitSize(ctx)
+	if sd.options.add.tooltip.IsOpen {
+		layouter.LayoutWidget(&sd.options.add.tooltip.Widget, sd.options.add.tooltip.Bounds)
+	}
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
-		Gap:       u / 4,
+		Gap:       sd.gap(ctx),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &sd.list.path,
@@ -249,7 +262,7 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 			{
 				Layout: gui.LinearLayout{
 					Direction: gui.LayoutDirectionHorizontal,
-					Gap:       u / 4,
+					Gap:       sd.gap(ctx),
 					Items: []gui.LinearLayoutItem{
 						{
 							Widget: &sd.options.add.create_request_button,
@@ -275,8 +288,56 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return sd.list.widget.Measure(ctx, constraints)
+func (sd *Sidebar[T]) handle_tooltips(ctx *gui.Context, widgetBounds *gui.WidgetBounds) {
+	if !widgetBounds.IsHitAtCursor() {
+		return
+	}
+
+	b := widgetBounds.Bounds()
+	tooltip_bounds := b
+	gap := sd.gap(ctx)
+
+	tooltip_bounds.Max.X = 0
+	tooltip_bounds.Min.X = 0
+	tooltip_bounds.Min.Y += sd.list.path.Measure(ctx, gui.Constraints{}).Y + gap
+
+	button := widget.Button{}
+	button_height := button.Measure(ctx, gui.Constraints{}).Y
+	tooltip_bounds.Max.Y = tooltip_bounds.Min.Y + button_height
+
+	cursor_x, cursor_y := ebiten.CursorPosition()
+	if cursor_y > tooltip_bounds.Max.Y || cursor_y < tooltip_bounds.Min.Y {
+		return
+	}
+
+	left_x := b.Min.X
+	w := sd.options.add.create_request_button.Measure(ctx, gui.Constraints{}).X
+	if cursor_x >= left_x && cursor_x <= left_x+w {
+		tooltip_bounds.Min.X = left_x
+		tooltip_bounds.Max.X = left_x + w
+		sd.options.add.tooltip.Open(true, "Create new request", tooltip_bounds)
+		return
+	}
+	left_x += w + gap
+
+	w = sd.options.add.create_folder_button.Measure(ctx, gui.Constraints{}).X
+	if cursor_x >= left_x && cursor_x <= left_x+w {
+		tooltip_bounds.Min.X = left_x
+		tooltip_bounds.Max.X = left_x + w
+		sd.options.add.tooltip.Open(true, "Create new folder", tooltip_bounds)
+		return
+	}
+	left_x += w + gap
+
+	w = sd.options.add.variable_button.Measure(ctx, gui.Constraints{}).X
+	if cursor_x >= left_x && cursor_x <= left_x+w {
+		tooltip_bounds.Min.X = left_x
+		tooltip_bounds.Max.X = left_x + w
+		sd.options.add.tooltip.Open(true, "Variables panel (Environment variables)", tooltip_bounds)
+		return
+	}
+
+	sd.options.add.tooltip.Open(false, "", tooltip_bounds)
 }
 
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
@@ -289,5 +350,10 @@ func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 		sd.list.contextmenu.right_clicked_item = nil
 	}
 
+	sd.handle_tooltips(ctx, widgetBounds)
 	return gui.HandleInputResult{}
+}
+
+func (sd *Sidebar[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	return sd.list.widget.Measure(ctx, constraints)
 }
