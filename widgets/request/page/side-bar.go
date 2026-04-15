@@ -303,10 +303,17 @@ func (sd *Sidebar[T]) handle_tooltips(ctx *gui.Context, widgetBounds *gui.Widget
 
 	button := widget.Button{}
 	button_height := button.Measure(ctx, gui.Constraints{}).Y
-	tooltip_bounds.Max.Y = tooltip_bounds.Min.Y + button_height
+	search_bar_height := sd.options.search_widget.Measure(ctx, gui.Constraints{}).Y
+	tooltip_bounds.Max.Y = tooltip_bounds.Min.Y + button_height + search_bar_height + gap
 
 	cursor_x, cursor_y := ebiten.CursorPosition()
 	if cursor_y > tooltip_bounds.Max.Y || cursor_y < tooltip_bounds.Min.Y {
+		return
+	} else if cursor_y >= tooltip_bounds.Min.Y+gap+button_height && cursor_y <= tooltip_bounds.Max.Y {
+		tooltip_bounds.Min.Y += button_height + gap
+		tooltip_bounds.Min.X = b.Min.X
+		tooltip_bounds.Max.X = b.Max.X
+		sd.options.add.tooltip.Open(true, "Search bar", tooltip_bounds)
 		return
 	}
 
