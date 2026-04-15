@@ -3,8 +3,6 @@ package request_page
 import (
 	"API-Client/icons"
 
-	"image"
-
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -17,18 +15,14 @@ type NothingWidget struct {
 }
 
 func (nw *NothingWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	nw.image.IconName = "large-icons/add-box"
+	nw.image.SetIcon("large-icons/add-box")
 	u := widget.UnitSize(ctx)
-	size := u * 8
-	point := image.Pt(size, size)
-	nw.image.Point = &point
-	nw.image.OnClick(func() {})
-
-	adder.AddWidget(&nw.image)
-
+	nw.image.SetSize(u * 8)
 	if nw.on_click != nil {
 		nw.image.OnClick(nw.on_click)
 	}
+
+	adder.AddWidget(&nw.image)
 	return nil
 }
 

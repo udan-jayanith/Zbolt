@@ -76,13 +76,15 @@ type Icon struct {
 	gui.DefaultWidget
 
 	image_widget widget.Image
-	IconName     string
-	Point        *image.Point
-	on_click     func()
+	icon_name    string
+
+	size_specified bool
+	size           image.Point
+
+	on_click func()
 }
 
 func (icon *Icon) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	icon.image_widget.SetImage(Store.Open(icon.IconName))
 	adder.AddWidget(&icon.image_widget)
 	return nil
 }
@@ -92,12 +94,11 @@ func (icon *Icon) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layou
 }
 
 func (icon *Icon) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	if icon.Point == nil {
+	if !icon.size_specified {
 		u := widget.UnitSize(ctx)
-		pt := image.Pt(u, u)
-		icon.Point = &pt
+		icon.SetSize(u)
 	}
-	return *icon.Point
+	return icon.size
 }
 
 func (icon *Icon) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
@@ -111,20 +112,40 @@ func (icon *Icon) OnClick(fn func()) {
 	icon.on_click = fn
 }
 
-func NewIcon(icon_name string, size ...int) *Icon {
-	var pt *image.Point
-	if len(size) == 1 {
+func (icon *Icon) SetSize(size ...int) {
+	var pt image.Point
+	if len(size) == 0 {
+		return
+	} else if len(size) == 1 {
 		point := image.Pt(size[0], size[0])
-		pt = &point
+		pt = point
 	} else if len(size) == 2 {
 		point := image.Pt(size[0], size[1])
-		pt = &point
+		pt = point
 	} else if len(size) > 2 {
 		log.Fatal("Extra arguments to NewIcon")
 	}
+	icon.size_specified = true
+	icon.size = pt
+}
 
-	return &Icon{
-		IconName: icon_name,
-		Point:    pt,
+func (icon *Icon) SetIcon(icon_name string) {
+	if icon.icon_name == icon_name {
+		return
 	}
+	icon.icon_name = icon_name
+	icon.image_widget.SetImage(Store.Open(icon_name))
+}
+
+func (icon *Icon) IconName() string {
+	return icon.icon_name
+}
+
+func NewIcon(icon_name string, size ...int) *Icon {
+	icon := Icon{}
+	if len(size) > 0 {
+		icon.SetSize(size...)
+	}
+	icon.SetIcon(icon_name)
+	return &icon
 }

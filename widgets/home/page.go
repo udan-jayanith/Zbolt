@@ -3,7 +3,6 @@ package home
 import (
 	"API-Client/basic"
 	"API-Client/icons"
-	"image"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -17,9 +16,9 @@ type HomePage struct {
 	recently_opened gui.WidgetWithPadding[*widget.Text]
 	sidebar         widget.List[struct{}]
 
-	zbolt_icon                                          icons.Icon
+	zbolt_icon                                            icons.Icon
 	open_button, new_project_button, quick_request_button widget.Button
-	footer_widget                                       footer_widget
+	footer_widget                                         footer_widget
 }
 
 func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -37,12 +36,9 @@ func (wp *HomePage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	wp.sidebar.SetStyle(widget.ListStyleSidebar)
 	adder.AddWidget(&wp.sidebar)
 
-	wp.zbolt_icon.IconName = "large-icons/zbolt-passtrough"
+	wp.zbolt_icon.SetIcon("large-icons/zbolt-passtrough")
 	size := widget.UnitSize(ctx) * 14
-	wp.zbolt_icon.Point = &image.Point{
-		X: size,
-		Y: size,
-	}
+	wp.zbolt_icon.SetSize(size)
 	adder.AddWidget(&wp.zbolt_icon)
 
 	wp.open_button.SetText("Open project")

@@ -35,20 +35,16 @@ func (fw *footer_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	icon_size := widget.LineHeight(ctx)
 	icon_size -= (icon_size / 3)
-	icon_point := &image.Point{
-		X: icon_size,
-		Y: icon_size,
-	}
 
-	fw.repo_link.IconName = "github"
-	fw.repo_link.Point = icon_point
+	fw.repo_link.SetIcon("github")
+	fw.repo_link.SetSize(icon_size)
 	fw.repo_link.OnClick(func() {
 		browser.OpenURL("https://github.com/udan-jayanith/API-Client")
 	})
 	adder.AddWidget(&fw.repo_link)
 
-	fw.stars.star_icon.IconName = "star"
-	fw.stars.star_icon.Point = icon_point
+	fw.stars.star_icon.SetIcon("star")
+	fw.stars.star_icon.SetSize(icon_size)
 	adder.AddWidget(&fw.stars.star_icon)
 
 	fw.stars.star_count.SetValue("0")

@@ -86,7 +86,7 @@ type path_widget struct {
 	gui.DefaultWidget
 
 	segments  []path_segment_widget
-	separator []icons.Icon
+	separator []*icons.Icon
 
 	on_select func(ctx *gui.Context, path string)
 }
@@ -98,14 +98,11 @@ func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		adder.AddWidget(segment)
 
 		if i != l-1 {
-			separator := &pw.separator[i]
+			separator := pw.separator[i]
 
 			line_height := widget.LineHeight(ctx)
 			size := line_height - line_height/3
-			separator.Point = &image.Point{
-				X: size,
-				Y: size,
-			}
+			separator.SetSize(size)
 
 			adder.AddWidget(separator)
 		}
@@ -116,7 +113,7 @@ func (pw *path_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding: basic.NewPadding(widget.UnitSize(ctx)/3-10, 0),
+		Padding:   basic.NewPadding(widget.UnitSize(ctx)/3-10, 0),
 		Items:     make([]gui.LinearLayoutItem, 0, len(pw.segments)),
 	}
 
@@ -128,7 +125,7 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 		})
 
 		if i != l-1 {
-			separator := &pw.separator[i]
+			separator := pw.separator[i]
 			layout.Items = append(layout.Items, gui.LinearLayoutItem{
 				Widget: separator,
 			})
@@ -139,7 +136,7 @@ func (pw *path_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 func (pw *path_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
-	point.Y = widget.LineHeight(ctx)+widget.UnitSize(ctx)/3
+	point.Y = widget.LineHeight(ctx) + widget.UnitSize(ctx)/3
 
 	for i, _ := range pw.segments {
 		measurements := pw.segments[i].Measure(ctx, constraints)
@@ -221,7 +218,7 @@ func (path_widget *Path) SetPath(directory_path string) {
 	l := len(list)
 
 	path_widget.path_widget.segments = make([]path_segment_widget, 0, l)
-	path_widget.path_widget.separator = make([]icons.Icon, 0, l-1)
+	path_widget.path_widget.separator = make([]*icons.Icon, 0, l-1)
 
 	for i, path_name := range list {
 		path_widget.path_widget.segments = append(path_widget.path_widget.segments, path_segment_widget{
@@ -231,9 +228,7 @@ func (path_widget *Path) SetPath(directory_path string) {
 		})
 
 		if i != l-1 {
-			path_widget.path_widget.separator = append(path_widget.path_widget.separator, icons.Icon{
-				IconName: "arrow_forward",
-			})
+			path_widget.path_widget.separator = append(path_widget.path_widget.separator, icons.NewIcon("arrow_forward"))
 		}
 	}
 }

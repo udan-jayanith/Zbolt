@@ -25,12 +25,9 @@ type TabItem[T any] struct {
 
 type tab_item[T any] struct {
 	gui.DefaultWidget
-	text_widget  widget.Text
-	close_widget struct {
-		icon     *icons.Icon
-		normal   *icons.Icon
-		selected *icons.Icon
-	}
+	text_widget widget.Text
+	close_icon  icons.Icon
+
 	border_widget WidgetWithBorder[*tab_item[T]]
 
 	tab_item   *TabItem[T]
@@ -62,19 +59,18 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&item.text_widget)
 
 	if item.tab_item.Closable {
-		if item.close_widget.icon == nil {
+		if item.close_icon.IconName() == "" {
 			line_height := widget.LineHeight(ctx)
 			size := line_height - line_height/4
-			item.close_widget.normal = icons.NewIcon("close", size)
-			item.close_widget.selected = icons.NewIcon("close-grey", size)
+			item.close_icon.SetSize(size)
 		}
 
 		if item.tab_widget.selected_item_index == item.index {
-			item.close_widget.icon = item.close_widget.normal
+			item.close_icon.SetIcon("close")
 		} else {
-			item.close_widget.icon = item.close_widget.selected
+			item.close_icon.SetIcon("close-grey")
 		}
-		adder.AddWidget(item.close_widget.icon)
+		adder.AddWidget(&item.close_icon)
 	}
 
 	return nil
@@ -102,7 +98,7 @@ func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 
 	if item.tab_item.Closable {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
-			Widget: item.close_widget.icon,
+			Widget: &item.close_icon,
 		})
 	}
 
@@ -119,8 +115,8 @@ func (item *tab_item[T]) Measure(ctx *gui.Context, constraints gui.Constraints) 
 		point.X += icon_measurement.X + gap
 	}
 
-	if item.tab_item.Closable && item.close_widget.icon != nil {
-		icon_measurement := item.close_widget.icon.Measure(ctx, constraints)
+	if item.tab_item.Closable {
+		icon_measurement := item.close_icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
 	}
 	point.X += padding.End + padding.Start
@@ -337,7 +333,7 @@ func (tab *Tab[T]) GetSelectedIndex() int {
 func (tab *Tab[T]) GetSelectedTab() (index int, value T) {
 	if len(tab.tab.tab_items) == 0 {
 		var t T
-		return 0, t 
+		return 0, t
 	}
 	return tab.tab.selected_item_index, tab.tab.tab_items[tab.tab.selected_item_index].tab_item.Value
 }

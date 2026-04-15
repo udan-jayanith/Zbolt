@@ -22,10 +22,9 @@ type sidebar_item_type_card struct {
 }
 
 func (sitc *sidebar_item_type_card) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	sitc.icon_widget.IconName = "large-icons/" + sitc.Icon_name
+	sitc.icon_widget.SetIcon("large-icons/" + sitc.Icon_name)
 	u := widget.UnitSize(ctx)
-	icon_size := image.Pt(u*2, u*2)
-	sitc.icon_widget.Point = &icon_size
+	sitc.icon_widget.SetSize(u*2)
 	adder.AddWidget(&sitc.icon_widget)
 
 	sitc.text_widget.SetValue(sitc.Text)
@@ -320,7 +319,7 @@ func (sitp *sidebar_item_types_panel) Measure(ctx *gui.Context, constraints gui.
 	} else {
 		point.Y = sitp.select_type_text_widget.Measure(ctx, constraints).Y
 		point.Y += sitp.request_name_input.Measure(ctx, constraints).Y
-		point.Y += (u * 4) + gap + gap*2 + padding*3+sitp.line.Measure(ctx, gui.Constraints{}).Y
+		point.Y += (u * 4) + gap + gap*2 + padding*3 + sitp.line.Measure(ctx, gui.Constraints{}).Y
 	}
 
 	if w, ok := constraints.FixedWidth(); ok {
