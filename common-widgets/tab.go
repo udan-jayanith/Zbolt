@@ -28,8 +28,6 @@ type tab_item[T any] struct {
 	text_widget widget.Text
 	close_icon  icons.Icon
 
-	border_widget WidgetWithBorder[*tab_item[T]]
-
 	tab_item   *TabItem[T]
 	tab_widget *tab[T]
 
@@ -50,12 +48,6 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	text_widget.SetTabular(true)
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 
-	if item.tab_widget.closest != nil && item.tab_widget.closest.index == item.index {
-		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeInset)
-	} else {
-		item.border_widget.SetBorderType(basicwidgetdraw.RoundedRectBorderTypeRegular)
-	}
-
 	adder.AddWidget(&item.text_widget)
 
 	if item.tab_item.Closable {
@@ -70,6 +62,12 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		} else {
 			item.close_icon.SetIcon("close-grey")
 		}
+
+		if item.tab_widget.on_close != nil {
+			item.close_icon.OnClick(func() {
+				item.tab_widget.on_close(*item.tab_item)
+			})
+		}
 		adder.AddWidget(&item.close_icon)
 	}
 
@@ -77,7 +75,6 @@ func (item *tab_item[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 }
 
 func (item *tab_item[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	//	u := widget.UnitSize(ctx)
 	layout := gui.LinearLayout{
 		Padding:   basic.NewPadding(0, widget.LineHeight(ctx)/2),
 		Gap:       widget.UnitSize(ctx) / 4,
@@ -226,6 +223,7 @@ type tab[T any] struct {
 	selected_item_index int
 	on_select_fn        func(from, to *TabItem[T])
 	on_swap             func(ctx *gui.Context, swap Swap)
+	on_close            func(tab_item TabItem[T])
 }
 
 func (tab *tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -352,6 +350,10 @@ func (tab *Tab[T]) SelectTabItemByIndex(index int) {
 
 func (tab *Tab[T]) OnSwap(fn func(ctx *gui.Context, swap Swap)) {
 	tab.tab.on_swap = fn
+}
+
+func (tab *Tab[T]) OnClose(fn func(tab_item TabItem[T])) {
+	tab.tab.on_close = fn
 }
 
 func (tab *Tab[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
