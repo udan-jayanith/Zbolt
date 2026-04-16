@@ -108,7 +108,11 @@ func (item *tab_item) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 	if item.tab_item.Closable {
 		icon_measurement := item.close_icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
+		item.close_icon.OnClick(func() {
+			item.tabs_container.on_close(item.index, item.tab_item)
+		})
 	}
+
 	point.X += padding.End + padding.Start
 	point.Y = widget.UnitSize(ctx)
 	return point
