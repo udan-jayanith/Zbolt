@@ -28,7 +28,7 @@ type tab_item struct {
 
 	index          int
 	tab_item       TabItem
-	tabs_container *tab // tabs_container is the tab container
+	tabs_container *tabs_container // tabs_container is the tab container
 
 	text_widget widget.Text
 	close_icon  icons.Icon
@@ -61,11 +61,6 @@ func (item *tab_item) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			item.close_icon.SetIcon("close-grey")
 		}
 
-		if item.tabs_container.on_close != nil {
-			item.close_icon.OnClick(func() {
-				item.tabs_container.on_close(item.tab_item)
-			})
-		}
 		adder.AddWidget(&item.close_icon)
 	}
 
@@ -127,7 +122,7 @@ func (item *tab_item) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst
 	if item.tabs_container.selected_item_index == item.index {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
 		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
-	} else if item.tabs_container.closest != nil && item.tabs_container.closest.index == item.index {
+	} else if widgetBounds.IsHitAtCursor() && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.4, 0.4)
 		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
 	} else if widgetBounds.IsHitAtCursor() {

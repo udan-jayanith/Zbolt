@@ -16,21 +16,14 @@ type Swap struct {
 	To   int
 }
 
-type tab struct {
+type tabs_container struct {
 	gui.DefaultWidget
 	tab_items []*tab_item
 
-	holding_tab_item *tab_item
-	closest          *tab_item
-	swap             *Swap
-
 	selected_item_index int
-	on_select_fn        func(from, to TabItem, i, j int)
-	on_swap             func(ctx *gui.Context, swap Swap)
-	on_close            func(tab_item TabItem)
 }
 
-func (tab *tab) on_select(index int, tab_item TabItem) {
+func (tab *tabs_container) on_select(index int, tab_item TabItem) {
 	// TODO: handle this
 	/*
 		if item.tabs_container.on_select_fn != nil {
@@ -40,12 +33,12 @@ func (tab *tab) on_select(index int, tab_item TabItem) {
 	*/
 }
 
-func (tab *tab) on_holding(index int, relative_cursor_x int) {
+func (tab *tabs_container) on_holding(index int, relative_cursor_x int) {
 	// TODO:
 	// item.tabs_container.holding_tab_item = item
 }
 
-func (tab *tab) on_holding_cancel(index int) {
+func (tab *tabs_container) on_holding_cancel(index int) {
 	// TODO:
 	/*
 		  tab_widget := item.tabs_container
@@ -62,7 +55,7 @@ func (tab *tab) on_holding_cancel(index int) {
 	*/
 }
 
-func (tab *tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (tab *tabs_container) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if tab.swap != nil {
 		if tab.on_swap != nil {
 			tab.on_swap(ctx, *tab.swap)
@@ -83,7 +76,7 @@ func (tab *tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (tab *tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (tab *tabs_container) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
 		Items:     make([]gui.LinearLayoutItem, 0, len(tab.tab_items)),
@@ -123,7 +116,7 @@ func (tab *tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layoute
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (tab *tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (tab *tabs_container) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
 	for _, tab_item := range tab.tab_items {
 		measurement := tab_item.Measure(ctx, constraints)
@@ -136,63 +129,13 @@ func (tab *tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Poi
 	return point
 }
 
-type Tab[T any] struct {
+type Tab struct {
 	gui.DefaultWidget
-	panel widget.Panel
-	tab   tab[T]
+	panel         widget.Panel
+	tab_container tab
 }
 
-func (tab *tab) SetTabItems(tab_items []TabItem[T]) {
-	if len(tab_items) != len(tab.tab.tab_items) {
-		tab.tab.tab_items = make([]*tab_item[T], len(tab_items))
-	}
-
-	for i, item := range tab_items {
-		tab.tab.tab_items[i] = &tab_item[T]{
-			tab_item:   &item,
-			tab_widget: &tab.tab,
-			index:      i,
-		}
-	}
-}
-
-func (tab *tab) OnSwitch(fn func(from, to *TabItem[T])) {
-	tab.tab.on_select_fn = fn
-}
-
-func (tab *tab) GetSelectedIndex() int {
-	return tab.tab.selected_item_index
-}
-
-func (tab *tab) GetSelectedTab() (index int, value T) {
-	if len(tab.tab.tab_items) == 0 {
-		var t T
-		return 0, t
-	}
-	return tab.tab.selected_item_index, tab.tab.tab_items[tab.tab.selected_item_index].tab_item.Value
-}
-
-func (tab *tab) GetTabByIndex(index int) (text string, value T) {
-	tab_item := tab.tab.tab_items[index]
-	return tab_item.tab_item.Text, tab_item.tab_item.Value
-}
-
-func (tab *tab) SelectTabItemByIndex(index int) {
-	if tab.tab.on_select_fn != nil {
-		tab.tab.on_select_fn(tab.tab.tab_items[tab.tab.selected_item_index].tab_item, tab.tab.tab_items[index].tab_item)
-	}
-	tab.tab.selected_item_index = index
-}
-
-func (tab *tab) OnSwap(fn func(ctx *gui.Context, swap Swap)) {
-	tab.tab.on_swap = fn
-}
-
-func (tab *tab) OnClose(fn func(tab_item TabItem[T])) {
-	tab.tab.on_close = fn
-}
-
-func (tab *tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (tab *Tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab)
 	tab.panel.SetStyle(widget.PanelStyleSide)
 	tab.panel.SetAutoBorder(true)
@@ -201,7 +144,7 @@ func (tab *tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (tab *tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (tab *Tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Padding:   basic.NewPadding(2),
@@ -215,7 +158,7 @@ func (tab *tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layoute
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (tab *tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (tab *Tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	var point image.Point
 
 	if w, ok := constraints.FixedWidth(); ok {
@@ -233,7 +176,7 @@ func (tab *tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Poi
 	return point
 }
 
-func (tab *tab) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
+func (tab *Tab) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
 	cm := ctx.ColorMode()
 	r := basic.BorderRadius(ctx)
 	border_type := basicwidgetdraw.RoundedRectBorderTypeRegular
