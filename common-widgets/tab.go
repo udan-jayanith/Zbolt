@@ -82,7 +82,9 @@ func (tab *tabs_container) on_close(index int, item TabItem) {
 }
 
 func (tab *tabs_container) update_tab_items(tab_items []TabItem) {
-
+	for i, widget := range tab.tab_items {
+		widget.tab_item = tab_items[i]
+	}
 }
 
 func (tab *tabs_container) set_tab_items(tab_items []TabItem) {
@@ -99,6 +101,14 @@ func (tab *tabs_container) set_tab_items(tab_items []TabItem) {
 		tab_item_widget.tab_item = item
 		tab.tab_items = append(tab.tab_items, &tab_item_widget)
 	}
+
+	if len(tab_items) > 0 {
+		tab.on_select(0, tab_items[0])
+	}
+}
+
+func (tab *tabs_container) select_tab(index int) {
+	tab.on_select(index, tab.tab_items[index].tab_item)
 }
 
 func (tab *tabs_container) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -210,7 +220,7 @@ type Tab struct {
 }
 
 func (tab *Tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	tab.panel.SetContent(&tab.tab)
+	tab.panel.SetContent(&tab.tab_container)
 	tab.panel.SetStyle(widget.PanelStyleSide)
 	tab.panel.SetAutoBorder(true)
 	tab.panel.SetContentConstraints(widget.PanelContentConstraintsFixedWidth)
@@ -225,7 +235,7 @@ func (tab *Tab) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layoute
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &tab.panel,
-				Size:   gui.FixedSize(tab.tab.Measure(ctx, gui.FixedHeightConstraints(1)).Y),
+				Size:   gui.FixedSize(tab.tab_container.Measure(ctx, gui.Constraints{}).Y),
 			},
 		},
 	}
@@ -244,7 +254,7 @@ func (tab *Tab) Measure(ctx *gui.Context, constraints gui.Constraints) image.Poi
 	if h, ok := constraints.FixedHeight(); ok {
 		point.Y = h
 	} else {
-		point.Y = tab.tab.Measure(ctx, constraints).Y + 4
+		point.Y = tab.tab_container.Measure(ctx, constraints).Y + 4
 	}
 
 	return point
