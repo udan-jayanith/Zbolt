@@ -219,6 +219,30 @@ type Tab struct {
 	tab_container tabs_container
 }
 
+func (tab *Tab) SetTabItem(items []TabItem) {
+	tab.tab_container.set_tab_items(items)
+}
+
+func (tab *Tab) SelectTab(index int) {
+	tab.tab_container.select_tab(index)
+}
+
+func (tab *Tab) SelectedTab() int {
+	return tab.tab_container.selected_item_index
+}
+
+func (tab *Tab) OnSelect(fn func(from TabItemContainer, to TabItemContainer)) {
+	tab.tab_container.listeners.on_select = fn
+}
+
+func (tab *Tab) OnSwap(fn func(from TabItemContainer, to TabItemContainer)) {
+	tab.tab_container.listeners.on_swap = fn
+}
+
+func (tab *Tab) OnClose(fn func(closed TabItemContainer)) {
+	tab.tab_container.listeners.on_close = fn
+}
+
 func (tab *Tab) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	tab.panel.SetContent(&tab.tab_container)
 	tab.panel.SetStyle(widget.PanelStyleSide)

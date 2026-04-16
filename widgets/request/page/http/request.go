@@ -21,7 +21,7 @@ type request_widget struct {
 	t           time.Time
 	url_preview CommonWidgets.URLPreview
 
-	tab         CommonWidgets.Tab[string]
+	tab         CommonWidgets.Tab
 	tab_content struct {
 		params, header  []attr.AttrCheck
 		table           CommonWidgets.AttributeTable
