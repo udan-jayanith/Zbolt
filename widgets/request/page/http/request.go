@@ -84,8 +84,8 @@ func (rw *request_widget) FullURL() string {
 
 func (rw *request_widget) update_url_preview() string {
 	var parameters []attr.AttrCheck
-	_, tab := rw.tab.GetSelectedTab()
-	if tab == "parameters" {
+	_, tab := rw.tab.SelectedTab()
+	if tab.Value == "parameters" {
 		parameters = rw.tab_content.table.RowsCheck()
 	} else {
 		parameters = rw.tab_content.params
@@ -113,8 +113,8 @@ func (rw *request_widget) OnURLInputChanged(fn func(context *gui.Context, text s
 }
 
 func (rw *request_widget) SetParameters(parameters []attr.AttrCheck) {
-	_, selected_tab_value := rw.tab.GetSelectedTab()
-	if selected_tab_value == "parameters" {
+	_, item := rw.tab.SelectedTab()
+	if item.Value == "parameters" {
 		rw.tab_content.table.SetRowsCheck(parameters)
 	}
 
@@ -122,24 +122,24 @@ func (rw *request_widget) SetParameters(parameters []attr.AttrCheck) {
 }
 
 func (rw *request_widget) Parameters() []attr.AttrCheck {
-	_, selected_tab_value := rw.tab.GetSelectedTab()
-	if selected_tab_value == "parameters" {
+	_, selected_tab := rw.tab.SelectedTab()
+	if selected_tab.Value == "parameters" {
 		rw.tab_content.params = rw.tab_content.table.RowsCheck()
 	}
 	return rw.tab_content.params
 }
 
 func (rw *request_widget) SetHeaders(headers []attr.AttrCheck) {
-	_, selected_tab_value := rw.tab.GetSelectedTab()
-	if selected_tab_value == "headers" {
+	_, selected_tab := rw.tab.SelectedTab()
+	if selected_tab.Value == "headers" {
 		rw.tab_content.table.SetRowsCheck(headers)
 	}
 	rw.tab_content.header = headers
 }
 
 func (rw *request_widget) Headers() []attr.AttrCheck {
-	_, selected_tab_value := rw.tab.GetSelectedTab()
-	if selected_tab_value == "headers" {
+	_, selected_tab := rw.tab.SelectedTab()
+	if selected_tab.Value == "headers" {
 		rw.tab_content.header = rw.tab_content.table.RowsCheck()
 	}
 	return rw.tab_content.header
@@ -151,19 +151,19 @@ func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 }
 
 func (rw *request_widget) SelectedTab() int {
-	i, _ := rw.tab.GetSelectedTab()
+	i, _ := rw.tab.SelectedTab()
 	return i
 }
 
 func (rw *request_widget) SetTab(index int) {
-	rw.tab.SelectTabItemByIndex(index)
+	rw.tab.SelectTab(index)
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rw.input_bar_widget)
 	adder.AddWidget(&rw.url_preview)
 
-	rw.tab.SetTabItems([]CommonWidgets.TabItem[string]{
+	rw.tab.SetTabItems([]CommonWidgets.TabItem{
 		{
 			Text:  "Parameters",
 			Value: "parameters",
@@ -178,22 +178,22 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		},
 	})
 
-	rw.tab.OnSwitch(func(from, to *CommonWidgets.TabItem[string]) {
-		if from.Value == "parameters" && to.Value == "headers" {
+	rw.tab.OnSelect(func(from, to CommonWidgets.TabItemContainer) {
+		if from.Item.Value == "parameters" && to.Item.Value == "headers" {
 			rw.tab_content.params = rw.tab_content.table.RowsCheck()
-		} else if from.Value == "headers" && to.Value == "parameters" {
+		} else if from.Item.Value == "headers" && to.Item.Value == "parameters" {
 			rw.tab_content.header = rw.tab_content.table.RowsCheck()
 		}
 
-		if to.Value == "parameters" {
+		if to.Item.Value == "parameters" {
 			rw.tab_content.table.SetRowsCheck(rw.tab_content.params)
-		} else if to.Value == "headers" {
+		} else if to.Item.Value == "headers" {
 			rw.tab_content.table.SetRowsCheck(rw.tab_content.header)
 		}
 	})
 
-	_, selected_tab_value := rw.tab.GetSelectedTab()
-	switch selected_tab_value {
+	_, selected_tab := rw.tab.SelectedTab()
+	switch selected_tab.Value {
 	case "parameters", "headers":
 		rw.tab_content.selected_widget = &rw.tab_content.table
 	case "body":

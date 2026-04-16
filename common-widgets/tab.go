@@ -219,7 +219,7 @@ type Tab struct {
 	tab_container tabs_container
 }
 
-func (tab *Tab) SetTabItem(items []TabItem) {
+func (tab *Tab) SetTabItems(items []TabItem) {
 	tab.tab_container.set_tab_items(items)
 }
 
