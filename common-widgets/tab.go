@@ -227,8 +227,8 @@ func (tab *Tab) SelectTab(index int) {
 	tab.tab_container.select_tab(index)
 }
 
-func (tab *Tab) SelectedTab() int {
-	return tab.tab_container.selected_item_index
+func (tab *Tab) SelectedTab() (int, TabItem) {
+	return tab.tab_container.selected_item_index, tab.tab_container.tab_items[tab.tab_container.selected_item_index].tab_item
 }
 
 func (tab *Tab) OnSelect(fn func(from TabItemContainer, to TabItemContainer)) {
