@@ -151,18 +151,17 @@ func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
 }
 
 func (rw *request_widget) SelectedTab() int {
+	rw.set_tab_items()
 	i, _ := rw.tab.SelectedTab()
 	return i
 }
 
-func (rw *request_widget) SetTab(index int) {
+func (rw *request_widget) SelectTab(index int) {
+	rw.set_tab_items()
 	rw.tab.SelectTab(index)
 }
 
-func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddWidget(&rw.input_bar_widget)
-	adder.AddWidget(&rw.url_preview)
-
+func (rw *request_widget) set_tab_items() {
 	rw.tab.SetTabItems([]CommonWidgets.TabItem{
 		{
 			Text:  "Parameters",
@@ -177,6 +176,13 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 			Value: "body",
 		},
 	})
+}
+
+func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	adder.AddWidget(&rw.input_bar_widget)
+	adder.AddWidget(&rw.url_preview)
+
+	rw.set_tab_items()
 
 	rw.tab.OnSelect(func(from, to CommonWidgets.TabItemContainer) {
 		if from.Item.Value == "parameters" && to.Item.Value == "headers" {

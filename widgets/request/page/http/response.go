@@ -15,7 +15,7 @@ import (
 type response_widget struct {
 	gui.DefaultWidget
 	header_widget response_header_widget
-	tab           CommonWidgets.Tab[struct{}]
+	tab           CommonWidgets.Tab
 	tab_content   struct {
 		response_header  widget.Table[struct{}]
 		response_body    CommonWidgets.BodyWidget
@@ -84,33 +84,33 @@ func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
 }
 
 func (rw *response_widget) SetSelectedTab(index int) {
-	rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
-		{
-			Text: "Body",
-		},
-		{
-			Text: "Header",
-		},
-	})
-	rw.tab.SelectTabItemByIndex(index)
+	rw.set_tab_items()
+	rw.tab.SelectTab(index)
 }
 
 func (rw *response_widget) SelectedTab() int {
-	return rw.tab.GetSelectedIndex()
+	index, _ := rw.tab.SelectedTab()
+	return index
+}
+
+func (rw *response_widget) set_tab_items() {
+	rw.tab.SetTabItems([]CommonWidgets.TabItem{
+		{
+			Text:  "Body",
+			Value: "body",
+		},
+		{
+			Text:  "Header",
+			Value: "header",
+		},
+	})
 }
 
 func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&rw.header_widget)
 
 	u := widget.UnitSize(ctx)
-	rw.tab.SetTabItems([]CommonWidgets.TabItem[struct{}]{
-		{
-			Text: "Body",
-		},
-		{
-			Text: "Header",
-		},
-	})
+	rw.set_tab_items()
 
 	{
 		rw.tab_content.response_header.SetColumns([]widget.TableColumn{
@@ -128,11 +128,12 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 			},
 		})
 
-		switch rw.tab.GetSelectedIndex() {
-		case 0:
+		_, selected_tab := rw.tab.SelectedTab()
+		switch selected_tab.Value {
+		case "body":
 			rw.tab_content.response_body.SetType(CommonWidgets.HTTP_Response)
 			rw.tab_content.selected_content = &rw.tab_content.response_body
-		case 1:
+		case "header":
 			rw.tab_content.selected_content = &rw.tab_content.response_header
 		default:
 			panic("Unknown tab selected")
