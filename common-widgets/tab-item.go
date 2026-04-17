@@ -154,11 +154,14 @@ func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 	is_hovering := widgetBounds.IsHitAtCursor()
 
 	if item.tab_item.Closable && is_hovering {
-		tab_item_size := item.Measure(ctx, gui.Constraints{})
 		padding := item.padding(ctx)
+		tab_item_size := widgetBounds.Bounds()
+		tab_item_size.Max.X -= padding.End
+
 		close_icon_size := item.close_icon.Measure(ctx, gui.Constraints{})
 		cursor_x, _ := ebiten.CursorPosition()
-		if tab_item_size.X-padding.End >= cursor_x && cursor_x >= (tab_item_size.X-padding.End)-close_icon_size.X && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+
+		if cursor_x <= tab_item_size.Max.X && cursor_x >= tab_item_size.Max.X-close_icon_size.X && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
 			println("closed")
 			item.tabs_container.on_close(item.index, item.tab_item)
 			return gui.HandleInputResult{}
