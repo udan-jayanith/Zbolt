@@ -19,6 +19,7 @@ type TabItemContainer struct {
 type tabs_container struct {
 	gui.DefaultWidget
 	tab_items []*tab_item
+	closable  bool
 
 	holding struct {
 		is_holding               bool
@@ -245,6 +246,10 @@ func (tab *Tab) OnSelect(fn func(from TabItemContainer, to TabItemContainer)) {
 
 func (tab *Tab) OnSwap(fn func(from TabItemContainer, to TabItemContainer)) {
 	tab.tab_container.listeners.on_swap = fn
+}
+
+func (tab *Tab) SetClosable(closable bool) {
+	tab.tab_container.closable = closable
 }
 
 func (tab *Tab) OnClose(fn func(closed TabItemContainer)) {

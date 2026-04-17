@@ -17,10 +17,9 @@ import (
 )
 
 type TabItem struct {
-	Text     string
-	Value    string
-	Closable bool
-	Icon     *icons.Icon
+	Text  string
+	Value string
+	Icon  *icons.Icon
 }
 
 type tab_item struct {
@@ -48,7 +47,7 @@ func (item *tab_item) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	adder.AddWidget(&item.text_widget)
 
-	if item.tab_item.Closable {
+	if item.tabs_container.closable {
 		if item.close_icon.IconName() == "" {
 			line_height := widget.LineHeight(ctx)
 			size := line_height - line_height/4
@@ -94,7 +93,7 @@ func (item *tab_item) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Size:   gui.FlexibleSize(1),
 	})
 
-	if item.tab_item.Closable {
+	if item.tabs_container.closable {
 		layout.Items = append(layout.Items, gui.LinearLayoutItem{
 			Widget: &item.close_icon,
 		})
@@ -113,7 +112,7 @@ func (item *tab_item) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 		point.X += icon_measurement.X + gap
 	}
 
-	if item.tab_item.Closable {
+	if item.tabs_container.closable {
 		icon_measurement := item.close_icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
 	}
@@ -153,7 +152,7 @@ func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 	b := widgetBounds.Bounds()
 	is_hovering := widgetBounds.IsHitAtCursor()
 
-	if item.tab_item.Closable && is_hovering {
+	if item.tabs_container.closable && is_hovering {
 		padding := item.padding(ctx)
 		tab_item_size := widgetBounds.Bounds()
 		tab_item_size.Max.X -= padding.End
@@ -162,7 +161,6 @@ func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 		cursor_x, _ := ebiten.CursorPosition()
 
 		if cursor_x <= tab_item_size.Max.X && cursor_x >= tab_item_size.Max.X-close_icon_size.X && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
-			println("closed")
 			item.tabs_container.on_close(item.index, item.tab_item)
 			return gui.HandleInputResult{}
 		}

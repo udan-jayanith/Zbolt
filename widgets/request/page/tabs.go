@@ -39,9 +39,8 @@ func (tabs *TabsHandler) Open(request *def.Request, ctx *gui.Context) {
 	line_height := widget.LineHeight(ctx)
 	size := line_height - line_height/4
 	tabs.tab_items = append(tabs.tab_items, CommonWidgets.TabItem{
-		Text:     request.Name(),
-		Closable: true,
-		Icon:     icons.NewIcon(request.Type.IconName(), size),
+		Text: request.Name(),
+		Icon: icons.NewIcon(request.Type.IconName(), size),
 	})
 	tabs.tabs_data = append(tabs.tabs_data, request)
 
@@ -76,6 +75,7 @@ func (tabs *TabsHandler) Add(adder *gui.ChildAdder) {
 		tabs.tab_widget.OnSelect(tabs.on_select)
 	}
 
+	tabs.tab_widget.SetClosable(true)
 	tabs.tab_widget.OnClose(func(closed CommonWidgets.TabItemContainer) {
 		tabs.tab_items = slices.Delete(tabs.tab_items, closed.Index, closed.Index+1)
 		tabs.tabs_data = slices.Delete(tabs.tabs_data, closed.Index, closed.Index+1)
