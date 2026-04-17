@@ -19,6 +19,14 @@ type TabsHandler struct {
 	on_close  func(closed CommonWidgets.TabItemContainer)
 }
 
+func (tabs *TabsHandler) OnSelect(fn func(from CommonWidgets.TabItemContainer, to CommonWidgets.TabItemContainer)) {
+	tabs.on_select = fn
+}
+
+func (tabs *TabsHandler) OnClose(fn func(closed CommonWidgets.TabItemContainer)) {
+	tabs.on_close = fn
+}
+
 // Open opens
 func (tabs *TabsHandler) Open(request *def.Request, ctx *gui.Context) {
 	for i, _ := range tabs.tab_items {
@@ -50,6 +58,14 @@ func (tabs *TabsHandler) SelectedTab() int {
 	return index
 }
 
+func (tabs *TabsHandler) IsEmpty() bool {
+	return len(tabs.tab_items) == 0
+}
+
+func (tabs *TabsHandler) GetData(index int) *def.Request {
+	return tabs.tabs_data[index]
+}
+
 func (tabs *TabsHandler) Add(adder *gui.ChildAdder) {
 	if tabs.on_select != nil {
 		tabs.tab_widget.OnSelect(tabs.on_select)
@@ -76,4 +92,8 @@ func (tabs *TabsHandler) Add(adder *gui.ChildAdder) {
 
 	tabs.tab_widget.SetTabItems(tabs.tab_items)
 	adder.AddWidget(&tabs.tab_widget)
+}
+
+func (tabs *TabsHandler) Widget() *CommonWidgets.Tab {
+	return &tabs.tab_widget
 }

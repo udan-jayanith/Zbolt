@@ -3,11 +3,9 @@ package request_page
 import (
 	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
-	"API-Client/icons"
 	"API-Client/widgets/request/def"
 	http_widget "API-Client/widgets/request/page/http"
 	websocket_widget "API-Client/widgets/request/page/websocket"
-	"fmt"
 
 	"image"
 
@@ -36,10 +34,7 @@ type RequestPage struct {
 	current_directory string
 	sidebar_items     []SidebarItem[sidebar_item]
 
-	tab_widget CommonWidgets.Tab
-	tab_items  []CommonWidgets.TabItem
-	tabs_data  []*def.Request
-
+	tabs_handler   TabsHandler
 	nothing_widget NothingWidget
 
 	request_widget   CommonWidgets.WidgetWithPadding[def.RequestWidget]
@@ -54,27 +49,6 @@ type RequestPage struct {
 	popup_widget  widget.Popup
 
 	notify_widget CommonWidgets.Notify
-}
-
-func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
-	for i, _ := range rp.tab_items {
-		if rp.tabs_data[i].Path() == request.Path() {
-			rp.tab_widget.SelectTab(i)
-			return fmt.Errorf("%s is already opened", request.Path())
-		}
-	}
-
-	line_height := widget.LineHeight(ctx)
-	size := line_height - line_height/4
-	rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem{
-		Value:    request,
-		Text:     request.Name(),
-		Closable: true,
-		Icon:     icons.NewIcon(request.Type.IconName(), size),
-	})
-
-	rp.tab_widget.SelectTabItemByIndex(len(rp.tab_items) - 1)
-	return nil
 }
 
 func (rp *RequestPage) create_sidebar_item(request *def.Request) {
@@ -132,30 +106,18 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 
 		request := item.Data.(*def.Request)
-		err := rp.open_tab(request, ctx)
-		if err != nil {
-			rp.notify_widget.SetText(err.Error())
-			rp.notify_widget.Open()
-		}
+		rp.tabs_handler.Open(request, ctx)
 	})
 	adder.AddWidget(&rp.sidebar)
 
-	if len(rp.tab_items) > 0 {
-		rp.tab_widget.SetTabItems(rp.tab_items)
-		rp.tab_widget.OnSwap(func(ctx *gui.Context, swap CommonWidgets.Swap) {
-			temp := rp.tab_items[swap.From]
-			rp.tab_items[swap.From] = rp.tab_items[swap.To]
-			rp.tab_items[swap.To] = temp
-		})
-		adder.AddWidget(&rp.tab_widget)
-
-		_, req := rp.tab_widget.GetSelectedTab()
-		switch req.Type {
+	rp.tabs_handler.OnSelect(func(from, to CommonWidgets.TabItemContainer) {
+		data := rp.tabs_handler.GetData(to.Index)
+		switch data.Type {
 		case def.HTTP:
-			rp.http_widget.SetReq(req)
+			rp.http_widget.SetReq(data)
 			rp.request_widget.SetWidget(&rp.http_widget)
 		case def.Websocket:
-			rp.websocket_widget.SetReq(req)
+			rp.websocket_widget.SetReq(data)
 			rp.request_widget.SetWidget(&rp.websocket_widget)
 		default:
 			panic("request type not handled")
@@ -163,12 +125,16 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		rp.request_widget.SetPadding(padding)
 		adder.AddWidget(&rp.request_widget)
-	} else {
+	})
+
+	if rp.tabs_handler.IsEmpty() {
 		rp.nothing_widget.OnClick(func() {
 			rp.request_create_widget.Clear()
 			rp.open_popup(&rp.request_create_widget, ctx)
 		})
 		adder.AddWidget(&rp.nothing_widget)
+	} else {
+		rp.tabs_handler.Add(adder)
 	}
 
 	rp.popup_widget.SetBackgroundDark(true)
@@ -214,10 +180,10 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 		Direction: gui.LayoutDirectionVertical,
 	}
 
-	if len(rp.tab_items) > 0 {
+	if !rp.tabs_handler.IsEmpty() {
 		tab_container_layout.Items = []gui.LinearLayoutItem{
 			{
-				Widget: &rp.tab_widget,
+				Widget: rp.tabs_handler.Widget(),
 			},
 			{
 				Widget: &rp.request_widget,
