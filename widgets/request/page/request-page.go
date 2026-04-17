@@ -36,8 +36,9 @@ type RequestPage struct {
 	current_directory string
 	sidebar_items     []SidebarItem[sidebar_item]
 
-	tab_widget CommonWidgets.Tab[*def.Request]
-	tab_items  []CommonWidgets.TabItem[*def.Request]
+	tab_widget CommonWidgets.Tab
+	tab_items  []CommonWidgets.TabItem
+	tabs_data  []*def.Request
 
 	nothing_widget NothingWidget
 
@@ -56,16 +57,16 @@ type RequestPage struct {
 }
 
 func (rp *RequestPage) open_tab(request *def.Request, ctx *gui.Context) error {
-	for i, req := range rp.tab_items {
-		if req.Value.Path() == request.Path() {
-			rp.tab_widget.SelectTabItemByIndex(i)
+	for i, _ := range rp.tab_items {
+		if rp.tabs_data[i].Path() == request.Path() {
+			rp.tab_widget.SelectTab(i)
 			return fmt.Errorf("%s is already opened", request.Path())
 		}
 	}
 
 	line_height := widget.LineHeight(ctx)
 	size := line_height - line_height/4
-	rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem[*def.Request]{
+	rp.tab_items = append(rp.tab_items, CommonWidgets.TabItem{
 		Value:    request,
 		Text:     request.Name(),
 		Closable: true,
