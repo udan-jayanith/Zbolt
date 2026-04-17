@@ -110,8 +110,16 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&rp.sidebar)
 
-	rp.tabs_handler.OnSelect(func(from, to CommonWidgets.TabItemContainer) {
-		data := rp.tabs_handler.GetData(to.Index)
+	if rp.tabs_handler.IsEmpty() {
+		rp.nothing_widget.OnClick(func() {
+			rp.request_create_widget.Clear()
+			rp.open_popup(&rp.request_create_widget, ctx)
+		})
+		adder.AddWidget(&rp.nothing_widget)
+	} else {
+		rp.tabs_handler.Add(adder)
+
+		data := rp.tabs_handler.GetData(rp.tabs_handler.SelectedTab())
 		switch data.Type {
 		case def.HTTP:
 			rp.http_widget.SetReq(data)
@@ -125,16 +133,6 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 		rp.request_widget.SetPadding(padding)
 		adder.AddWidget(&rp.request_widget)
-	})
-
-	if rp.tabs_handler.IsEmpty() {
-		rp.nothing_widget.OnClick(func() {
-			rp.request_create_widget.Clear()
-			rp.open_popup(&rp.request_create_widget, ctx)
-		})
-		adder.AddWidget(&rp.nothing_widget)
-	} else {
-		rp.tabs_handler.Add(adder)
 	}
 
 	rp.popup_widget.SetBackgroundDark(true)
