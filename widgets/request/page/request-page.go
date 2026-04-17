@@ -120,6 +120,9 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rp.tabs_handler.Add(adder)
 
 		data := rp.tabs_handler.GetData(rp.tabs_handler.SelectedTab())
+		if data == nil {
+			panic("Invalid")
+		}
 		switch data.Type {
 		case def.HTTP:
 			rp.http_widget.SetReq(data)
