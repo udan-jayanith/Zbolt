@@ -56,8 +56,12 @@ func (tab *tabs_container) on_holding(index int, relative_cursor_x int) {
 	tab.holding.relative_cursor_position = relative_cursor_x
 }
 
-func (tab *tabs_container) on_holding_cancel(index int) {
+func (tab *tabs_container) on_mouse_up(index int) {
+	if !tab.holding.is_holding {
+		return
+	}
 	tab.holding.is_holding = false
+
 	if tab.holding.closest_index != -1 && len(tab.tab_items) > 0 && tab.listeners.on_swap != nil {
 		from := TabItemContainer{
 			Index: index,
@@ -108,6 +112,9 @@ func (tab *tabs_container) set_tab_items(tab_items []TabItem) {
 }
 
 func (tab *tabs_container) select_tab(index int) {
+	if index >= len(tab.tab_items) {
+		panic("Invalid index")
+	}
 	tab.on_select(index, tab.tab_items[index].tab_item)
 }
 
@@ -228,6 +235,9 @@ func (tab *Tab) SelectTab(index int) {
 }
 
 func (tab *Tab) SelectedTab() (int, TabItem) {
+	if len(tab.tab_container.tab_items) == 0 {
+		return 0, TabItem{}
+	}
 	return tab.tab_container.selected_item_index, tab.tab_container.tab_items[tab.tab_container.selected_item_index].tab_item
 }
 

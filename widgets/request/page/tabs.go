@@ -45,6 +45,7 @@ func (tabs *TabsHandler) Open(request *def.Request, ctx *gui.Context) {
 	})
 	tabs.tabs_data = append(tabs.tabs_data, request)
 
+	tabs.tab_widget.SetTabItems(tabs.tab_items)
 	tabs.tab_widget.SelectTab(len(tabs.tab_items) - 1)
 }
 
@@ -54,6 +55,7 @@ func (tabs *TabsHandler) SelectTab(index int) {
 }
 
 func (tabs *TabsHandler) SelectedTab() int {
+	tabs.tab_widget.SetTabItems(tabs.tab_items)
 	index, _ := tabs.tab_widget.SelectedTab()
 	return index
 }

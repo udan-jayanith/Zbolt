@@ -34,6 +34,7 @@ type tab_item struct {
 	close_icon  icons.Icon
 
 	relative_cursor_axis int
+	pressed              bool
 }
 
 func (item *tab_item) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -147,14 +148,15 @@ func (item *tab_item) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst
 func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	b := widgetBounds.Bounds()
 	is_hovering := widgetBounds.IsHitAtCursor()
-
 	if is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		println("selected")
 		item.tabs_container.on_select(item.index, item.tab_item)
-	} else if is_hovering && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
+	} else if is_hovering && inpututil.MouseButtonPressDuration(ebiten.MouseButton0) >= 10 && item.tabs_container.selected_item_index == item.index {
+		println("holding")
 		cursor_axis, _ := ebiten.CursorPosition()
 		item.tabs_container.on_holding(item.index, cursor_axis-b.Min.X)
-	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) {
-		item.tabs_container.on_holding_cancel(item.index)
+	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && item.tabs_container.selected_item_index == item.index {
+		item.tabs_container.on_mouse_up(item.index)
 	}
 
 	return gui.HandleInputResult{}
