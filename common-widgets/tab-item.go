@@ -34,7 +34,6 @@ type tab_item struct {
 	close_icon  icons.Icon
 
 	relative_cursor_axis int
-	pressed              bool
 }
 
 func (item *tab_item) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -132,7 +131,7 @@ func (item *tab_item) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst
 	if item.tabs_container.selected_item_index == item.index {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.2, 0.2)
 		border_type = basicwidgetdraw.RoundedRectBorderTypeInset
-	} else if widgetBounds.IsHitAtCursor() && ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
+	} else if inpututil.MouseButtonPressDuration(ebiten.MouseButton0) >= 10 && widgetBounds.IsHitAtCursor() && item.tabs_container.holding.is_holding {
 		background_color = draw_color.Color2(cm, draw_color.ColorTypeBase, 0.4, 0.4)
 		border_type = basicwidgetdraw.RoundedRectBorderTypeRegular
 	} else if widgetBounds.IsHitAtCursor() {

@@ -62,7 +62,7 @@ func (tab *tabs_container) on_mouse_up(index int) {
 	}
 	tab.holding.is_holding = false
 
-	if tab.holding.closest_index != -1 && len(tab.tab_items) > 0 && tab.listeners.on_swap != nil {
+	if len(tab.tab_items) > 0 {
 		from := TabItemContainer{
 			Index: index,
 			Item:  tab.tab_items[index].tab_item,
@@ -71,7 +71,6 @@ func (tab *tabs_container) on_mouse_up(index int) {
 			Index: tab.holding.closest_index,
 			Item:  tab.tab_items[tab.holding.closest_index].tab_item,
 		}
-		println("swapping from", index+1, "to", tab.holding.closest_index+1)
 		tab.selected_item_index = tab.holding.closest_index
 		if tab.listeners.on_swap != nil {
 			tab.listeners.on_swap(from, to)
@@ -185,34 +184,24 @@ func (tab *tabs_container) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 }
 
 func (tab *tabs_container) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	if !widgetBounds.IsHitAtCursor() || !tab.holding.is_holding {
+	if !tab.holding.is_holding || len(tab.tab_items) == 0 {
 		return gui.HandleInputResult{}
 	}
 
 	b := widgetBounds.Bounds()
-	holding_item_bounds := tab.holding_item_bounds(ctx, b)
+	var closest_item_index int
+	cursor_x, _ := ebiten.CursorPosition()
 
-	var closest_overlaying_item_bounds image.Rectangle
-	closest_overlaying_item_index := -1
-
-	for _, tab_item := range tab.tab_items {
+	for i, tab_item := range tab.tab_items {
 		w := tab_item.Measure(ctx, gui.Constraints{}).X
-		bounds := image.Rect(b.Min.X, b.Min.Y, b.Min.X+w, b.Max.Y)
+		if b.Min.X <= cursor_x && cursor_x <= b.Min.X+w {
+			closest_item_index = i
+			break
+		}
 		b.Min.X += w
-
-		if tab_item.index == tab.holding.tab_item_index {
-			continue
-		}
-
-		intersection_w := holding_item_bounds.Intersect(bounds).Dx()
-		if intersection_w > 0 && closest_overlaying_item_index == -1 || intersection_w >= closest_overlaying_item_bounds.Intersect(holding_item_bounds).Dx() {
-			closest_overlaying_item_bounds = bounds
-			closest_overlaying_item_index = tab_item.index
-			println("closest", tab_item.index+1)
-		}
 	}
 
-	tab.holding.closest_index = closest_overlaying_item_index
+	tab.holding.closest_index = closest_item_index
 	return gui.HandleInputResult{}
 }
 
