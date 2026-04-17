@@ -54,7 +54,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.SetAutowrap(data.RequestConfig.AutoWrap)
 	brp.request_widget.SetFormat(data.RequestConfig.Formate)
 	brp.request_widget.SetBody(&data.Body)
-	brp.request_widget.SetTab(data.SelectedRequestTab())
+	brp.request_widget.SelectTab(data.SelectedRequestTab())
 
 	if data.Method == "" {
 		data.Method = "Get"
