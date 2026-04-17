@@ -71,7 +71,11 @@ func (tab *tabs_container) on_mouse_up(index int) {
 			Index: tab.holding.closest_index,
 			Item:  tab.tab_items[tab.holding.closest_index].tab_item,
 		}
-		tab.listeners.on_swap(from, to)
+		println("swapping from", index+1, "to", tab.holding.closest_index+1)
+		tab.selected_item_index = tab.holding.closest_index
+		if tab.listeners.on_swap != nil {
+			tab.listeners.on_swap(from, to)
+		}
 	}
 }
 
@@ -97,6 +101,10 @@ func (tab *tabs_container) set_tab_items(tab_items []TabItem) {
 		return
 	}
 
+	tab.selected_item_index = 0
+	if len(tab_items) <= tab.selected_item_index {
+		tab.selected_item_index = 0
+	}
 	tab.tab_items = make([]*tab_item, 0, len(tab_items))
 	for i, item := range tab_items {
 		tab_item_widget := tab_item{}
@@ -188,18 +196,19 @@ func (tab *tabs_container) HandlePointingInput(ctx *gui.Context, widgetBounds *g
 	closest_overlaying_item_index := -1
 
 	for _, tab_item := range tab.tab_items {
-		if tab_item.index == tab.holding.tab_item_index {
-			continue
-		}
-
 		w := tab_item.Measure(ctx, gui.Constraints{}).X
 		bounds := image.Rect(b.Min.X, b.Min.Y, b.Min.X+w, b.Max.Y)
 		b.Min.X += w
 
+		if tab_item.index == tab.holding.tab_item_index {
+			continue
+		}
+
 		intersection_w := holding_item_bounds.Intersect(bounds).Dx()
-		if intersection_w > 0 && closest_overlaying_item_index == -1 || intersection_w > closest_overlaying_item_bounds.Intersect(holding_item_bounds).Dx() {
+		if intersection_w > 0 && closest_overlaying_item_index == -1 || intersection_w >= closest_overlaying_item_bounds.Intersect(holding_item_bounds).Dx() {
 			closest_overlaying_item_bounds = bounds
 			closest_overlaying_item_index = tab_item.index
+			println("closest", tab_item.index+1)
 		}
 	}
 

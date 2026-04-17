@@ -65,6 +65,9 @@ func (tabs *TabsHandler) IsEmpty() bool {
 }
 
 func (tabs *TabsHandler) GetData(index int) *def.Request {
+	if index >= len(tabs.tabs_data) {
+		return nil
+	}
 	return tabs.tabs_data[index]
 }
 

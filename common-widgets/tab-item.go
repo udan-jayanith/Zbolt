@@ -68,10 +68,18 @@ func (item *tab_item) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
+func (item *tab_item) padding(ctx *gui.Context) gui.Padding {
+	return basic.NewPadding(0, widget.LineHeight(ctx)/2)
+}
+
+func (item *tab_item) gap(ctx *gui.Context) int {
+	return widget.UnitSize(ctx) / 4
+}
+
 func (item *tab_item) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
-		Padding:   basic.NewPadding(0, widget.LineHeight(ctx)/2),
-		Gap:       widget.UnitSize(ctx) / 4,
+		Padding:   item.padding(ctx),
+		Gap:       item.gap(ctx),
 		Direction: gui.LayoutDirectionHorizontal,
 		Items:     make([]gui.LinearLayoutItem, 0, 3),
 	}
@@ -98,9 +106,9 @@ func (item *tab_item) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 
 func (item *tab_item) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := item.text_widget.Measure(ctx, constraints)
-	padding := basic.NewPadding(0, widget.LineHeight(ctx)/2)
+	padding := item.padding(ctx)
 
-	gap := widget.UnitSize(ctx) / 4
+	gap := item.gap(ctx)
 	if item.tab_item.Icon != nil {
 		icon_measurement := item.tab_item.Icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
@@ -109,9 +117,6 @@ func (item *tab_item) Measure(ctx *gui.Context, constraints gui.Constraints) ima
 	if item.tab_item.Closable {
 		icon_measurement := item.close_icon.Measure(ctx, constraints)
 		point.X += icon_measurement.X + gap
-		item.close_icon.OnClick(func() {
-			item.tabs_container.on_close(item.index, item.tab_item)
-		})
 	}
 
 	point.X += padding.End + padding.Start
@@ -148,11 +153,22 @@ func (item *tab_item) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst
 func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	b := widgetBounds.Bounds()
 	is_hovering := widgetBounds.IsHitAtCursor()
+
+	if item.tab_item.Closable && is_hovering {
+		tab_item_size := item.Measure(ctx, gui.Constraints{})
+		padding := item.padding(ctx)
+		close_icon_size := item.close_icon.Measure(ctx, gui.Constraints{})
+		cursor_x, _ := ebiten.CursorPosition()
+		if tab_item_size.X-padding.End >= cursor_x && cursor_x >= (tab_item_size.X-padding.End)-close_icon_size.X && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+			println("closed")
+			item.tabs_container.on_close(item.index, item.tab_item)
+			return gui.HandleInputResult{}
+		}
+	}
+
 	if is_hovering && inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
-		println("selected")
 		item.tabs_container.on_select(item.index, item.tab_item)
 	} else if is_hovering && inpututil.MouseButtonPressDuration(ebiten.MouseButton0) >= 10 && item.tabs_container.selected_item_index == item.index {
-		println("holding")
 		cursor_axis, _ := ebiten.CursorPosition()
 		item.tabs_container.on_holding(item.index, cursor_axis-b.Min.X)
 	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && item.tabs_container.selected_item_index == item.index {
