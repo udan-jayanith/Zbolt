@@ -18,7 +18,7 @@ type request_widget struct {
 	
 	url_preview CommonWidgets.URLPreview
 
-	tab_widget CommonWidgets.Tab[struct{}]
+	tab_widget CommonWidgets.Tab
 	content    struct {
 		params, headers CommonWidgets.AttributeTable
 		body            request_body // TODO: make a editor widget and replace with it.
@@ -35,7 +35,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	adder.AddWidget(&rw.url_preview)
 	
-	rw.tab_widget.SetTabItems([]CommonWidgets.TabItem[struct{}]{
+	rw.tab_widget.SetTabItems([]CommonWidgets.TabItem{
 		{
 			Text: "Parameters",
 		},
