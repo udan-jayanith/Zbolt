@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -89,8 +88,9 @@ type HTTP_Data struct {
 	selected_request_tab int
 
 	request struct {
-		is_fetching         bool
-		response_data_mutex sync.Mutex
+		is_fetching, cancel bool
+		err                 error
+		m                   sync.Mutex
 		response_data       HTTP_Response_Data
 	}
 	response_data HTTP_Response_Data
@@ -192,9 +192,13 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 	}
 }
 
-// Do perform the http request
+// Do performs the http request
 // Response data can be revised through ResponseData method
+// Calling Do updates Headers so headers must be update in the HTTP_widget
 func (data *HTTP_Data) Do() bool {
+	if data.request.is_fetching {
+		panic("Request is alredy being requested")
+	}
 	// TODO: http.NewRequestWithContext()
 	method := strings.ToUpper(data.Method)
 	var body io.Reader
@@ -208,18 +212,39 @@ func (data *HTTP_Data) Do() bool {
 		return false
 	}
 	data.set_req_headers(req)
+	go data.do(req)
 
 	return true
 }
 
-func (data *HTTP_Data) Cancel() {
+func (data *HTTP_Data) do(req *http.Request) {
+	// TODO: before caneling the request update response data
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		data.request.err = err
+		return
+	}
 
+	p := make([]byte, 1024)
+	for {
+		n, err := res.Body.Read(p)
+		if err != nil {
+			data.request.err = err
+			return
+		}
+
+	}
+}
+
+func (data *HTTP_Data) Cancel() {
+	data.request.cancel = true
 }
 
 type HTTP_Response_Body struct {
-	File         *os.File
-	Path         string
-	IsFileClosed bool
+	// TODO:
+	//File         *os.File
+	//Path         string
+	//IsFileClosed bool
 
 	ContentType ContentType
 	content     []byte
