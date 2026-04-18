@@ -68,7 +68,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	u.Path = data.URL.EncodedPath()
 	brp.request_widget.SetURL(u)
 	brp.request_widget.DisableURLInput(data.URL.IsPattern())
-	// TODO: set url preview
 
 	// Setup response widget
 	res_data := data.ResponseData()
@@ -117,6 +116,7 @@ func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
 	u, _ := url.Parse(brp.data.URL.BaseURL)
 	brp.url_panel_widget.Set(u.Scheme, u.Host, brp.data.URL.RawPath())
 	brp.popup_widget.SetOpen(true)
+	// TODO: Set patters to the url panel if any
 }
 
 func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.PopupCloseReason) {

@@ -135,9 +135,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 
 		rp.tabs_handler.OnSelect(func(from, to CommonWidgets.TabItemContainer, by_user bool) {
-			if by_user {
-				rp.request_widget.Widget().SyncData()
-			}
+			rp.request_widget.Widget().SyncData()
 		})
 
 		rp.tabs_handler.OnClose(func(closed CommonWidgets.TabItemContainer) {
