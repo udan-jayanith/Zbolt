@@ -114,9 +114,8 @@ func (brp *HTTP_Widget) url_panel_popup_size(ctx *gui.Context, widgetBounds *gui
 
 func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
 	u, _ := url.Parse(brp.data.URL.BaseURL)
-	brp.url_panel_widget.Set(u.Scheme, u.Host, brp.data.URL.RawPath())
+	brp.url_panel_widget.Set(u.Scheme, u.Host, brp.data.URL.RawPath(), brp.data.URL.Path.Pattern.Attributes)
 	brp.popup_widget.SetOpen(true)
-	// TODO: Set patters to the url panel if any
 }
 
 func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.PopupCloseReason) {

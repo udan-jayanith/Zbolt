@@ -97,7 +97,7 @@ func (w *url_panel_content) init_scheme() {
 	}
 }
 
-func (w *url_panel_content) set(shceme, host, path string) {
+func (w *url_panel_content) set(shceme, host, path string, pattern []attr.Attribute) {
 	w.init_scheme()
 	if shceme == "https" || shceme == "HTTPS" {
 		w.scheme.SelectItemByIndex(1)
@@ -106,6 +106,7 @@ func (w *url_panel_content) set(shceme, host, path string) {
 	}
 	w.host.SetValue(host)
 	w.path.SetValue(path)
+	w.query.SetRows(pattern)
 	w.update_query_table()
 }
 
@@ -255,8 +256,8 @@ func (w *url_panel_widget) Clear() {
 	w.content.clear()
 }
 
-func (w *url_panel_widget) Set(shceme, host, path string) {
-	w.content.set(shceme, host, path)
+func (w *url_panel_widget) Set(shceme, host, path string, pattern []attr.Attribute) {
+	w.content.set(shceme, host, path, pattern)
 }
 
 func (w *url_panel_widget) Build(context *gui.Context, adder *gui.ChildAdder) error {
