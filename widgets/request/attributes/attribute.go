@@ -38,10 +38,15 @@ func bidirectional_attr_check_merge(a []AttrCheck, b []AttrCheck) []AttrCheck {
 	merged := make([]AttrCheck, 0, len(a)+len(b))
 	mapped := make(map[string]int, len(a)+len(b))
 
-	for i, attr := range a {
-		mapped[attr.Key] = i
+	for _, attr := range a {
+		i, ok := mapped[attr.Key]
+		if ok {
+			merged[i] = attr
+		} else {
+			merged = append(merged, attr)
+			mapped[attr.Key] = len(merged) - 1
+		}
 	}
-	merged = append(merged, a...)
 
 	for _, attr := range b {
 		i, ok := mapped[attr.Key]

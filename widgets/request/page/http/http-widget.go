@@ -84,6 +84,8 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		brp.response_widget.SetStatus(res_data.Status_code)
 	}
 	// TODO: set response time
+	// TODO: set content type
+	// TODO: only enable body tab if selected method is POST, PUT or PATCH
 	gui.RequestRebuild(brp)
 }
 

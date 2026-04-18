@@ -1,10 +1,15 @@
 package def
 
 import (
+	messages "API-Client/massages"
 	attr "API-Client/widgets/request/attributes"
 	url_utils "API-Client/widgets/request/url-utils"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -82,7 +87,13 @@ type HTTP_Data struct {
 	} `json:"response-config"`
 
 	selected_request_tab int
-	response_data        HTTP_Response_Data
+
+	request struct {
+		is_fetching         bool
+		response_data_mutex sync.Mutex
+		response_data       HTTP_Response_Data
+	}
+	response_data HTTP_Response_Data
 }
 
 func (data *HTTP_Data) SetSelectedRequestTab(index int) {
@@ -111,15 +122,98 @@ func (data *HTTP_Data) FullURL() *url.URL {
 }
 
 func (data *HTTP_Data) ResponseData() *HTTP_Response_Data {
+	if data.request.is_fetching {
+		data.update_response_data()
+	}
 	return &data.response_data
 }
 
-func (data *HTTP_Data) Do() {
-
+// UpdateResponseData updates HTTP_Response_Data if http response data isn't locked
+func (data *HTTP_Data) update_response_data() {
 }
 
-// UpdateResponseData updates HTTP_Response_Data if http response data isn't locked
-func (data *HTTP_Data) UpdateResponseData() {
+func (data *HTTP_Data) set_req_headers(req *http.Request) {
+	req_headers_mapped := make(map[string]string, len(req.Header))
+	for key, vals := range req.Header {
+		req_headers_mapped[key] = strings.Join(vals, ",")
+	}
+
+	for i, header := range data.Headers {
+		if len(req_headers_mapped) == 0 {
+			break
+		}
+		val, ok := req_headers_mapped[header.Key]
+		if ok {
+			header.Checked = true
+			header.Value = val
+			data.Headers[i] = header
+			delete(req_headers_mapped, header.Key)
+		}
+	}
+
+	for k, v := range req_headers_mapped {
+		data.Headers = append([]attr.AttrCheck{
+			{
+				Checked: true,
+				Key:     k,
+				Value:   v,
+			},
+		}, data.Headers...)
+	}
+
+	if data.Body.ContentType != "" {
+		var content_type_found bool
+		for i, header := range data.Headers {
+			if header.Key == "Content-Type" {
+				header.Value = string(data.Body.ContentType)
+				header.Checked = true
+				data.Headers[i] = header
+				content_type_found = true
+				break
+			}
+		}
+
+		if !content_type_found {
+			data.Headers = append([]attr.AttrCheck{
+				{
+					Checked: true,
+					Key:     "Content-Type",
+					Value:   string(data.Body.ContentType),
+				},
+			}, data.Headers...)
+		}
+	}
+
+	for _, header := range data.Headers {
+		if !header.Checked {
+			continue
+		}
+		req.Header.Set(header.Key, header.Value)
+	}
+}
+
+// Do perform the http request
+// Response data can be revised through ResponseData method
+func (data *HTTP_Data) Do() bool {
+	// TODO: http.NewRequestWithContext()
+	method := strings.ToUpper(data.Method)
+	var body io.Reader
+	if method == "POST" || method == "PUT" || method == "PATCH" {
+		body = strings.NewReader(data.Body.Content)
+	}
+
+	req, err := http.NewRequest(method, data.FullURL().String(), body)
+	if err != nil {
+		messages.Alerts.Push(err.Error())
+		return false
+	}
+	data.set_req_headers(req)
+
+	return true
+}
+
+func (data *HTTP_Data) Cancel() {
+
 }
 
 type HTTP_Response_Body struct {
@@ -128,7 +222,11 @@ type HTTP_Response_Body struct {
 	IsFileClosed bool
 
 	ContentType ContentType
-	Content     string
+	content     []byte
+}
+
+func (b *HTTP_Response_Body) Content() []byte {
+	return b.content
 }
 
 type Version struct {
