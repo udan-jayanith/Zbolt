@@ -7,6 +7,7 @@ import (
 	url_utils "API-Client/widgets/request/url-utils"
 	"image"
 	"net/url"
+	"strings"
 	"time"
 
 	gui "github.com/guigui-gui/guigui"
@@ -65,6 +66,10 @@ func (rw *request_widget) Body() string {
 
 func (rw *request_widget) ContentType() def.ContentType {
 	return rw.tab_content.body.ContentType()
+}
+
+func (rw *request_widget) SetContentType(content_type def.ContentType) {
+	rw.tab_content.body.SetContentType(content_type)
 }
 
 func (rw *request_widget) SetURL(u *url.URL) {
@@ -162,20 +167,39 @@ func (rw *request_widget) SelectTab(index int) {
 }
 
 func (rw *request_widget) set_tab_items() {
-	rw.tab.SetTabItems([]CommonWidgets.TabItem{
-		{
-			Text:  "Parameters",
-			Value: "parameters",
-		},
-		{
-			Text:  "Headers",
-			Value: "headers",
-		},
-		{
-			Text:  "Body",
-			Value: "body",
-		},
-	})
+	method := strings.ToUpper(rw.input_bar_widget.method())
+	if method == "POST" || method == "PUT" || method == "PATCH" {
+		rw.tab.SetTabItems([]CommonWidgets.TabItem{
+			{
+				Text:  "Parameters",
+				Value: "parameters",
+			},
+			{
+				Text:  "Headers",
+				Value: "headers",
+			},
+			{
+				Text:  "Body",
+				Value: "body",
+			},
+		})
+	} else {
+		selected_tab, _ := rw.tab.SelectedTab()
+		rw.tab.SetTabItems([]CommonWidgets.TabItem{
+			{
+				Text:  "Parameters",
+				Value: "parameters",
+			},
+			{
+				Text:  "Headers",
+				Value: "headers",
+			},
+		})
+
+		if selected_tab == 2 {
+			rw.tab.SelectTab(1)
+		}
+	}
 }
 
 func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

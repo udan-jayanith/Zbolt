@@ -53,13 +53,13 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.SetParameters(data.Parameters)
 	brp.request_widget.SetAutowrap(data.RequestConfig.AutoWrap)
 	brp.request_widget.SetFormat(data.RequestConfig.Formate)
+	brp.request_widget.SetContentType(data.Body.ContentType)
 	brp.request_widget.SetBody(&data.Body)
-	brp.request_widget.SelectTab(data.SelectedRequestTab())
-
 	if data.Method == "" {
 		data.Method = "Get"
 	}
 	brp.request_widget.SetMethod(data.Method)
+	brp.request_widget.SelectTab(data.SelectedRequestTab())
 
 	u, err := url.Parse(data.URL.BaseURL)
 	if err != nil {
@@ -84,8 +84,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 		brp.response_widget.SetStatus(res_data.Status_code)
 	}
 	// TODO: set response time
-	// TODO: set content type
-	// TODO: only enable body tab if selected method is POST, PUT or PATCH
 	gui.RequestRebuild(brp)
 }
 

@@ -48,7 +48,10 @@ func (w *http_body_header_widget) request_build(ctx *gui.Context, adder *gui.Chi
 	input_widget := w.content_type.input.Widget()
 	input_widget.SetAllowFreeInput(true)
 	input_widget.SetItems([]string{"application/json", "application/octet-stream", "text/html", "text/plain", "image/png", "image/jpeg"})
-	w.content_type.content_type = def.ContentType(input_widget.Value())
+	input_widget.SetValue(string(w.content_type.content_type))
+	input_widget.OnValueChanged(func(context *gui.Context, value string, committed bool) {
+		w.content_type.content_type = def.ContentType(input_widget.Value())
+	})
 	adder.AddWidget(&w.content_type.input)
 }
 
@@ -249,9 +252,7 @@ func (body *BodyWidget) ContentType() def.ContentType {
 }
 
 func (body *BodyWidget) SetContentType(content_type def.ContentType) {
-	if body.t == HTTP_Response {
-		body.header.content_type.content_type = content_type
-	}
+	body.header.content_type.content_type = content_type
 }
 
 func (body *BodyWidget) Body() string {
