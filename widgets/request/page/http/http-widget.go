@@ -83,7 +83,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	if res_data.Status_code != 0 {
 		brp.response_widget.SetStatus(res_data.Status_code)
 	}
-	// TODO: set response time
 	gui.RequestRebuild(brp)
 }
 
