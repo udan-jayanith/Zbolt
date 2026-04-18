@@ -119,6 +119,9 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 		}
 	})
 	rib.method_select_widget.SelectItemByIndex(rib.selected_method_index)
+	if rib.method_select_widget.IsPopupOpen() {
+		rib.open_tooltip(false, "", image.Rectangle{})
+	}
 	adder.AddWidget(&rib.method_select_widget)
 
 	ctx.SetEnabled(&rib.url_input, !rib.url_input_disabled)
