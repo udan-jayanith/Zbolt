@@ -15,11 +15,11 @@ type TabsHandler struct {
 	tab_items  []CommonWidgets.TabItem
 	tabs_data  []*def.Request
 
-	on_select func(from CommonWidgets.TabItemContainer, to CommonWidgets.TabItemContainer)
+	on_select func(from CommonWidgets.TabItemContainer, to CommonWidgets.TabItemContainer, by_user bool)
 	on_close  func(closed CommonWidgets.TabItemContainer)
 }
 
-func (tabs *TabsHandler) OnSelect(fn func(from CommonWidgets.TabItemContainer, to CommonWidgets.TabItemContainer)) {
+func (tabs *TabsHandler) OnSelect(fn func(from CommonWidgets.TabItemContainer, to CommonWidgets.TabItemContainer, by_user bool)) {
 	tabs.on_select = fn
 }
 

@@ -184,7 +184,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	rw.set_tab_items()
 
-	rw.tab.OnSelect(func(from, to CommonWidgets.TabItemContainer) {
+	rw.tab.OnSelect(func(from, to CommonWidgets.TabItemContainer, _ bool) {
 		if from.Item.Value == "parameters" && to.Item.Value == "headers" {
 			rw.tab_content.params = rw.tab_content.table.RowsCheck()
 		} else if from.Item.Value == "headers" && to.Item.Value == "parameters" {

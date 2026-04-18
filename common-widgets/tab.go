@@ -30,13 +30,13 @@ type tabs_container struct {
 	selected_item_index int
 
 	listeners struct {
-		on_select func(from TabItemContainer, to TabItemContainer)
+		on_select func(from TabItemContainer, to TabItemContainer, by_user bool)
 		on_swap   func(from TabItemContainer, to TabItemContainer)
 		on_close  func(closed TabItemContainer)
 	}
 }
 
-func (tab *tabs_container) on_select(index int, tab_item TabItem) {
+func (tab *tabs_container) on_select(index int, tab_item TabItem, by_user bool) {
 	if tab.listeners.on_select != nil {
 		from := TabItemContainer{
 			Index: tab.selected_item_index,
@@ -46,7 +46,7 @@ func (tab *tabs_container) on_select(index int, tab_item TabItem) {
 			Index: index,
 			Item:  tab_item,
 		}
-		tab.listeners.on_select(from, to)
+		tab.listeners.on_select(from, to, by_user)
 	}
 	tab.selected_item_index = index
 }
@@ -115,15 +115,15 @@ func (tab *tabs_container) set_tab_items(tab_items []TabItem) {
 	}
 
 	if len(tab_items) > 0 {
-		tab.on_select(0, tab_items[0])
+		tab.on_select(0, tab_items[0], false)
 	}
 }
 
-func (tab *tabs_container) select_tab(index int) {
+func (tab *tabs_container) select_tab(index int, by_user bool) {
 	if index >= len(tab.tab_items) {
 		panic("Invalid index")
 	}
-	tab.on_select(index, tab.tab_items[index].tab_item)
+	tab.on_select(index, tab.tab_items[index].tab_item, by_user)
 }
 
 func (tab *tabs_container) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -230,7 +230,7 @@ func (tab *Tab) SetTabItems(items []TabItem) {
 }
 
 func (tab *Tab) SelectTab(index int) {
-	tab.tab_container.select_tab(index)
+	tab.tab_container.select_tab(index, false)
 }
 
 func (tab *Tab) SelectedTab() (int, TabItem) {
@@ -240,7 +240,7 @@ func (tab *Tab) SelectedTab() (int, TabItem) {
 	return tab.tab_container.selected_item_index, tab.tab_container.tab_items[tab.tab_container.selected_item_index].tab_item
 }
 
-func (tab *Tab) OnSelect(fn func(from TabItemContainer, to TabItemContainer)) {
+func (tab *Tab) OnSelect(fn func(from TabItemContainer, to TabItemContainer, by_user bool)) {
 	tab.tab_container.listeners.on_select = fn
 }
 
