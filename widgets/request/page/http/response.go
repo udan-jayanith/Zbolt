@@ -74,10 +74,8 @@ func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {
 }
 
 func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
-	if body.File == nil {
-		// TODO: handle this so that images and large files can render.
-		rw.tab_content.response_body.SetBody(string(body.Content()), body.ContentType)
-	}
+	// TODO: handle this so that images and large files can render.
+	rw.tab_content.response_body.SetBody(string(body.Content()), body.ContentType)
 
 	// If file is not nil and the content type is jpg, png or a text format show it in the response body widget.
 	// Other wise show not unable to open and close the file. User should be able to click the open with button to view it.

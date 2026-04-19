@@ -1,9 +1,9 @@
 package def
 
 import (
-	messages "API-Client/massages"
 	attr "API-Client/widgets/request/attributes"
 	url_utils "API-Client/widgets/request/url-utils"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -88,10 +88,12 @@ type HTTP_Data struct {
 	selected_request_tab int
 
 	request struct {
-		is_fetching, cancel bool
-		err                 error
-		m                   sync.Mutex
-		response_data       HTTP_Response_Data
+		is_fetching, canceled     bool
+		response_data_update_time time.Time
+		err                       error
+		cancel                    chan struct{}
+		m                         sync.Mutex
+		response_data             HTTP_Response_Data
 	}
 	response_data HTTP_Response_Data
 }
@@ -121,15 +123,20 @@ func (data *HTTP_Data) FullURL() *url.URL {
 	return u
 }
 
+func (data *HTTP_Data) update_response_data() {
+	if !data.request.m.TryLock() {
+		return
+	}
+	defer data.request.m.Unlock()
+
+	data.response_data = data.request.response_data
+}
+
 func (data *HTTP_Data) ResponseData() *HTTP_Response_Data {
 	if data.request.is_fetching {
 		data.update_response_data()
 	}
 	return &data.response_data
-}
-
-// UpdateResponseData updates HTTP_Response_Data if http response data isn't locked
-func (data *HTTP_Data) update_response_data() {
 }
 
 func (data *HTTP_Data) set_req_headers(req *http.Request) {
@@ -192,14 +199,32 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 	}
 }
 
+func (data *HTTP_Data) GrabRequestErr() error {
+	err := data.request.err
+	data.request.err = nil
+	return err
+}
+
+func (data *HTTP_Data) close_request() {
+	data.update_response_data()
+
+	data.request.response_data = HTTP_Response_Data{}
+	close(data.request.cancel)
+	data.request.is_fetching = false
+	data.request.canceled = false
+}
+
 // Do performs the http request
 // Response data can be revised through ResponseData method
 // Calling Do updates Headers so headers must be update in the HTTP_widget
 func (data *HTTP_Data) Do() bool {
 	if data.request.is_fetching {
-		panic("Request is alredy being requested")
+		panic("Request is already being requested")
 	}
-	// TODO: http.NewRequestWithContext()
+	data.request.is_fetching = true
+	data.request.err = nil
+	data.request.cancel = make(chan struct{}, 1)
+
 	method := strings.ToUpper(data.Method)
 	var body io.Reader
 	if method == "POST" || method == "PUT" || method == "PATCH" {
@@ -208,7 +233,8 @@ func (data *HTTP_Data) Do() bool {
 
 	req, err := http.NewRequest(method, data.FullURL().String(), body)
 	if err != nil {
-		messages.Alerts.Push(err.Error())
+		data.request.err = err
+		data.close_request()
 		return false
 	}
 	data.set_req_headers(req)
@@ -217,27 +243,81 @@ func (data *HTTP_Data) Do() bool {
 	return true
 }
 
+func (data *HTTP_Data) update_res_data_with(res_data HTTP_Response_Data) {
+	locked := data.request.m.TryLock()
+	if !locked {
+		return
+	}
+	defer data.request.m.Unlock()
+
+	body_content_copied := make([]byte, len(res_data.Body.content))
+	copy(body_content_copied, res_data.Body.content)
+
+	headers_copied := make([]attr.AttrCheck, len(res_data.Headers))
+	copy(headers_copied, res_data.Headers)
+
+	res_data.SelectedResponseTab = data.request.response_data.SelectedResponseTab
+
+	data.request.response_data = res_data
+	data.request.response_data.Headers = headers_copied
+	data.request.response_data.Body.content = body_content_copied
+}
+
 func (data *HTTP_Data) do(req *http.Request) {
-	// TODO: before caneling the request update response data
+	res_data := HTTP_Response_Data{}
+	response_time := time.Now()
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		data.request.err = err
+		data.close_request()
 		return
 	}
+	defer res.Body.Close()
 
+	res_data.Status_code = res.StatusCode
+	res_data.Version = Version{
+		Major: res.ProtoMajor,
+		Minor: res.ProtoMinor,
+	}
+	res_data.Body.ContentType = ContentType(res.Header.Get("Content-Type"))
+	res_data.Headers = http_headers_to_attr_check(res.Header)
+	res_data.ResponseTime = time.Since(response_time)
+	data.update_res_data_with(res_data)
+
+	body_content := make([]byte, 0, 1024*2)
 	p := make([]byte, 1024)
+	update_time := time.Now()
+res_body_reader_loop:
 	for {
 		n, err := res.Body.Read(p)
 		if err != nil {
 			data.request.err = err
-			return
+			break
 		}
 
+		select {
+		case <-data.request.cancel:
+			break res_body_reader_loop
+		default:
+		}
+
+		body_content = append(body_content, p[:n]...)
+		res_data.ResponseSize = len(body_content)
+		res_data.ResponseTime = time.Since(response_time)
+		if time.Since(update_time).Milliseconds() >= 500 {
+			data.update_res_data_with(res_data)
+		}
 	}
+	data.close_request()
 }
 
-func (data *HTTP_Data) Cancel() {
-	data.request.cancel = true
+func (data *HTTP_Data) CancelRequest() error {
+	if data.request.canceled {
+		return errors.New("Request is already being canceled")
+	}
+	data.request.cancel <- struct{}{}
+	data.request.canceled = true
+	return nil
 }
 
 type HTTP_Response_Body struct {
@@ -261,7 +341,7 @@ type Version struct {
 type HTTP_Response_Data struct {
 	Status_code  int
 	ResponseTime time.Duration
-	ResponseSize int // In bytes
+	ResponseSize int // In bytes // TODO: change this to Content-Length since header size is quite hard calculate
 	Version      Version
 	Headers      []attr.AttrCheck
 	Body         HTTP_Response_Body
