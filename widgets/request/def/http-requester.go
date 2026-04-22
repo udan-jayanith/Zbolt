@@ -1,0 +1,193 @@
+package def
+
+import (
+	attr "API-Client/widgets/request/attributes"
+	"errors"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+)
+
+func (data *HTTP_Data) IsFetching() bool {
+	return data.request.is_fetching.Load()
+}
+
+func (data *HTTP_Data) GrabRequestErr() error {
+	return data.request.err.Load()
+}
+
+// set_req_headers is not concurrent safe
+func (data *HTTP_Data) set_req_headers(req *http.Request) {
+	req_headers_mapped := make(map[string]string, len(req.Header))
+	for key, vals := range req.Header {
+		req_headers_mapped[key] = strings.Join(vals, ",")
+	}
+
+	for i, header := range data.Headers {
+		if len(req_headers_mapped) == 0 {
+			break
+		}
+		val, ok := req_headers_mapped[header.Key]
+		if ok {
+			header.Checked = true
+			header.Value = val
+			data.Headers[i] = header
+			delete(req_headers_mapped, header.Key)
+		}
+	}
+
+	for k, v := range req_headers_mapped {
+		data.Headers = append([]attr.AttrCheck{
+			{
+				Checked: true,
+				Key:     k,
+				Value:   v,
+			},
+		}, data.Headers...)
+	}
+
+	if data.Body.ContentType != "" {
+		var content_type_found bool
+		for i, header := range data.Headers {
+			if header.Key == "Content-Type" {
+				header.Value = string(data.Body.ContentType)
+				header.Checked = true
+				data.Headers[i] = header
+				content_type_found = true
+				break
+			}
+		}
+
+		if !content_type_found {
+			data.Headers = append([]attr.AttrCheck{
+				{
+					Checked: true,
+					Key:     "Content-Type",
+					Value:   string(data.Body.ContentType),
+				},
+			}, data.Headers...)
+		}
+	}
+
+	for _, header := range data.Headers {
+		if !header.Checked {
+			continue
+		}
+		req.Header.Set(header.Key, header.Value)
+	}
+}
+
+func (data *HTTP_Data) open_request() {
+	data.request.cancel = make(chan struct{}, 1)
+	data.request.is_fetching.Store(true)
+	data.request.canceled.Store(false)
+	data.request.err.Store(nil)
+}
+
+func (data *HTTP_Data) close_request() {
+	close(data.request.cancel)
+	data.request.is_fetching.Store(false)
+}
+
+func (data *HTTP_Data) CancelRequest() error {
+	if !data.IsFetching() {
+		return errors.New("HTTP request is no fetching")
+	} else if data.request.canceled.Load() {
+		return errors.New("Request is already being canceled")
+	}
+	data.request.canceled.Store(true)
+	data.request.cancel <- struct{}{}
+	return nil
+}
+
+// Do performs the http request
+// Response data can be revised through ResponseData method
+// Calling Do updates Headers so headers must be update in the HTTP_widget
+func (data *HTTP_Data) Do() bool {
+	if data.request.is_fetching.Load() {
+		panic("Request is already being requested")
+	}
+	data.open_request()
+
+	method := strings.ToUpper(data.Method)
+	var body io.Reader
+	if method == "POST" || method == "PUT" || method == "PATCH" {
+		body = strings.NewReader(data.Body.Content)
+	}
+
+	req, err := http.NewRequest(method, data.FullURL().String(), body)
+	if err != nil {
+		data.request.err.Store(err)
+		data.close_request()
+		return false
+	}
+	data.set_req_headers(req)
+	go data.do(req)
+
+	return true
+}
+
+func (data *HTTP_Data) set_response_data(res_data HTTP_Response_Data) {
+	body_content_copied := make([]byte, len(res_data.Body.content))
+	copy(body_content_copied, res_data.Body.content)
+
+	headers_copied := make([]attr.AttrCheck, len(res_data.Headers))
+	copy(headers_copied, res_data.Headers)
+
+	data.ResponseData(func(value *HTTP_Response_Data) {
+		*value = res_data
+		value.Headers = headers_copied
+		value.Body.content = body_content_copied
+	})
+}
+
+func (data *HTTP_Data) do(req *http.Request) {
+	defer data.close_request()
+
+	res_data := HTTP_Response_Data{}
+	response_time := time.Now()
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		data.request.err.Store(err)
+		return
+	}
+	defer res.Body.Close()
+
+	res_data.Status_code = res.StatusCode
+	res_data.Version = Version{
+		Major: res.ProtoMajor,
+		Minor: res.ProtoMinor,
+	}
+	res_data.Body.ContentType = ContentType(res.Header.Get("Content-Type"))
+	res_data.Headers = http_headers_to_attr_check(res.Header)
+	res_data.ResponseTime = time.Since(response_time)
+	data.set_response_data(res_data)
+
+	body_content := make([]byte, 0, 1024*2)
+	p := make([]byte, 1024)
+	update_time := time.Now()
+
+loop:
+	for {
+		n, err := res.Body.Read(p)
+		if err != nil {
+			data.request.err.Store(err)
+			break
+		}
+
+		select {
+		case <-data.request.cancel:
+			break loop
+		default:
+		}
+
+		body_content = append(body_content, p[:n]...)
+		res_data.ResponseSize = len(body_content)
+		res_data.ResponseTime = time.Since(response_time)
+		if time.Since(update_time).Milliseconds() >= 500 {
+			data.update_res_data_with(res_data)
+		}
+	}
+}

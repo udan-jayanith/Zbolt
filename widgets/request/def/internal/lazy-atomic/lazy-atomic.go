@@ -1,40 +1,45 @@
 package lazy_atomic
 
 import (
-	"sync/atomic"
+	"sync"
 )
 
 type Value[T any] struct {
-	atom        atomic.Value
-	initialized bool
+	// Use a mutex instead of a atomic.Value
+	val   T
+	Mutex sync.Mutex
 }
 
-func (v *Value[T]) init() {
-	if v.initialized {
-		return
-	}
-	v.initialized = true
-
-	var default_value T
-	v.atom.Store(default_value)
-}
-
-func (v *Value[T]) CompareAndSwap(old T, new T) (swapped bool) {
-	v.init()
-	return v.atom.CompareAndSwap(old, new)
+func (v *Value[T]) LoadUnsafe() *T {
+	return &v.val
 }
 
 func (v *Value[T]) Load() (val T) {
-	v.init()
-	return v.atom.Load().(T)
+	v.Mutex.Lock()
+	defer v.Mutex.Unlock()
+	return v.val
 }
 
 func (v *Value[T]) Store(val T) {
-	v.init()
-	v.atom.Store(val)
+	v.Mutex.Lock()
+	defer v.Mutex.Unlock()
+	v.val = val
 }
 
 func (v *Value[T]) Swap(new T) (old T) {
-	v.init()
-	return v.atom.Swap(new).(T)
+	v.Mutex.Lock()
+	defer v.Mutex.Unlock()
+	old = v.val
+	v.val = new
+	return old
+}
+
+func (v *Value[T]) Transaction(fn func(value T) (T, bool)) {
+	v.Mutex.Lock()
+	defer v.Mutex.Unlock()
+
+	val, ok := fn(v.val)
+	if ok {
+		v.val = val
+	}
 }
