@@ -98,9 +98,11 @@ func (rib *request_input_bar_widget) on_request_button_clicked(fn func(ctx *gui.
 	rib.on_request_button_clicked_fn = fn
 }
 
+// Value must be 'Request' or 'Cancel'
 func (rib *request_input_bar_widget) set_request_button_value(value string) {
 	if value == "Request" || value == "Cancel" {
 		rib.request_button_text = value
+		return
 	}
 	log.Fatalln("Unknown request button text:", value)
 }

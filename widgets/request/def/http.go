@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -88,14 +88,11 @@ type HTTP_Data struct {
 	selected_request_tab int
 
 	request struct {
-		is_fetching, canceled     bool
-		response_data_update_time time.Time
-		err                       error
-		cancel                    chan struct{}
-		m                         sync.Mutex
-		response_data             HTTP_Response_Data
+		is_fetching, canceled atomic.Bool // TODO: Set these both to atomic.Boolean
+		cancel                chan struct{}
+		err                   atomic.Value // err must hold a error types value
 	}
-	response_data HTTP_Response_Data
+	response_data atomic.Value // HTTP_Response_Data
 }
 
 func (data *HTTP_Data) SetSelectedRequestTab(index int) {
@@ -123,20 +120,32 @@ func (data *HTTP_Data) FullURL() *url.URL {
 	return u
 }
 
+func (data *HTTP_Data) IsFetching() bool {
+	return data.request.is_fetching.Load()
+}
+
 func (data *HTTP_Data) update_response_data() {
 	if !data.request.m.TryLock() {
 		return
 	}
 	defer data.request.m.Unlock()
 
+	data.request.response_data.SelectedResponseTab = data.response_data.SelectedResponseTab
 	data.response_data = data.request.response_data
 }
 
 func (data *HTTP_Data) ResponseData() *HTTP_Response_Data {
-	if data.request.is_fetching {
+	if data.request.is_fetching.Load() {
 		data.update_response_data()
 	}
 	return &data.response_data
+}
+
+// This shiuld only be used if fetching is false
+func (data *HTTP_Data) GrabRequestErr() error {
+	err := data.request.err
+	data.request.err = nil
+	return err
 }
 
 func (data *HTTP_Data) set_req_headers(req *http.Request) {
@@ -199,29 +208,24 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 	}
 }
 
-func (data *HTTP_Data) GrabRequestErr() error {
-	err := data.request.err
-	data.request.err = nil
-	return err
-}
-
 func (data *HTTP_Data) close_request() {
+	// When closing data should update definetly.
 	data.update_response_data()
 
 	data.request.response_data = HTTP_Response_Data{}
 	close(data.request.cancel)
-	data.request.is_fetching = false
-	data.request.canceled = false
+	data.request.is_fetching.Store(false)
+	data.request.canceled.Store(false)
 }
 
 // Do performs the http request
 // Response data can be revised through ResponseData method
 // Calling Do updates Headers so headers must be update in the HTTP_widget
 func (data *HTTP_Data) Do() bool {
-	if data.request.is_fetching {
+	if data.request.is_fetching.Load() {
 		panic("Request is already being requested")
 	}
-	data.request.is_fetching = true
+	data.request.is_fetching.Store(true)
 	data.request.err = nil
 	data.request.cancel = make(chan struct{}, 1)
 
@@ -256,20 +260,19 @@ func (data *HTTP_Data) update_res_data_with(res_data HTTP_Response_Data) {
 	headers_copied := make([]attr.AttrCheck, len(res_data.Headers))
 	copy(headers_copied, res_data.Headers)
 
-	res_data.SelectedResponseTab = data.request.response_data.SelectedResponseTab
-
+	// Selected response tab is updated at the update_res_data
 	data.request.response_data = res_data
 	data.request.response_data.Headers = headers_copied
 	data.request.response_data.Body.content = body_content_copied
 }
 
 func (data *HTTP_Data) do(req *http.Request) {
+	defer data.close_request()
 	res_data := HTTP_Response_Data{}
 	response_time := time.Now()
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		data.request.err = err
-		data.close_request()
 		return
 	}
 	defer res.Body.Close()
@@ -308,15 +311,14 @@ res_body_reader_loop:
 			data.update_res_data_with(res_data)
 		}
 	}
-	data.close_request()
 }
 
 func (data *HTTP_Data) CancelRequest() error {
-	if data.request.canceled {
+	if data.request.canceled.Load() {
 		return errors.New("Request is already being canceled")
 	}
 	data.request.cancel <- struct{}{}
-	data.request.canceled = true
+	data.request.canceled.Store(true)
 	return nil
 }
 

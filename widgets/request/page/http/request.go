@@ -105,8 +105,14 @@ func (rw *request_widget) update_url_preview() string {
 	return u_str
 }
 
+// Value is 'Request' or 'Cancel'
 func (rw *request_widget) OnRequestButtonClicked(fn func(ctx *gui.Context, value string)) {
 	rw.input_bar_widget.on_request_button_clicked(fn)
+}
+
+//Value is 'Request' or 'Cancel'
+func (rw *request_widget) SetRequestButtonText(value string) {
+	rw.input_bar_widget.set_request_button_value(value)
 }
 
 func (rw *request_widget) DisableURLInput(disabled bool) {

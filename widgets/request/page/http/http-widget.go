@@ -139,6 +139,10 @@ func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.Popup
 	brp.url_panel_widget.Clear()
 }
 
+func (brp *HTTP_Widget) on_request_button_clicked(ctx *gui.Context, value string) {
+
+}
+
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
@@ -171,6 +175,8 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		u.Path = ""
 		brp.data.URL.BaseURL = u.String()
 	})
+
+	brp.request_widget.OnRequestButtonClicked(brp.on_request_button_clicked)
 
 	brp.request_widget.OnAutowrap(func(ctx *gui.Context, value bool) {
 		brp.data.RequestConfig.AutoWrap = value
