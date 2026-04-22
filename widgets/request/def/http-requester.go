@@ -14,7 +14,9 @@ func (data *HTTP_Data) IsFetching() bool {
 }
 
 func (data *HTTP_Data) GrabRequestErr() error {
-	return data.request.err.Load()
+	err := data.request.err.Load()
+	data.request.err.Store(nil)
+	return err
 }
 
 // set_req_headers is not concurrent safe
@@ -137,6 +139,7 @@ func (data *HTTP_Data) set_response_data(res_data HTTP_Response_Data) {
 
 	data.ResponseData(func(value *HTTP_Response_Data) {
 		*value = res_data
+		res_data.SelectedResponseTab = value.SelectedResponseTab
 		value.Headers = headers_copied
 		value.Body.content = body_content_copied
 	})
@@ -166,12 +169,12 @@ func (data *HTTP_Data) do(req *http.Request) {
 	data.set_response_data(res_data)
 
 	body_content := make([]byte, 0, 1024*2)
-	p := make([]byte, 1024)
+	buffer := make([]byte, 1024)
 	update_time := time.Now()
 
 loop:
 	for {
-		n, err := res.Body.Read(p)
+		n, err := res.Body.Read(buffer)
 		if err != nil {
 			data.request.err.Store(err)
 			break
@@ -183,11 +186,12 @@ loop:
 		default:
 		}
 
-		body_content = append(body_content, p[:n]...)
+		body_content = append(body_content, buffer[:n]...)
 		res_data.ResponseSize = len(body_content)
 		res_data.ResponseTime = time.Since(response_time)
 		if time.Since(update_time).Milliseconds() >= 500 {
-			data.update_res_data_with(res_data)
+			data.set_response_data(res_data)
 		}
 	}
+	data.set_response_data(res_data)
 }
