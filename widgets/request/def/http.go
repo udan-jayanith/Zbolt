@@ -5,6 +5,7 @@ import (
 	lazy_atomic "API-Client/widgets/request/def/internal/lazy-atomic"
 	url_utils "API-Client/widgets/request/url-utils"
 	"net/url"
+	"sync/atomic"
 	"time"
 )
 
@@ -84,7 +85,7 @@ type HTTP_Data struct {
 	selected_request_tab int
 
 	request struct {
-		is_fetching, canceled lazy_atomic.Value[bool]
+		is_fetching, canceled atomic.Bool
 		cancel                chan struct{}
 		err                   lazy_atomic.Value[error]
 	}
