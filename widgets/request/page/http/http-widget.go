@@ -70,19 +70,20 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.DisableURLInput(data.URL.IsPattern())
 
 	// Setup response widget
-	res_data := data.ResponseData()
-	brp.response_widget.SetHeaders(res_data.Headers)
+	data.ResponseData(func(res_data *def.HTTP_Response_Data) {
+		brp.response_widget.SetHeaders(res_data.Headers)
 
-	brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
-	brp.response_widget.SetFormat(data.ResponseConfig.Formate)
-	brp.response_widget.SetResponseBody(&res_data.Body)
-	brp.response_widget.SetSelectedTab(res_data.SelectedResponseTab)
+		brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
+		brp.response_widget.SetFormat(data.ResponseConfig.Formate)
+		brp.response_widget.SetResponseBody(&res_data.Body)
+		brp.response_widget.SetSelectedTab(res_data.SelectedResponseTab)
 
-	brp.response_widget.SetHTTPVersion(res_data.Version)
-	brp.response_widget.SetResponseTime(res_data.ResponseTime)
-	if res_data.Status_code != 0 {
-		brp.response_widget.SetStatus(res_data.Status_code)
-	}
+		brp.response_widget.SetHTTPVersion(res_data.Version)
+		brp.response_widget.SetResponseTime(res_data.ResponseTime)
+		if res_data.Status_code != 0 {
+			brp.response_widget.SetStatus(res_data.Status_code)
+		}
+	})
 	gui.RequestRebuild(brp)
 }
 
@@ -94,7 +95,9 @@ func (brp *HTTP_Widget) SyncData() {
 	brp.data.Body.Content = brp.request_widget.Body()
 
 	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
-	brp.data.ResponseData().SelectedResponseTab = brp.response_widget.SelectedTab()
+	brp.data.ResponseData(func(value *def.HTTP_Response_Data) {
+		value.SelectedResponseTab = brp.response_widget.SelectedTab()
+	})
 	// TODO: HTTP response data is synced in when request is finished
 }
 
