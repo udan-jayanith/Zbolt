@@ -69,7 +69,13 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.SetURL(u)
 	brp.request_widget.DisableURLInput(data.URL.IsPattern())
 
+	brp.setup_response_widget(false)
+	gui.RequestRebuild(brp)
+}
+
+func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 	// Setup response widget
+	data := brp.data
 	data.ResponseData(func(res_data *def.HTTP_Response_Data) {
 		brp.response_widget.SetHeaders(res_data.Headers)
 
@@ -84,7 +90,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 			brp.response_widget.SetStatus(res_data.Status_code)
 		}
 	})
-	gui.RequestRebuild(brp)
 }
 
 // TODO: SyncData should be run to save data before switching tabs, closing tabs or closing the app.
@@ -143,7 +148,10 @@ func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.Popup
 }
 
 func (brp *HTTP_Widget) on_request_button_clicked(ctx *gui.Context, value string) {
-
+	if value == RequestButton {
+		brp.request_widget.SetRequestButtonText(CancelButton)
+		brp.data.Do()
+	}
 }
 
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
@@ -194,6 +202,10 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	brp.response_widget.OnFormatToggle(func(ctx *gui.Context, value bool) {
 		brp.data.ResponseConfig.Formate = value
 	})
+
+	if brp.data.IsFetching() {
+		brp.setup_response_widget(true)
+	}
 
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.vr)

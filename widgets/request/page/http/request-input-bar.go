@@ -10,6 +10,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	RequestButton string = "Request"
+	CancelButton  string = "Cancel"
+)
+
 type request_input_bar_widget struct {
 	gui.DefaultWidget
 
@@ -90,7 +95,7 @@ func (rib *request_input_bar_widget) on_url_input_value_changed(fn func(context 
 func (rib *request_input_bar_widget) init_request_button_text() {
 	if rib.request_button_text == "" {
 		// TODO: Set a icon
-		rib.request_button_text = "Request"
+		rib.request_button_text = RequestButton
 	}
 }
 
@@ -100,7 +105,7 @@ func (rib *request_input_bar_widget) on_request_button_clicked(fn func(ctx *gui.
 
 // Value must be 'Request' or 'Cancel'
 func (rib *request_input_bar_widget) set_request_button_value(value string) {
-	if value == "Request" || value == "Cancel" {
+	if value == RequestButton || value == CancelButton {
 		rib.request_button_text = value
 		return
 	}
@@ -136,7 +141,7 @@ func (rib *request_input_bar_widget) Build(ctx *gui.Context, adder *gui.ChildAdd
 	adder.AddWidget(&rib.open_in)
 
 	rib.init_request_button_text()
-	if rib.request_button_text == "Request" {
+	if rib.request_button_text == RequestButton {
 		rib.request_btn_widget.SetType(widget.ButtonTypePrimary)
 	} else {
 		rib.request_btn_widget.SetType(widget.ButtonTypeNormal)
