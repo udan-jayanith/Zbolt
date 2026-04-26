@@ -6,6 +6,7 @@ import (
 	"API-Client/icons"
 	"fmt"
 	"image"
+	"log"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -21,7 +22,7 @@ type SidebarItem[T comparable] struct {
 type sidebar_item_widget[T comparable] struct {
 	gui.DefaultWidget
 
-	icon_widget *icons.Icon
+	icon_widget icons.Icon
 
 	text_widget    widget.Text
 	sidebar_item   SidebarItem[T]
@@ -30,13 +31,13 @@ type sidebar_item_widget[T comparable] struct {
 
 func (sd *sidebar_item_widget[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	line_height := widget.LineHeight(ctx)
-
-	if sd.icon_widget == nil && sd.sidebar_item.IconName == "" {
-		sd.icon_widget = icons.NewIcon("request-page", line_height)
-	} else if sd.icon_widget == nil {
-		sd.icon_widget = icons.NewIcon(sd.sidebar_item.IconName, line_height)
+	if sd.sidebar_item.IconName == "" {
+		log.Fatalln("Sidebar item dosen't have a icon")
+	} else {
+		sd.icon_widget.SetIcon(sd.sidebar_item.IconName)
+		sd.icon_widget.SetSize(line_height)
 	}
-	adder.AddWidget(sd.icon_widget)
+	adder.AddWidget(&sd.icon_widget)
 
 	sd.text_widget.SetValue(sd.sidebar_item.Text)
 	adder.AddWidget(&sd.text_widget)
@@ -53,7 +54,7 @@ func (sd *sidebar_item_widget[T]) Layout(ctx *gui.Context, widgetBounds *gui.Wid
 		Items: []gui.LinearLayoutItem{
 			{},
 			{
-				Widget: sd.icon_widget,
+				Widget: &sd.icon_widget,
 			},
 			{
 				Widget: &sd.text_widget,

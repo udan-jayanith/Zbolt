@@ -141,6 +141,8 @@ func (icon *Icon) IconName() string {
 	return icon.icon_name
 }
 
+
+// TODO: remove this function
 func NewIcon(icon_name string, size ...int) *Icon {
 	icon := Icon{}
 	if len(size) > 0 {

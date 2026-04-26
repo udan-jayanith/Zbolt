@@ -49,12 +49,14 @@ func (tab *tabs_container) on_select(index int, tab_item TabItem, by_user bool) 
 		tab.listeners.on_select(from, to, by_user)
 	}
 	tab.selected_item_index = index
+	gui.RequestRedraw(tab)
 }
 
 func (tab *tabs_container) on_holding(index int, relative_cursor_x int) {
 	tab.holding.is_holding = true
 	tab.holding.tab_item_index = index
 	tab.holding.relative_cursor_position = relative_cursor_x
+	gui.RequestRebuild(tab)
 }
 
 func (tab *tabs_container) on_mouse_up(index int) {
@@ -77,6 +79,7 @@ func (tab *tabs_container) on_mouse_up(index int) {
 			tab.listeners.on_swap(from, to)
 		}
 	}
+	gui.RequestRedraw(tab)
 }
 
 func (tab *tabs_container) on_close(index int, item TabItem) {
