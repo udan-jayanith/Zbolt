@@ -89,6 +89,7 @@ func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 		if res_data.Status_code != 0 {
 			brp.response_widget.SetStatus(res_data.Status_code)
 		}
+
 	})
 }
 
@@ -203,8 +204,13 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		brp.data.ResponseConfig.Formate = value
 	})
 
+	brp.setup_response_widget(true)
 	if brp.data.IsFetching() {
-		brp.setup_response_widget(true)
+	} else {
+		err := brp.data.GrabRequestErr()
+		if err != nil {
+			println(err.Error())
+		}
 	}
 
 	adder.AddWidget(&brp.request_widget)
