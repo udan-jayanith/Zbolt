@@ -10,6 +10,7 @@ import (
 	"os"
 
 	gui "github.com/guigui-gui/guigui"
+	"github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 
 	message_model "API-Client/message-model"
@@ -19,17 +20,31 @@ import (
 
 type Root struct {
 	gui.DefaultWidget
-
 	message_model_widget gui.Widget
-	welcome_page_widget  home.HomePage
-	request_page_widget  request_page.RequestPage
+	menubar_widget       basicwidget.Menubar[struct{}]
+
+	welcome_page_widget home.HomePage
+	request_page_widget request_page.RequestPage
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
+	r.menubar_widget.SetItems([]basicwidget.MenubarItem{
+		{
+			Text: "Zbolt",
+		},
+		{
+			Text: "Project",
+		},
+		{
+			Text: "Logs",
+		},
+	})
+	adder.AddWidget(&r.menubar_widget)
+	adder.AddWidget(&r.request_page_widget)
+
 	if r.message_model_widget == nil {
 		r.message_model_widget = &message_model.MessageModel
 	}
-	adder.AddWidget(&r.request_page_widget)
 	adder.AddWidget(&message_model.MessageModel)
 	return nil
 }
@@ -41,7 +56,19 @@ func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBound
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
 	layouter.LayoutWidget(r.message_model_widget, b)
-	layouter.LayoutWidget(&r.request_page_widget, b)
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionVertical,
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &r.menubar_widget,
+			},
+			{
+				Widget: &r.request_page_widget,
+				Size:   gui.FlexibleSize(1),
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
 //go:embed icon.png
