@@ -171,8 +171,10 @@ func (item *tab_item) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 	} else if is_hovering && inpututil.MouseButtonPressDuration(ebiten.MouseButton0) >= 10 && item.tabs_container.selected_item_index == item.index {
 		cursor_axis, _ := ebiten.CursorPosition()
 		item.tabs_container.on_holding(item.index, cursor_axis-b.Min.X)
+		gui.RequestRebuild(item)
 	} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && item.tabs_container.selected_item_index == item.index {
 		item.tabs_container.on_mouse_up(item.index)
+		gui.RequestRebuild(item)
 	}
 
 	return gui.HandleInputResult{}

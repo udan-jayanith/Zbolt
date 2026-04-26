@@ -40,6 +40,8 @@ func (lazy_loading *LazyLoading) Tick(ctx *gui.Context, widgetBounds *gui.Widget
 		lazy_loading.is_decreasing = false
 	}
 	lazy_loading.t = time.Now()
+	
+	gui.RequestRedraw(lazy_loading)
 	return nil
 }
 
