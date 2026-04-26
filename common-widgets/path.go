@@ -39,7 +39,7 @@ func (psw *path_segment_widget) Build(context *gui.Context, adder *gui.ChildAdde
 func (psw *path_segment_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionHorizontal,
-		Padding:   basic.NewPadding(0, widget.UnitSize(ctx)/4),
+		Padding:   basic.NewPadding(0, widget.RoundedCornerRadius(ctx)),
 		Items: []gui.LinearLayoutItem{
 			{
 				Widget: &psw.text_widget,
@@ -65,7 +65,7 @@ func (psw *path_segment_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetB
 		background_color = draw.BackgroundSecondaryColor(cm)
 	}
 
-	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, widget.UnitSize(ctx)/4)
+	draw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_color, widget.RoundedCornerRadius(ctx))
 }
 
 func (psw *path_segment_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {

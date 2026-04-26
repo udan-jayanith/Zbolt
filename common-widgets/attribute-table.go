@@ -296,13 +296,12 @@ func (t *AttributeTable) Measure(ctx *gui.Context, constraints gui.Constraints) 
 }
 
 func (t *AttributeTable) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	border_radius := widget.UnitSize(ctx) / 4
-
+	r := widget.RoundedCornerRadius(ctx)
 	background_clr := basicwidgetdraw.ControlColor(ctx.ColorMode(), ctx.IsEnabled(t))
-	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_clr, border_radius)
+	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), background_clr, r)
 
 	border_clr1, border_clr2 := basicwidgetdraw.BorderColors(ctx.ColorMode(), basicwidgetdraw.RoundedRectBorderTypeInset)
-	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, border_radius, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
+	basicwidgetdraw.DrawRoundedRectBorder(ctx, dst, widgetBounds.Bounds(), border_clr1, border_clr2, r, 1, basicwidgetdraw.RoundedRectBorderTypeInset)
 }
 
 func (t *AttributeTable) SetRows(rows []attr.Attribute) {

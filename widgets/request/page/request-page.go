@@ -88,7 +88,7 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
 	adder.AddWidget(&rp.background)
-	padding := basic.NewPadding(widget.UnitSize(ctx)/4, 0)
+	padding := basic.NewPadding(basic.Gap(ctx), 0)
 
 	sidebar := rp.sidebar.Widget()
 	sidebar.SetItems(rp.sidebar_items)
@@ -186,6 +186,9 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 	if !rp.tabs_handler.IsEmpty() {
 		tab_container_layout.Items = []gui.LinearLayoutItem{
+			{
+				Size: gui.FixedSize(basic.Gap(ctx)),
+			},
 			{
 				Widget: rp.tabs_handler.Widget(),
 			},
