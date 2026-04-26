@@ -196,6 +196,8 @@ loop:
 			data.set_response_data(res_data)
 		}
 	}
+	res_data.ResponseSize = len(body_content)
+	res_data.ResponseTime = time.Since(response_time)
 	res_data.Body.content = body_content
 	data.set_response_data(res_data)
 }

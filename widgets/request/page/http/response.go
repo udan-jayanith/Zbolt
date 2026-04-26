@@ -47,7 +47,7 @@ func (rw *response_widget) SetStatus(status_code int) {
 
 // SetResponseTime sets the http response time
 func (rw *response_widget) SetResponseTime(response_time time.Duration) {
-	rw.header_widget.response_time.SetValue(response_time.String())
+	rw.header_widget.response_time.SetValue(response_time.Round(time.Millisecond).String())
 }
 
 func (rw *response_widget) SetHTTPVersion(version def.Version) {
