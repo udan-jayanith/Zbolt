@@ -178,17 +178,21 @@ type BodyWidget struct {
 	t RequestResponse
 
 	header http_body_header_widget
-	view   widget.TextInput
+
+	view          widget.TextInput
+	lazey_loading LazyLoading
 }
 
 func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&w.header)
 
-	w.view.SetAutoWrap(w.header.options.auto_wrap.toggle.Value())
-	w.view.SetMultiline(true)
-	w.view.SetEditable(w.t == HTTP_Request)
-	adder.AddWidget(&w.view)
-
+	/*
+		w.view.SetAutoWrap(w.header.options.auto_wrap.toggle.Value())
+		w.view.SetMultiline(true)
+		w.view.SetEditable(w.t == HTTP_Request)
+		adder.AddWidget(&w.view)
+	*/
+	adder.AddWidget(&w.lazey_loading)
 	// make the view handle images and text.
 	// Show content type not supported if content type is not jpg, png or text type.
 	return nil
@@ -205,7 +209,7 @@ func (w *BodyWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, la
 				Widget: &w.header,
 			},
 			{
-				Widget: &w.view,
+				Widget: &w.lazey_loading,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
