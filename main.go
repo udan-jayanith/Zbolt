@@ -13,7 +13,6 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 
-	messages "API-Client/massages"
 	home "API-Client/widgets/home"
 	request_page "API-Client/widgets/request/page"
 )
