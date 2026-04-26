@@ -40,6 +40,8 @@ type message_model interface {
 	SetMessage(message string)
 	OnResult(fn func(ok bool, ctx *gui.Context))
 	Bounds(ctx *gui.Context, widgetBounds *gui.WidgetBounds) image.Rectangle
+//	Open(open bool)
+//	IsOpen() bool
 }
 
 type message_model_widget struct {
@@ -73,7 +75,9 @@ func (wi *message_model_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 	modeled_widget.SetMessage(wi.current_message_data.message)
 	modeled_widget.OnResult(func(ok bool, ctx *gui.Context) {
 		wi.is_showing_message = false
-		wi.current_message_data.on_result(ok, ctx)
+		if wi.current_message_data.on_result != nil {
+			wi.current_message_data.on_result(ok, ctx)
+		}
 	})
 	adder.AddWidget(modeled_widget)
 
@@ -98,3 +102,6 @@ func (wi *message_model_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 	}
 	layouter.LayoutWidget(modeled_widget, modeled_widget.Bounds(ctx, widgetBounds))
 }
+
+// This whidget only must be used by the rott widget
+var MessageModel = message_model_widget{}

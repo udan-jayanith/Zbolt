@@ -2,7 +2,7 @@ package http_widget
 
 import (
 	CommonWidgets "API-Client/common-widgets"
-	messages "API-Client/massages"
+	message_model "API-Client/message-model"
 	"API-Client/widgets/request/def"
 	url_utils "API-Client/widgets/request/url-utils"
 	"image"
@@ -63,7 +63,8 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 
 	u, err := url.Parse(data.URL.BaseURL)
 	if err != nil {
-		messages.Alerts.Push(err.Error())
+		// TODO: Make message model widgets handle nil function
+		message_model.Show(err.Error(), message_model.Alert, nil)
 	}
 	u.Path = data.URL.EncodedPath()
 	brp.request_widget.SetURL(u)
@@ -129,7 +130,7 @@ func (brp *HTTP_Widget) on_url_panel_open(ctx *gui.Context) {
 func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.PopupCloseReason) {
 	u, err := url.Parse(brp.url_panel_widget.URL())
 	if err != nil {
-		messages.Alerts.Push(err.Error())
+		message_model.Show(err.Error(), message_model.Alert, nil)
 	}
 	brp.request_widget.SetURL(u)
 
@@ -178,7 +179,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		}
 		u, err := url.Parse(text)
 		if err != nil {
-			messages.Alerts.Push(err.Error())
+			message_model.Show(err.Error(), message_model.Alert, nil)
 		}
 		brp.request_widget.SetURL(u)
 

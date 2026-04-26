@@ -3,6 +3,7 @@ package CommonWidgets
 import (
 	"API-Client/basic"
 	"API-Client/icons"
+	message_model "API-Client/message-model"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -26,6 +27,9 @@ func (up *URLPreview) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&up.url_preview)
 
 	up.copy_button.SetIcon(icons.Store.Open("copy-all"))
+	up.copy_button.OnDown(func(context *gui.Context) {
+		message_model.Show("Copied", message_model.Notify, nil)
+	})
 	adder.AddWidget(&up.copy_button)
 
 	if up.tooltip.IsOpen {

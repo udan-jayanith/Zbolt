@@ -105,14 +105,18 @@ type alert_widget struct {
 }
 
 func (w *alert_widget) SetMessage(message string) {
+	if !w.popup.IsOpen() {
+		w.popup.SetOpen(true)
+	}
 	w.widget.SetMessage(message)
 }
 
 func (w *alert_widget) OnResult(fn result_fn_type) {
-	w.popup.SetOpen(true)
 	w.widget.OnResult(func(ok bool, ctx *gui.Context) {
 		w.popup.SetOpen(false)
-		fn(ok, ctx)
+		if fn != nil {
+			fn(ok, ctx)
+		}
 	})
 }
 
@@ -121,7 +125,6 @@ func (w *alert_widget) Bounds(ctx *gui.Context, widgetBounds *gui.WidgetBounds) 
 }
 
 func (w *alert_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	w.popup.SetOpen(true)
 	w.popup.SetAnimated(true)
 	w.popup.SetContent(&w.widget)
 	adder.AddWidget(&w.popup)

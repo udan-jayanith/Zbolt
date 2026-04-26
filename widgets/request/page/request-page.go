@@ -47,8 +47,6 @@ type RequestPage struct {
 	popup_content gui.Widget
 	popup_size    image.Point
 	popup_widget  widget.Popup
-
-	notify_widget CommonWidgets.Notify
 }
 
 func (rp *RequestPage) create_sidebar_item(request *def.Request) {
@@ -164,8 +162,6 @@ func (rp *RequestPage) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rp.sidebar.Widget().OnVariableClicked(func(ctx *gui.Context) {
 		rp.open_popup(&rp.variable_panel_widget, ctx)
 	})
-
-	adder.AddWidget(&rp.notify_widget)
 	return nil
 }
 
@@ -183,7 +179,6 @@ func (rp *RequestPage) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, 
 
 		layouter.LayoutWidget(&rp.popup_widget, popup_size)
 	}
-	rp.notify_widget.LayoutWidget(ctx, widgetBounds, layouter)
 
 	tab_container_layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,

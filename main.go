@@ -10,9 +10,9 @@ import (
 	"os"
 
 	gui "github.com/guigui-gui/guigui"
-	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 
+	message_model "API-Client/message-model"
 	home "API-Client/widgets/home"
 	request_page "API-Client/widgets/request/page"
 )
@@ -20,32 +20,17 @@ import (
 type Root struct {
 	gui.DefaultWidget
 
-	welcome_page_widget home.HomePage
-	request_page_widget request_page.RequestPage
-
-	alert_box messages.AlertBox
-	popup     widget.Popup
+	message_model_widget gui.Widget
+	welcome_page_widget  home.HomePage
+	request_page_widget  request_page.RequestPage
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
-	adder.AddWidget(&r.request_page_widget)
-
-	if r.popup.IsOpen() {
-		r.popup.SetAnimated(true)
-		r.popup.SetContent(&r.alert_box)
-		adder.AddWidget(&r.popup)
-	} else {
-		alert, ok := messages.Alerts.Get()
-		r.popup.SetOpen(ok)
-		r.alert_box.SetAlert(alert)
-
-		r.alert_box.OnOk(func(ctx *gui.Context) {
-			alert, ok := messages.Alerts.Get()
-			r.popup.SetOpen(ok)
-			r.alert_box.SetAlert(alert)
-		})
+	if r.message_model_widget == nil {
+		r.message_model_widget = &message_model.MessageModel
 	}
-
+	adder.AddWidget(&r.request_page_widget)
+	adder.AddWidget(&message_model.MessageModel)
 	return nil
 }
 
@@ -55,20 +40,7 @@ func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBound
 
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
-
-	if r.popup.IsOpen() {
-		alert_box_point := r.alert_box.Measure(ctx, gui.Constraints{})
-		middle := image.Rectangle{
-			Min: image.Point{
-				X: b.Max.X/2 - alert_box_point.X/2,
-				Y: b.Max.Y/2 - alert_box_point.Y/2,
-			},
-		}
-		middle.Max = middle.Min.Add(alert_box_point)
-
-		layouter.LayoutWidget(&r.popup, middle)
-	}
-
+	layouter.LayoutWidget(r.message_model_widget, b)
 	layouter.LayoutWidget(&r.request_page_widget, b)
 }
 

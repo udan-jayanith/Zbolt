@@ -3,22 +3,30 @@ package message_model
 import (
 	"API-Client/basic"
 	"image"
+	"time"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/guigui-gui/guigui/basicwidget/basicwidgetdraw"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type notify_widget struct {
 	gui.DefaultWidget
 
-	text_widget gui.WidgetWithPadding[*widget.Text]
+	text_widget widget.Text
+	open        bool
+	t           time.Time
 	on_result   result_fn_type
 }
 
 func (w *notify_widget) SetMessage(message string) {
-	w.text_widget.Widget().SetValue(message)
+	w.text_widget.SetValue(message)
+	if !w.open {
+		w.t = time.Now()
+	}
+	w.open = true
 }
 
 func (w *notify_widget) OnResult(fn result_fn_type) {
@@ -27,23 +35,62 @@ func (w *notify_widget) OnResult(fn result_fn_type) {
 
 // TODO: close the notify_widget after X amount of time
 func (notify_widget *notify_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	text_widget := notify_widget.text_widget.Widget()
+	text_widget := &notify_widget.text_widget
 	text_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	text_widget.SetHorizontalAlign(widget.HorizontalAlignCenter)
+	text_widget.SetEllipsisString("...")
 	text_widget.SetOpacity(0.9)
 
-	line_height := widget.LineHeight(ctx)
-	notify_widget.text_widget.SetPadding(basic.NewPadding(line_height/3, line_height/2+line_height/3))
 	adder.AddWidget(&notify_widget.text_widget)
+
+	if time.Since(notify_widget.t) >= 2*time.Second {
+		if notify_widget.on_result != nil {
+			notify_widget.on_result(true, ctx)
+		}
+		println(time.Since(notify_widget.t).String())
+		notify_widget.open = false
+	}
 	return nil
 }
 
+func (notify_widget *notify_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
+		if notify_widget.on_result != nil {
+			notify_widget.on_result(true, ctx)
+		}
+		notify_widget.open = false
+	}
+	return gui.HandleInputResult{}
+}
+
+func (notify_widget *notify_widget) padding(ctx *gui.Context) gui.Padding {
+	line_height := widget.LineHeight(ctx)
+	return basic.NewPadding(line_height/3, line_height/2+line_height/3)
+}
+
 func (notify_widget *notify_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
-	layouter.LayoutWidget(&notify_widget.text_widget, widgetBounds.Bounds())
+	layout := gui.LinearLayout{
+		Direction: gui.LayoutDirectionHorizontal,
+		Padding:   notify_widget.padding(ctx),
+		Items: []gui.LinearLayoutItem{
+			{
+				Widget: &notify_widget.text_widget,
+			},
+		},
+	}
+	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
 func (notify_widget *notify_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	return notify_widget.text_widget.Widget().Measure(ctx, constraints)
+	size := notify_widget.text_widget.Measure(ctx, gui.Constraints{})
+	padding := notify_widget.padding(ctx)
+	size.X += padding.End + padding.Start
+	size.Y += padding.Top + padding.Bottom
+	max_w := widget.UnitSize(ctx) * 4
+	if size.X > max_w {
+		size.X = max_w
+	}
+	return size
 }
 
 func (notify_widget *notify_widget) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
