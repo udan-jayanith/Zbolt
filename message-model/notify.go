@@ -47,7 +47,6 @@ func (notify_widget *notify_widget) Build(ctx *gui.Context, adder *gui.ChildAdde
 		if notify_widget.on_result != nil {
 			notify_widget.on_result(true, ctx)
 		}
-		println(time.Since(notify_widget.t).String())
 		notify_widget.open = false
 	}
 	return nil

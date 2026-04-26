@@ -125,6 +125,7 @@ func (data *HTTP_Data) Do() bool {
 		return false
 	}
 	data.set_req_headers(req)
+
 	go data.do(req)
 
 	return true
@@ -195,5 +196,6 @@ loop:
 			data.set_response_data(res_data)
 		}
 	}
+	res_data.Body.content = body_content
 	data.set_response_data(res_data)
 }

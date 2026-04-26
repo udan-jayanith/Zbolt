@@ -38,17 +38,25 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	if req.Type != def.HTTP {
 		panic("Invalid request type")
 	}
+	if brp.req == req {
+		return
+	}
 	brp.req = req
 
 	data, ok := req.Data().(*def.HTTP_Data)
 	if !ok {
 		panic("Invalid data type")
-	} else if data == brp.data {
-		return
 	}
 
 	// Setup request widget
 	brp.data = data
+	brp.setup_request_widget()
+	brp.setup_response_widget(false)
+	gui.RequestRebuild(brp)
+}
+
+func (brp *HTTP_Widget) setup_request_widget() {
+	data := brp.data
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
 	brp.request_widget.SetAutowrap(data.RequestConfig.AutoWrap)
@@ -70,8 +78,6 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	brp.request_widget.SetURL(u)
 	brp.request_widget.DisableURLInput(data.URL.IsPattern())
 
-	brp.setup_response_widget(false)
-	gui.RequestRebuild(brp)
 }
 
 func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
@@ -151,8 +157,10 @@ func (brp *HTTP_Widget) on_url_panel_close(ctx *gui.Context, reason widget.Popup
 
 func (brp *HTTP_Widget) on_request_button_clicked(ctx *gui.Context, value string) {
 	if value == RequestButton {
+		brp.SyncData()
 		brp.request_widget.SetRequestButtonText(CancelButton)
 		brp.data.Do()
+		brp.setup_request_widget()
 	}
 }
 
@@ -205,13 +213,13 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		brp.data.ResponseConfig.Formate = value
 	})
 
+	brp.data.ResponseData(func(value *def.HTTP_Response_Data) {
+		value.SelectedResponseTab = brp.response_widget.SelectedTab()
+	})
 	brp.setup_response_widget(true)
-	if brp.data.IsFetching() {
-	} else {
-		err := brp.data.GrabRequestErr()
-		if err != nil {
-			println(err.Error())
-		}
+	err := brp.data.GrabRequestErr()
+	if err != nil {
+		message_model.Show(err.Error(), message_model.Alert, nil)
 	}
 
 	adder.AddWidget(&brp.request_widget)
