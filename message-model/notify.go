@@ -33,6 +33,16 @@ func (w *notify_widget) OnResult(fn result_fn_type) {
 	w.on_result = fn
 }
 
+func (w *notify_widget) Tick(ctx *gui.Context, widgetBounds *gui.WidgetBounds) error {
+	if time.Since(w.t) >= 2*time.Second {
+		if w.on_result != nil {
+			w.on_result(true, ctx)
+		}
+		w.open = false
+	}
+	return nil
+}
+
 // TODO: close the notify_widget after X amount of time
 func (notify_widget *notify_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	text_widget := &notify_widget.text_widget
@@ -42,13 +52,6 @@ func (notify_widget *notify_widget) Build(ctx *gui.Context, adder *gui.ChildAdde
 	text_widget.SetOpacity(0.9)
 
 	adder.AddWidget(&notify_widget.text_widget)
-
-	if time.Since(notify_widget.t) >= 2*time.Second {
-		if notify_widget.on_result != nil {
-			notify_widget.on_result(true, ctx)
-		}
-		notify_widget.open = false
-	}
 	return nil
 }
 

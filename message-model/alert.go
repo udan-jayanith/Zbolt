@@ -23,6 +23,7 @@ func (w *alert_widget_content) SetMessage(message string) {
 
 func (w *alert_widget_content) OnResult(fn result_fn_type) {
 	w.on_result = fn
+	gui.RequestRebuild(w)
 }
 
 func (w *alert_widget_content) Bounds(ctx *gui.Context, widgetBounds *gui.WidgetBounds) image.Rectangle {

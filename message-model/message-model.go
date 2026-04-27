@@ -27,21 +27,13 @@ type message_data struct {
 
 var messsage_queue queue.SliceQueue[message_data]
 
-func Show(message string, t MessageModelType, on_result func(ok bool, ctx *gui.Context)) {
-	messsage_queue.Enqueue(message_data{
-		message:   message,
-		t:         t,
-		on_result: on_result,
-	})
-}
-
 type message_model interface {
 	gui.Widget
 	SetMessage(message string)
 	OnResult(fn func(ok bool, ctx *gui.Context))
 	Bounds(ctx *gui.Context, widgetBounds *gui.WidgetBounds) image.Rectangle
-//	Open(open bool)
-//	IsOpen() bool
+	// Open(open bool)
+	// IsOpen() bool
 }
 
 type message_model_widget struct {
@@ -78,6 +70,9 @@ func (wi *message_model_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) e
 		if wi.current_message_data.on_result != nil {
 			wi.current_message_data.on_result(ok, ctx)
 		}
+		if !messsage_queue.IsEmpty() {
+			gui.RequestRebuild(wi)
+		}
 	})
 	adder.AddWidget(modeled_widget)
 
@@ -105,3 +100,12 @@ func (wi *message_model_widget) Layout(ctx *gui.Context, widgetBounds *gui.Widge
 
 // This whidget only must be used by the rott widget
 var MessageModel = message_model_widget{}
+
+func Show(message string, t MessageModelType, on_result func(ok bool, ctx *gui.Context)) {
+	messsage_queue.Enqueue(message_data{
+		message:   message,
+		t:         t,
+		on_result: on_result,
+	})
+	gui.RequestRebuild(&MessageModel)
+}
