@@ -157,7 +157,6 @@ func (at *attribute_table) push_row(row attr.AttrCheck) {
 	row_widget.key_cell.SetValue(row.Key)
 	row_widget.value_cell.SetValue(row.Value)
 	at.rows = append(at.rows, &row_widget)
-	gui.RequestRebuild(at)
 }
 
 func (at *attribute_table) delete_row(index int) {
@@ -418,4 +417,5 @@ func (t *AttributeTable) Count() int {
 
 func (t *AttributeTable) PushRow(row attr.AttrCheck) {
 	t.table.Widget().push_row(row)
+	gui.RequestRebuild(t.table.Widget())
 }

@@ -23,7 +23,7 @@ func (lazy_loading *LazyLoading) Tick(ctx *gui.Context, widgetBounds *gui.Widget
 		return nil
 	}
 
-	max, min := 24.0, 16.0
+	max, min := 26.0, 16.0
 	if lazy_loading.whiteness == 0 {
 		lazy_loading.whiteness = min
 	}
@@ -40,7 +40,7 @@ func (lazy_loading *LazyLoading) Tick(ctx *gui.Context, widgetBounds *gui.Widget
 		lazy_loading.is_decreasing = false
 	}
 	lazy_loading.t = time.Now()
-	
+
 	gui.RequestRedraw(lazy_loading)
 	return nil
 }
@@ -51,4 +51,26 @@ func (lazy_loading *LazyLoading) Draw(ctx *gui.Context, widgetBounds *gui.Widget
 	basicwidgetdraw.DrawRoundedRect(ctx, dst, widgetBounds.Bounds(), clr, widget.RoundedCornerRadius(ctx))
 }
 
-// TODO: implement widget with lazy loading
+type WidgetWithLazyLoading[T gui.Widget] struct {
+	gui.DefaultWidget
+
+	widget       lazy_widget[T]
+	lazy_loading LazyLoading
+	lazy_load    bool
+}
+
+func (wi *WidgetWithLazyLoading[T]) Widget() T {
+	return wi.widget.Widget()
+}
+
+func (wi *WidgetWithLazyLoading[T]) SetWidget(widget T) {
+	wi.widget.SetWidget(widget)
+}
+
+func (wi *WidgetWithLazyLoading[T]) LazyLoad() bool {
+	return wi.lazy_load
+}
+
+func (wi *WidgetWithLazyLoading[T]) SetLazyLoad(lazy_load bool) {
+	wi.lazy_load = lazy_load
+}
