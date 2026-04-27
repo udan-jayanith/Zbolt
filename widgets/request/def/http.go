@@ -83,6 +83,7 @@ type HTTP_Data struct {
 	} `json:"response-config"`
 
 	selected_request_tab int
+	// TODO: Store wether the url panel is opne or not
 
 	request struct {
 		is_fetching, canceled atomic.Bool
