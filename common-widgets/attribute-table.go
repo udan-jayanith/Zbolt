@@ -124,9 +124,9 @@ func (row_widget *table_row_widget) Measure(ctx *gui.Context, constraints gui.Co
 	return point
 }
 
-func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
-	return gui.HandleInputResult{}
-}
+//func (w *table_row_widget) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
+//return gui.HandleInputResult{}
+//}
 
 func (row_widget *table_row_widget) on_delete(fn func(index int)) {
 	if row_widget.row_delete_btn == nil {
@@ -157,6 +157,7 @@ func (at *attribute_table) push_row(row attr.AttrCheck) {
 	row_widget.key_cell.SetValue(row.Key)
 	row_widget.value_cell.SetValue(row.Value)
 	at.rows = append(at.rows, &row_widget)
+	gui.RequestRebuild(at)
 }
 
 func (at *attribute_table) delete_row(index int) {
@@ -260,7 +261,7 @@ func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	b := widgetBounds.Bounds()
 	b.Min.Y += at.header_height(ctx)
 
-	line_color := draw_color.ScaleAlpha(draw_color.Color(	ctx.ColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
+	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
 	width := 1 * float32(ctx.Scale())
 
 	for i, _ := range at.rows {
@@ -325,6 +326,7 @@ func (t *AttributeTable) SetRows(rows []attr.Attribute) {
 		table_row.value_cell.SetValue(row.Value)
 	}
 	t.table.Widget().rows = table_rows
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) SetRowsCheck(rows []attr.AttrCheck) {
@@ -352,6 +354,7 @@ func (t *AttributeTable) SetRowsCheck(rows []attr.AttrCheck) {
 		table_row.value_cell.SetValue(row.Value)
 	}
 	t.table.Widget().rows = table_rows
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) RowsCheck() []attr.AttrCheck {
@@ -391,18 +394,22 @@ func (t *AttributeTable) Rows() []attr.Attribute {
 
 func (t *AttributeTable) DisableCheckbox(disable bool) {
 	t.table.Widget().checkbox_disabled = disable
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) DisableDelete(disable bool) {
 	t.table.Widget().delete_disabled = disable
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) KeyEditable(editable bool) {
 	t.table.Widget().key_not_editable = !editable
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) AutoAddRow(auto_add bool) {
 	t.table.Widget().disable_auto_add = !auto_add
+	gui.RequestRebuild(t)
 }
 
 func (t *AttributeTable) Count() int {
