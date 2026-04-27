@@ -242,6 +242,8 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 func (body *BodyWidget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
+	gui.RequestRedraw(&body.header)
+	gui.RequestRebuild(body)
 }
 
 func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
@@ -257,6 +259,7 @@ func (body *BodyWidget) ContentType() def.ContentType {
 
 func (body *BodyWidget) SetContentType(content_type def.ContentType) {
 	body.header.content_type.content_type = content_type
+	gui.RequestRebuild(&body.header)
 }
 
 func (body *BodyWidget) Body() string {
