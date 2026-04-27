@@ -23,6 +23,10 @@ type response_widget struct {
 	}
 }
 
+func (rw *response_widget) SetLazyLoad(lazy_load bool) {
+	rw.tab_content.response_body.SetLazyLoad(lazy_load)
+}
+
 func (rw *response_widget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
 	rw.tab_content.response_body.OnAutowrapToggle(fn)
 }

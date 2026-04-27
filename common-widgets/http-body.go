@@ -179,20 +179,25 @@ type BodyWidget struct {
 
 	header http_body_header_widget
 
-	view          widget.TextInput
-	lazey_loading LazyLoading
+	body WidgetWithLazyLoading[*widget.TextInput]
+}
+
+func (w *BodyWidget) SetLazyLoad(lazy_load bool) {
+	w.body.SetLazyLoad(lazy_load)
+}
+
+func (w *BodyWidget) LazyLoad() bool {
+	return w.body.LazyLoad()
 }
 
 func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&w.header)
 
-	/*
-		w.view.SetAutoWrap(w.header.options.auto_wrap.toggle.Value())
-		w.view.SetMultiline(true)
-		w.view.SetEditable(w.t == HTTP_Request)
-		adder.AddWidget(&w.view)
-	*/
-	adder.AddWidget(&w.lazey_loading)
+	body := w.body.Widget()
+	body.SetAutoWrap(w.header.options.auto_wrap.toggle.Value())
+	body.SetMultiline(true)
+	body.SetEditable(w.t == HTTP_Request)
+	adder.AddWidget(&w.body)
 	// make the view handle images and text.
 	// Show content type not supported if content type is not jpg, png or text type.
 	return nil
@@ -209,7 +214,7 @@ func (w *BodyWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, la
 				Widget: &w.header,
 			},
 			{
-				Widget: &w.lazey_loading,
+				Widget: &w.body,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
@@ -233,7 +238,7 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 		point.Y = h
 	} else {
 		point.Y += body.header.Measure(ctx, constraints).Y
-		point.Y += body.view.Measure(ctx, constraints).Y
+		point.Y += body.body.Measure(ctx, constraints).Y
 	}
 
 	return point
@@ -242,14 +247,13 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 func (body *BodyWidget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
-	gui.RequestRebuild(&body.header)
 	gui.RequestRebuild(body)
 }
 
 func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
 	t, sub_t := content_type.Parse()
 	if t == "text" || (t == "application" && sub_t == "json") {
-		body.view.SetValue(content)
+		body.body.Widget().SetValue(content)
 	}
 }
 
@@ -263,7 +267,7 @@ func (body *BodyWidget) SetContentType(content_type def.ContentType) {
 }
 
 func (body *BodyWidget) Body() string {
-	return body.view.Value()
+	return body.body.Widget().Value()
 }
 
 func (body *BodyWidget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {

@@ -1,6 +1,7 @@
 package CommonWidgets
 
 import (
+	"image"
 	"time"
 
 	gui "github.com/guigui-gui/guigui"
@@ -73,4 +74,25 @@ func (wi *WidgetWithLazyLoading[T]) LazyLoad() bool {
 
 func (wi *WidgetWithLazyLoading[T]) SetLazyLoad(lazy_load bool) {
 	wi.lazy_load = lazy_load
+}
+
+func (wi *WidgetWithLazyLoading[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	if wi.lazy_load {
+		adder.AddWidget(&wi.lazy_loading)
+		return nil
+	}
+	adder.AddWidget(wi.widget.Widget())
+	return nil
+}
+
+func (wi *WidgetWithLazyLoading[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	if wi.lazy_load {
+		layouter.LayoutWidget(&wi.lazy_loading, widgetBounds.Bounds())
+		return
+	}
+	layouter.LayoutWidget(wi.widget.Widget(), widgetBounds.Bounds())
+}
+
+func (wi *WidgetWithLazyLoading[T]) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+	return wi.widget.Widget().Measure(ctx, constraints)
 }

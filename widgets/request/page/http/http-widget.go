@@ -82,6 +82,8 @@ func (brp *HTTP_Widget) setup_request_widget() {
 
 func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 	// Setup response widget
+	brp.response_widget.SetLazyLoad(is_fetching)
+
 	data := brp.data
 	data.ResponseData(func(res_data *def.HTTP_Response_Data) {
 		brp.response_widget.SetHeaders(res_data.Headers)
@@ -216,7 +218,8 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	brp.data.ResponseData(func(value *def.HTTP_Response_Data) {
 		value.SelectedResponseTab = brp.response_widget.SelectedTab()
 	})
-	brp.setup_response_widget(true)
+	
+	brp.setup_response_widget(brp.data.IsFetching())
 	err := brp.data.GrabRequestErr()
 	if err != nil {
 		message_model.Show(err.Error(), message_model.Alert, nil)
