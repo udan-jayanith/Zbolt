@@ -231,6 +231,7 @@ func (path_widget *Path) SetPath(directory_path string) {
 			path_widget.path_widget.separator = append(path_widget.path_widget.separator, icons.NewIcon("arrow_forward"))
 		}
 	}
+	gui.RequestRebuild(&path_widget.path_widget)
 }
 
 func (path_widget *Path) OnSelect(fn func(ctx *gui.Context, path string)) {
