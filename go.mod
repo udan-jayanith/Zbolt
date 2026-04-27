@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/golang-ds/queue v1.0.0
-	github.com/guigui-gui/guigui v0.0.0-20260426192802-b7cbcb2fed63
+	github.com/guigui-gui/guigui v0.0.0-20260427181531-de65d1047702
 	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.11.0.20260419062649-1a4c38c37d35
 	github.com/hajimehoshi/iro v0.2.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c

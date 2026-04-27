@@ -20,6 +20,7 @@ import (
 
 type Root struct {
 	gui.DefaultWidget
+	background           basicwidget.Background
 	message_model_widget gui.Widget
 	menubar_widget       basicwidget.Menubar[struct{}]
 
@@ -28,6 +29,8 @@ type Root struct {
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
+	adder.AddWidget(&r.background)
+
 	r.menubar_widget.SetItems([]basicwidget.MenubarItem{
 		{
 			Text: "Zbolt",
@@ -55,7 +58,8 @@ func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBound
 
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
-	layouter.LayoutWidget(r.message_model_widget, b)
+	layouter.LayoutWidget(&r.background, b)
+
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
 		Items: []gui.LinearLayoutItem{

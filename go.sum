@@ -12,8 +12,8 @@ github.com/go-text/typesetting-utils v0.0.0-20260327125527-fbf04b32d9ad h1:J6fi0
 github.com/go-text/typesetting-utils v0.0.0-20260327125527-fbf04b32d9ad/go.mod h1:3/62I4La/HBRX9TcTpBj4eipLiwzf+vhI+7whTc9V7o=
 github.com/golang-ds/queue v1.0.0 h1:hqcXLnt7tAZLWv3t5Dfh6y1gIgy0KCW/viiKSUG55cM=
 github.com/golang-ds/queue v1.0.0/go.mod h1:0wfhzQPWD2kZRXcDIBwEe490RcBoXdcHuUiJVYgf3vU=
-github.com/guigui-gui/guigui v0.0.0-20260426192802-b7cbcb2fed63 h1:1MvUW09no9rmCYYKtIT9QgKFfkRZe4WAm/deVwjOkhY=
-github.com/guigui-gui/guigui v0.0.0-20260426192802-b7cbcb2fed63/go.mod h1:H6uRt+Qh/FCnlOGQdc6so7aIdQ6UjkBoVGXSvrk6MK4=
+github.com/guigui-gui/guigui v0.0.0-20260427181531-de65d1047702 h1:zIsJgEBxa8urcY9ZfRBTuKFmmoIK7UavJJ0FbtMQijA=
+github.com/guigui-gui/guigui v0.0.0-20260427181531-de65d1047702/go.mod h1:NhomJCwa+YZ/1b/OC3Vk36KIhQauBjHFd5sH8TVRx8k=
 github.com/hajimehoshi/bitmapfont/v4 v4.1.0 h1:eE3qa5Do4qhowZVIHjsrX5pYyyPN6sAFWMsO7QREm3U=
 github.com/hajimehoshi/bitmapfont/v4 v4.1.0/go.mod h1:/PD+aLjAJ0F2UoQx6hkOfXqWN7BkroDUMr5W+IT1dpE=
 github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.11.0.20260419062649-1a4c38c37d35 h1:CZKfmzf7TVT2hL3GVs/12m2iPzUe+v8fPza55y+6r0I=
