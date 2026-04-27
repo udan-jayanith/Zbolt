@@ -41,4 +41,5 @@ func (et *EditableText) Measure(ctx *gui.Context, constraints gui.Constraints) i
 
 func (et *EditableText) SetEditable(editable bool) {
 	et.not_editable = !editable
+	gui.RequestRebuild(et)
 }
