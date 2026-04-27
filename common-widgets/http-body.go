@@ -242,7 +242,7 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 func (body *BodyWidget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
-	gui.RequestRedraw(&body.header)
+	gui.RequestRebuild(&body.header)
 	gui.RequestRebuild(body)
 }
 
