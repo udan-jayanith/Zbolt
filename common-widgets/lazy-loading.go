@@ -24,7 +24,7 @@ func (lazy_loading *LazyLoading) Tick(ctx *gui.Context, widgetBounds *gui.Widget
 		return nil
 	}
 
-	max, min := 26.0, 16.0
+	max, min := 30.0, 18.0
 	if lazy_loading.whiteness == 0 {
 		lazy_loading.whiteness = min
 	}

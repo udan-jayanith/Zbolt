@@ -49,6 +49,8 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 		}, data.Headers...)
 	}
 
+	// TODO: Add
+	// * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent
 	if data.Body.ContentType != "" {
 		var content_type_found bool
 		for i, header := range data.Headers {
@@ -85,6 +87,7 @@ func (data *HTTP_Data) open_request() {
 	data.request.is_fetching.Store(true)
 	data.request.canceled.Store(false)
 	data.request.err.Store(nil)
+	data.set_response_data(HTTP_Response_Data{})
 }
 
 func (data *HTTP_Data) close_request() {
@@ -125,7 +128,6 @@ func (data *HTTP_Data) Do() bool {
 		return false
 	}
 	data.set_req_headers(req)
-
 	go data.do(req)
 
 	return true
