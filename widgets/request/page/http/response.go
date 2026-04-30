@@ -17,14 +17,22 @@ type response_widget struct {
 	header_widget response_header_widget
 	tab           CommonWidgets.Tab
 	tab_content   struct {
-		response_header  widget.Table[struct{}]
+		response_header  CommonWidgets.WidgetWithLazyLoading[*widget.Table[struct{}]]
 		response_body    CommonWidgets.BodyWidget
 		selected_content gui.Widget
 	}
 }
 
-func (rw *response_widget) SetLazyLoad(lazy_load bool) {
-	rw.tab_content.response_body.SetLazyLoad(lazy_load)
+func (rw *response_widget) SetLazyLoading(body, headers bool) {
+	rw.tab_content.response_body.SetLazyLoad(body)
+	rw.tab_content.response_header.SetLazyLoad(headers)
+}
+
+func (rw *response_widget) Clear() {
+	rw.header_widget.clear()
+	rw.tab_content.response_header.Widget().SetItems([]widget.TableRow[struct{}]{})
+	rw.tab_content.response_body.SetBody("", "")
+	rw.tab_content.response_body.SetContentType("")
 }
 
 func (rw *response_widget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
@@ -74,7 +82,7 @@ func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {
 		})
 	}
 
-	rw.tab_content.response_header.SetItems(header_items)
+	rw.tab_content.response_header.Widget().SetItems(header_items)
 }
 
 func (rw *response_widget) SetResponseBody(body *def.HTTP_Response_Body) {
@@ -116,7 +124,7 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	rw.set_tab_items()
 
 	{
-		rw.tab_content.response_header.SetColumns([]widget.TableColumn{
+		rw.tab_content.response_header.Widget().SetColumns([]widget.TableColumn{
 			{
 				HeaderText:                "Name",
 				HeaderTextHorizontalAlign: widget.HorizontalAlignLeft,

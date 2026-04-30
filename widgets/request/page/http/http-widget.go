@@ -82,10 +82,14 @@ func (brp *HTTP_Widget) setup_request_widget() {
 
 func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 	// Setup response widget
-	brp.response_widget.SetLazyLoad(is_fetching)
-
 	data := brp.data
 	data.ResponseData(func(res_data *def.HTTP_Response_Data) {
+		if is_fetching {
+			brp.response_widget.SetLazyLoading(len(res_data.Body.Content()) == 0, len(res_data.Headers) == 0)
+		} else {
+			brp.response_widget.SetLazyLoading(false, false)
+		}
+
 		brp.response_widget.SetHeaders(res_data.Headers)
 
 		brp.response_widget.SetAutowrap(data.ResponseConfig.AutoWrap)
@@ -162,6 +166,7 @@ func (brp *HTTP_Widget) on_request_button_clicked(ctx *gui.Context, value string
 		brp.SyncData()
 		brp.request_widget.SetRequestButtonText(CancelButton)
 		brp.data.Do()
+		brp.response_widget.Clear()
 		brp.setup_request_widget()
 	}
 }
@@ -218,8 +223,13 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	brp.data.ResponseData(func(value *def.HTTP_Response_Data) {
 		value.SelectedResponseTab = brp.response_widget.SelectedTab()
 	})
+
+	is_fetching := brp.data.IsFetching()
+	if !is_fetching {
+		brp.request_widget.SetRequestButtonText(RequestButton)
+	}
 	
-	brp.setup_response_widget(brp.data.IsFetching())
+	brp.setup_response_widget(is_fetching)
 	err := brp.data.GrabRequestErr()
 	if err != nil {
 		message_model.Show(err.Error(), message_model.Alert, nil)

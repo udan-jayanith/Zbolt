@@ -20,6 +20,13 @@ type response_header_widget struct {
 	tooltip_bounds image.Rectangle
 }
 
+func (w *response_header_widget) clear() {
+	w.status.SetValue("")
+	w.response_time.SetValue("")
+	w.size.SetValue("")
+	w.proto.SetValue("")
+}
+
 func (rhw *response_header_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	rhw.status.SetTabular(true)
 	if rhw.status.Value() == "" {
