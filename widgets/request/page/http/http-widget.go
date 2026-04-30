@@ -113,6 +113,7 @@ func (brp *HTTP_Widget) SyncData() {
 	brp.data.Body.ContentType = brp.request_widget.ContentType()
 	brp.data.Body.Content = brp.request_widget.Body()
 
+	// TODO: sync response data
 	brp.data.SetSelectedRequestTab(brp.request_widget.SelectedTab())
 	brp.data.ResponseData(func(value *def.HTTP_Response_Data) {
 		value.SelectedResponseTab = brp.response_widget.SelectedTab()
