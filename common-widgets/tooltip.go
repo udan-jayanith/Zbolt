@@ -7,9 +7,6 @@ import (
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type Opener interface {
-}
-
 type WidgetWithTooltip[T gui.Widget] struct {
 	gui.DefaultWidget
 
@@ -43,5 +40,54 @@ func (w *WidgetWithTooltip[T]) Measure(ctx *gui.Context, constraints gui.Constra
 	return w.widget.Widget().Measure(ctx, constraints)
 }
 
-// TODO: Add tooltip with button
-// TODO: Add tooltip with text
+type ButtonWithTooltip struct {
+	widget.Button
+	tooltip      widget.TooltipArea
+	tooltip_text string
+}
+
+func (w *ButtonWithTooltip) SetTooltip(text string) {
+	w.tooltip_text = text
+}
+
+func (w *ButtonWithTooltip) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	w.Button.Build(ctx, adder)
+	if w.tooltip_text != "" {
+		w.tooltip.SetText(w.tooltip_text)
+		adder.AddWidget(&w.tooltip)
+	}
+	return nil
+}
+
+func (w *ButtonWithTooltip) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	if w.tooltip_text != "" {
+		layouter.LayoutWidget(&w.tooltip, widgetBounds.Bounds())
+	}
+	w.Button.Layout(ctx, widgetBounds, layouter)
+}
+
+type TextWithTooltip struct {
+	widget.Text
+	tooltip      widget.TooltipArea
+	tooltip_text string
+}
+
+func (w *TextWithTooltip) SetTooltip(text string) {
+	w.tooltip_text = text
+}
+
+func (w *TextWithTooltip) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	w.Text.Build(ctx, adder)
+	if w.tooltip_text != "" {
+		w.tooltip.SetText(w.tooltip_text)
+		adder.AddWidget(&w.tooltip)
+	}
+	return nil
+}
+
+func (w *TextWithTooltip) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+	if w.tooltip_text != "" {
+		layouter.LayoutWidget(&w.tooltip, widgetBounds.Bounds())
+	}
+	w.Text.Layout(ctx, widgetBounds, layouter)
+}
