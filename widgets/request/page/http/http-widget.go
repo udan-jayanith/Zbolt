@@ -17,12 +17,14 @@ import (
 type HTTP_Widget struct {
 	gui.DefaultWidget
 
+	loading_bar     CommonWidgets.InfiniteLoadingBar
 	request_widget  request_widget
 	vr              CommonWidgets.VerticalLine
 	response_widget response_widget
 
 	url_panel_widget url_panel_widget
 	popup_widget     widget.Popup
+	is_fetching      bool // TODO: change this in SetReq
 
 	req  *def.Request
 	data *def.HTTP_Data
@@ -229,13 +231,17 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	if !is_fetching {
 		brp.request_widget.SetRequestButtonText(RequestButton)
 	}
-	
+
 	brp.setup_response_widget(is_fetching)
 	err := brp.data.GrabRequestErr()
 	if err != nil {
 		message_model.Show(err.Error(), message_model.Alert, nil)
 	}
+	brp.is_fetching = is_fetching
 
+	if is_fetching {
+		adder.AddWidget(&brp.loading_bar)
+	}
 	adder.AddWidget(&brp.request_widget)
 	adder.AddWidget(&brp.vr)
 	adder.AddWidget(&brp.response_widget)
@@ -246,6 +252,14 @@ func (brp *HTTP_Widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds,
 	if brp.popup_widget.IsOpen() {
 		brp.popup_widget.SetBackgroundBounds(widgetBounds.Bounds())
 		layouter.LayoutWidget(&brp.popup_widget, brp.url_panel_popup_size(ctx, widgetBounds))
+	}
+
+	if brp.is_fetching {
+		loading_bar_bounds := widgetBounds.Bounds()
+		loading_bar_size := brp.loading_bar.Measure(ctx, gui.Constraints{})
+		loading_bar_bounds.Max.Y = loading_bar_bounds.Min.Y
+		loading_bar_bounds.Min.Y -= loading_bar_size.Y
+		layouter.LayoutWidget(&brp.loading_bar, loading_bar_bounds)
 	}
 
 	layout := gui.LinearLayout{
