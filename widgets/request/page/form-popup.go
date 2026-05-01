@@ -1,7 +1,8 @@
-package CommonWidgets
+package request_page
 
 import (
 	"API-Client/basic"
+	CommonWidgets "API-Client/common-widgets"
 	"image"
 
 	gui "github.com/guigui-gui/guigui"
@@ -11,7 +12,7 @@ import (
 type popup_form_content struct {
 	gui.DefaultWidget
 
-	field_widget  Description
+	field_widget  CommonWidgets.Description
 	input_widget  widget.TextInput
 	button_widget widget.Button
 }
@@ -83,16 +84,16 @@ func (content *popup_form_content) Measure(ctx *gui.Context, constraints gui.Con
 	return point
 }
 
-type SimpleFormPopup struct {
+type folder_create_popup struct {
 	gui.DefaultWidget
 
 	popup_widget      widget.Popup
 	popup_content     popup_form_content
-	padding_widget    WidgetWithPadding[*popup_form_content]
+	padding_widget    CommonWidgets.WidgetWithPadding[*popup_form_content]
 	on_button_clicked func(ctx *gui.Context, value string)
 }
 
-func (sfp *SimpleFormPopup) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (sfp *folder_create_popup) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	sfp.popup_content.button_widget.OnUp(func(_ *gui.Context) {
 		sfp.popup_widget.SetOpen(false)
@@ -111,26 +112,30 @@ func (sfp *SimpleFormPopup) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 	return nil
 }
 
-func (sfp *SimpleFormPopup) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (sfp *folder_create_popup) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	layouter.LayoutWidget(&sfp.popup_widget, widgetBounds.Bounds())
 }
 
-func (sfp *SimpleFormPopup) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (sfp *folder_create_popup) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	return sfp.padding_widget.Measure(ctx, constraints)
 }
 
-func (sfp *SimpleFormPopup) SetButtonText(text string) {
+func (sfp *folder_create_popup) SetButtonText(text string) {
 	sfp.popup_content.button_widget.SetText(text)
 }
 
-func (sfp *SimpleFormPopup) SetFieldValue(text string) {
+func (sfp *folder_create_popup) SetFieldValue(text string) {
 	sfp.popup_content.field_widget.SetDescription(text)
 }
 
-func (sfp *SimpleFormPopup) SetOpen(open bool) {
+func (sfp *folder_create_popup) ClearInput() {
+	sfp.popup_content.input_widget.SetValue("")
+}
+
+func (sfp *folder_create_popup) SetOpen(open bool) {
 	sfp.popup_widget.SetOpen(open)
 }
 
-func (sfp *SimpleFormPopup) OnButtonClicked(fn func(ctx *gui.Context, value string)) {
+func (sfp *folder_create_popup) OnButtonClicked(fn func(ctx *gui.Context, value string)) {
 	sfp.on_button_clicked = fn
 }

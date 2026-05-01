@@ -1,7 +1,6 @@
 package request_page
 
 import (
-	"API-Client/basic"
 	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
 	"fmt"
@@ -83,32 +82,32 @@ type Sidebar[T comparable] struct {
 
 	options struct {
 		search_icon   *ebiten.Image
-		search_widget widget.TextInput
+		search_widget CommonWidgets.WidgetWithTooltip[*widget.TextInput]
 		add           struct {
-			create_request_button, create_folder_button, variable_button widget.Button
+			create_request_button, create_folder_button, variable_button CommonWidgets.ButtonWithTooltip
 			create_request_icon, create_folder_icon, variable_icon       *ebiten.Image
-			tooltip                                                      basic.TooltipHelper
 
 			on_variable_clicked func(ctx *gui.Context)
 			on_request_create   func(ctx *gui.Context)
 
-			folder_popup          CommonWidgets.SimpleFormPopup
+			folder_popup          folder_create_popup
 			folder_popup_position image.Point
 			on_folder_create      func(ctx *gui.Context, folder_name string)
 		}
 	}
 
 	list struct {
-		path            CommonWidgets.Path
+		path            CommonWidgets.WidgetWithTooltip[*CommonWidgets.Path]
 		widget          widget.List[T]
 		items           []widget.ListItem[T]
 		on_item_clicked func(value T)
 
+		// TODO: use context menu area
 		contextmenu struct {
 			menu     widget.PopupMenu[struct{}]
 			position image.Point
 
-			rename_popup_widget CommonWidgets.SimpleFormPopup
+			rename_popup_widget folder_create_popup
 			right_clicked_item  *sidebar_item_widget[T]
 		}
 	}
@@ -156,12 +155,14 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		sd.options.add.variable_icon = icons.Store.Open("variable")
 	}
 
+	sd.options.add.create_request_button.SetTooltip("Create a new request")
 	sd.options.add.create_request_button.SetIcon(sd.options.add.create_request_icon)
 	sd.options.add.create_request_button.OnDown(func(context *gui.Context) {
 		sd.options.add.on_request_create(ctx)
 	})
 	adder.AddWidget(&sd.options.add.create_request_button)
 
+	sd.options.add.create_folder_button.SetTooltip("Create a new folder")
 	sd.options.add.create_folder_button.SetIcon(sd.options.add.create_folder_icon)
 	sd.options.add.create_folder_button.OnDown(func(context *gui.Context) {
 		sd.options.add.folder_popup_position = image.Pt(ebiten.CursorPosition())
@@ -169,14 +170,12 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&sd.options.add.create_folder_button)
 
+	sd.options.add.variable_button.SetTooltip("Open project variables panel")
 	sd.options.add.variable_button.SetIcon(sd.options.add.variable_icon)
 	if sd.options.add.on_variable_clicked != nil {
 		sd.options.add.variable_button.OnDown(sd.options.add.on_variable_clicked)
 	}
 	adder.AddWidget(&sd.options.add.variable_button)
-
-	sd.options.add.create_request_button.SetIcon(sd.options.add.create_request_icon)
-	adder.AddWidget(&sd.options.add.create_request_button)
 
 	sd.options.add.folder_popup.SetButtonText("Create")
 	sd.options.add.folder_popup.SetFieldValue("Enter folder name")
@@ -184,13 +183,16 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		if sd.options.add.on_request_create != nil {
 			sd.options.add.on_folder_create(ctx, value)
 		}
+		sd.options.add.folder_popup.ClearInput()
 	})
 
 	if sd.options.search_icon == nil {
 		sd.options.search_icon = icons.Store.Open("search")
 	}
-	sd.options.search_widget.SetIcon(sd.options.search_icon)
-	sd.options.search_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
+	sd.options.search_widget.SetTooltip("Search bar")
+	search_widget := sd.options.search_widget.Widget()
+	search_widget.SetIcon(sd.options.search_icon)
+	search_widget.SetVerticalAlign(widget.VerticalAlignMiddle)
 	adder.AddWidget(&sd.options.search_widget)
 
 	sd.list.widget.SetItems(sd.list.items)
@@ -201,8 +203,10 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&sd.list.widget)
 
-	sd.list.path.SetPath(`Root/zed/extensions/work/codebook`)
-	sd.list.path.OnSelect(func(ctx *gui.Context, path string) {
+	sd.list.path.SetTooltip("Path relative to project path")
+	path_wdiget := sd.list.path.Widget()
+	path_wdiget.SetPath(`Root/zed/extensions/work/codebook`)
+	path_wdiget.OnSelect(func(ctx *gui.Context, path string) {
 		println(path)
 	})
 	adder.AddWidget(&sd.list.path)
@@ -220,10 +224,6 @@ func (sd *Sidebar[T]) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&sd.list.contextmenu.rename_popup_widget)
 	adder.AddWidget(&sd.list.contextmenu.menu)
 	adder.AddWidget(&sd.options.add.folder_popup)
-
-	if sd.options.add.tooltip.IsOpen {
-		adder.AddWidget(&sd.options.add.tooltip.Widget)
-	}
 	return nil
 }
 
@@ -247,10 +247,6 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 		Min: sd.list.contextmenu.position,
 		Max: sd.list.contextmenu.position.Add(rename_measurements),
 	})
-
-	if sd.options.add.tooltip.IsOpen {
-		layouter.LayoutWidget(&sd.options.add.tooltip.Widget, sd.options.add.tooltip.Bounds)
-	}
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
@@ -289,65 +285,6 @@ func (sd *Sidebar[T]) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, l
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (sd *Sidebar[T]) handle_tooltips(ctx *gui.Context, widgetBounds *gui.WidgetBounds) {
-	if !widgetBounds.IsHitAtCursor() {
-		return
-	}
-
-	b := widgetBounds.Bounds()
-	tooltip_bounds := b
-	gap := sd.gap(ctx)
-
-	tooltip_bounds.Max.X = 0
-	tooltip_bounds.Min.X = 0
-	tooltip_bounds.Min.Y += sd.list.path.Measure(ctx, gui.Constraints{}).Y + gap
-
-	button := widget.Button{}
-	button_height := button.Measure(ctx, gui.Constraints{}).Y
-	search_bar_height := sd.options.search_widget.Measure(ctx, gui.Constraints{}).Y
-	tooltip_bounds.Max.Y = tooltip_bounds.Min.Y + button_height + search_bar_height + gap
-
-	cursor_x, cursor_y := ebiten.CursorPosition()
-	if cursor_y > tooltip_bounds.Max.Y || cursor_y < tooltip_bounds.Min.Y {
-		return
-	} else if cursor_y >= tooltip_bounds.Min.Y+gap+button_height && cursor_y <= tooltip_bounds.Max.Y {
-		tooltip_bounds.Min.Y += button_height + gap
-		tooltip_bounds.Min.X = b.Min.X
-		tooltip_bounds.Max.X = b.Max.X
-		sd.options.add.tooltip.Open(true, "Search bar", tooltip_bounds)
-		return
-	}
-
-	left_x := b.Min.X
-	w := sd.options.add.create_request_button.Measure(ctx, gui.Constraints{}).X
-	if cursor_x >= left_x && cursor_x <= left_x+w {
-		tooltip_bounds.Min.X = left_x
-		tooltip_bounds.Max.X = left_x + w
-		sd.options.add.tooltip.Open(true, "Create new request", tooltip_bounds)
-		return
-	}
-	left_x += w + gap
-
-	w = sd.options.add.create_folder_button.Measure(ctx, gui.Constraints{}).X
-	if cursor_x >= left_x && cursor_x <= left_x+w {
-		tooltip_bounds.Min.X = left_x
-		tooltip_bounds.Max.X = left_x + w
-		sd.options.add.tooltip.Open(true, "Create new folder", tooltip_bounds)
-		return
-	}
-	left_x += w + gap
-
-	w = sd.options.add.variable_button.Measure(ctx, gui.Constraints{}).X
-	if cursor_x >= left_x && cursor_x <= left_x+w {
-		tooltip_bounds.Min.X = left_x
-		tooltip_bounds.Max.X = left_x + w
-		sd.options.add.tooltip.Open(true, "Variables panel (Environment variables)", tooltip_bounds)
-		return
-	}
-
-	sd.options.add.tooltip.Open(false, "", tooltip_bounds)
-}
-
 func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.WidgetBounds) gui.HandleInputResult {
 	if widgetBounds.IsHitAtCursor() && inpututil.IsMouseButtonJustReleased(ebiten.MouseButton2) && sd.list.contextmenu.right_clicked_item != nil {
 		sd.list.contextmenu.position = image.Pt(ebiten.CursorPosition())
@@ -357,8 +294,6 @@ func (sd *Sidebar[T]) HandlePointingInput(ctx *gui.Context, widgetBounds *gui.Wi
 
 		sd.list.contextmenu.right_clicked_item = nil
 	}
-
-	sd.handle_tooltips(ctx, widgetBounds)
 	return gui.HandleInputResult{}
 }
 
