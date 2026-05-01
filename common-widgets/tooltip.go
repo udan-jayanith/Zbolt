@@ -15,6 +15,10 @@ type WidgetWithTooltip[T gui.Widget] struct {
 	tooltip_text string
 }
 
+func (w *WidgetWithTooltip[T]) Widget() T {
+	return w.widget.Widget()
+}
+
 func (w *WidgetWithTooltip[T]) SetTooltip(text string) {
 	w.tooltip_text = text
 }

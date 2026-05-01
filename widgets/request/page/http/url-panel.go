@@ -17,11 +17,10 @@ import (
 
 type long_text_input_widget struct {
 	widget.TextInput
-	t widget.TextInput
 }
 
 func (w *long_text_input_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
-	point := w.t.Measure(ctx, gui.Constraints{})
+	point := w.TextInput.Measure(ctx, gui.Constraints{})
 	point.X *= 3
 	return point
 }
