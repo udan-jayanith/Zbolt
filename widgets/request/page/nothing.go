@@ -1,32 +1,35 @@
 package request_page
 
 import (
+	CommonWidgets "API-Client/common-widgets"
 	"API-Client/icons"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
 
-type NothingWidget struct {
+type nothing_widget struct {
 	gui.DefaultWidget
 
-	image    icons.Icon
+	image    CommonWidgets.WidgetWithTooltip[*icons.Icon]
 	on_click func()
 }
 
-func (nw *NothingWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
-	nw.image.SetIcon("large-icons/add-box")
+func (nw *nothing_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+	nw.image.SetTooltip("Create a new request")
+	image := nw.image.Widget()
+	image.SetIcon("large-icons/add-box")
 	u := widget.UnitSize(ctx)
-	nw.image.SetSize(u * 8)
+	image.SetSize(u * 8)
 	if nw.on_click != nil {
-		nw.image.OnClick(nw.on_click)
+		image.OnClick(nw.on_click)
 	}
 
 	adder.AddWidget(&nw.image)
 	return nil
 }
 
-func (nw *NothingWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (nw *nothing_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	flex1_item := gui.LinearLayoutItem{
 		Size: gui.FlexibleSize(1),
 	}
@@ -54,6 +57,6 @@ func (nw *NothingWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (nw *NothingWidget) OnClick(fn func()) {
+func (nw *nothing_widget) OnClick(fn func()) {
 	nw.on_click = fn
 }

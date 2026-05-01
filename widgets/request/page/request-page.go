@@ -35,7 +35,7 @@ type RequestPage struct {
 	sidebar_items     []SidebarItem[sidebar_item]
 
 	tabs_handler   TabsHandler
-	nothing_widget NothingWidget
+	nothing_widget nothing_widget
 
 	request_widget   CommonWidgets.WidgetWithPadding[def.RequestWidget]
 	http_widget      http_widget.HTTP_Widget
