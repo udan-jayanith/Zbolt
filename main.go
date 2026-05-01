@@ -20,9 +20,8 @@ import (
 
 type Root struct {
 	gui.DefaultWidget
-	background           basicwidget.Background
-	message_model_widget gui.Widget
-	menubar_widget       basicwidget.Menubar[struct{}]
+	background     basicwidget.Background
+	menubar_widget basicwidget.Menubar[struct{}]
 
 	welcome_page_widget home.HomePage
 	request_page_widget request_page.RequestPage
@@ -44,10 +43,6 @@ func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	})
 	adder.AddWidget(&r.menubar_widget)
 	adder.AddWidget(&r.request_page_widget)
-
-	if r.message_model_widget == nil {
-		r.message_model_widget = &message_model.MessageModel
-	}
 	adder.AddWidget(&message_model.MessageModel)
 	return nil
 }
@@ -59,6 +54,7 @@ func (r *Root) HandleButtonInput(ctx *gui.Context, widgetBounds *gui.WidgetBound
 func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	b := widgetBounds.Bounds()
 	layouter.LayoutWidget(&r.background, b)
+	layouter.LayoutWidget(&message_model.MessageModel, widgetBounds.Bounds())
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
@@ -91,6 +87,8 @@ func main() {
 			ApplePressAndHoldEnabled: true,
 		},
 	}
+
+	message_model.Show("Hello world", message_model.Alert, nil)
 	if err := gui.Run(&Root{}, op); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

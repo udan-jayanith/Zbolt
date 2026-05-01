@@ -31,8 +31,8 @@ func (w *alert_widget_content) Bounds(ctx *gui.Context, widgetBounds *gui.Widget
 	alert_box_point := w.Measure(ctx, gui.Constraints{})
 	middle := image.Rectangle{
 		Min: image.Point{
-			X: b.Max.X/2 - alert_box_point.X/2,
-			Y: b.Max.Y/2 - alert_box_point.Y/2,
+			X: (b.Min.X + b.Dx()/2) - alert_box_point.X/2,
+			Y: (b.Min.Y + b.Dy()/2) - alert_box_point.Y/2,
 		},
 	}
 	middle.Max = middle.Min.Add(alert_box_point)
