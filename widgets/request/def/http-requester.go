@@ -171,7 +171,7 @@ func (data *HTTP_Data) do(req *http.Request) {
 	res_data.ResponseTime = time.Since(response_time)
 	data.set_response_data(res_data)
 
-	body_content := make([]byte, 0, 1024*2)
+	body_content := make([]byte, 0, 2048)
 	buffer := make([]byte, 1024)
 	update_time := time.Now()
 
