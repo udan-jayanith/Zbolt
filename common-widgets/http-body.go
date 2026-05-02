@@ -251,7 +251,7 @@ func (body *BodyWidget) SetType(t RequestResponse) {
 
 func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
 	t, sub_t := content_type.Parse()
-	if t == "text" || (t == "application" && sub_t == "json") {
+	if body.t == HTTP_Request || t == "text" || (t == "application" && sub_t == "json") || content_type == "" {
 		body.body.Widget().ForceSetValue(content)
 	}
 }
