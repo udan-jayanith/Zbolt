@@ -127,7 +127,7 @@ func (icon *Icon) SetSize(size ...int) {
 	}
 	icon.size_specified = true
 	icon.size = pt
-	gui.RequestRebuild(icon)
+	//gui.RequestRebuild(icon)
 }
 
 func (icon *Icon) SetIcon(icon_name string) {
@@ -136,7 +136,7 @@ func (icon *Icon) SetIcon(icon_name string) {
 	}
 	icon.icon_name = icon_name
 	icon.image_widget.SetImage(Store.Open(icon_name))
-	gui.RequestRedraw(&icon.image_widget)
+	//gui.RequestRedraw(&icon.image_widget)
 }
 
 func (icon *Icon) IconName() string {
