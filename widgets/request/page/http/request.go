@@ -97,6 +97,9 @@ func (rw *request_widget) update_url_preview() string {
 	}
 
 	u, _ := url.Parse(rw.input_bar_widget.url_input_value())
+	if u == nil {
+		return rw.url_preview.URL()
+	}
 	url_utils.CleanURL(u)
 	u.RawQuery = url_utils.EncodeParameters(parameters)
 
