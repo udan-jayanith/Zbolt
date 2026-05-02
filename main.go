@@ -13,36 +13,27 @@ import (
 	"github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
 
+	"API-Client/basic"
 	message_model "API-Client/message-model"
-	home "API-Client/widgets/home"
-	request_page "API-Client/widgets/request/page"
+	"API-Client/widgets/request/def"
+	http_widget "API-Client/widgets/request/page/http"
 )
 
 type Root struct {
 	gui.DefaultWidget
-	background     basicwidget.Background
-	menubar_widget basicwidget.Menubar[struct{}]
-
-	welcome_page_widget home.HomePage
-	request_page_widget request_page.RequestPage
+	background  basicwidget.Background
+	http_widget http_widget.HTTP_Widget
+	req         *def.Request
 }
 
 func (r *Root) Build(context *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&r.background)
-
-	r.menubar_widget.SetItems([]basicwidget.MenubarItem{
-		{
-			Text: "Zbolt",
-		},
-		{
-			Text: "Project",
-		},
-		{
-			Text: "Logs",
-		},
-	})
-	adder.AddWidget(&r.menubar_widget)
-	adder.AddWidget(&r.request_page_widget)
+	if r.req == nil {
+		req := def.NewRequest(def.HTTP, "")
+		r.req = &req
+	}
+	r.http_widget.SetReq(r.req)
+	adder.AddWidget(&r.http_widget)
 	adder.AddWidget(&message_model.MessageModel)
 	return nil
 }
@@ -58,12 +49,10 @@ func (r *Root) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter
 
 	layout := gui.LinearLayout{
 		Direction: gui.LayoutDirectionVertical,
+		Padding: basic.NewPadding(basicwidget.UnitSize(ctx)/4),
 		Items: []gui.LinearLayoutItem{
 			{
-				Widget: &r.menubar_widget,
-			},
-			{
-				Widget: &r.request_page_widget,
+				Widget: &r.http_widget,
 				Size:   gui.FlexibleSize(1),
 			},
 		},
