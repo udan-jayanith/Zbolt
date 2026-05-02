@@ -24,7 +24,7 @@ type request_input_bar_widget struct {
 	on_method_changed_fn  func(method string)
 	selected_method_index int
 
-	url_input          CommonWidgets.WidgetWithTooltip[*widget.TextInput]
+	url_input          CommonWidgets.WidgetWithTooltip[*CommonWidgets.TextInputWithContextMenu]
 	url_input_disabled bool
 
 	request_button_text          string

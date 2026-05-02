@@ -12,7 +12,7 @@ type request_widget struct {
 	gui.DefaultWidget
 
 	url_input_bar struct {
-		url_input      widget.TextInput
+		url_input      CommonWidgets.TextInputWithContextMenu
 		connect_button widget.Button
 	}
 	

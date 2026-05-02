@@ -13,7 +13,7 @@ type popup_form_content struct {
 	gui.DefaultWidget
 
 	field_widget  CommonWidgets.Description
-	input_widget  widget.TextInput
+	input_widget  CommonWidgets.TextInputWithContextMenu
 	button_widget widget.Button
 }
 

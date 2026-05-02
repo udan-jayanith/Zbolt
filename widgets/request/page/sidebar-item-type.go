@@ -79,7 +79,7 @@ type request_name_inputs_widget struct {
 	gui.DefaultWidget
 
 	text_widget              widget.Text
-	input_widget             widget.TextInput
+	input_widget             CommonWidgets.TextInputWithContextMenu
 	create_button_widget     widget.Button
 	on_create_button_clicked func(name string)
 }

@@ -2,6 +2,7 @@ package websocket_widget
 
 import (
 	"API-Client/basic"
+	CommonWidgets "API-Client/common-widgets"
 
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
@@ -11,7 +12,7 @@ type request_body struct {
 	gui.DefaultWidget
 
 	send_button widget.Button
-	text_widget widget.TextInput
+	text_widget CommonWidgets.TextInputWithContextMenu
 }
 
 func (ww *request_body) Build(ctx *gui.Context, adder *gui.ChildAdder) error {

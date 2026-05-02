@@ -14,7 +14,7 @@ import (
 type URLPreview struct {
 	gui.DefaultWidget
 
-	url_preview widget.TextInput
+	url_preview TextInputWithContextMenu
 	copy_button widget.Button
 	tooltip     basic.TooltipHelper
 }

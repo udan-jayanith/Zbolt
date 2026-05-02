@@ -82,7 +82,7 @@ type Sidebar[T comparable] struct {
 
 	options struct {
 		search_icon   *ebiten.Image
-		search_widget CommonWidgets.WidgetWithTooltip[*widget.TextInput]
+		search_widget CommonWidgets.WidgetWithTooltip[*CommonWidgets.TextInputWithContextMenu]
 		add           struct {
 			create_request_button, create_folder_button, variable_button CommonWidgets.ButtonWithTooltip
 			create_request_icon, create_folder_icon, variable_icon       *ebiten.Image

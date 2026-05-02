@@ -180,7 +180,7 @@ type body_widget struct {
 
 	header http_body_header_widget
 
-	body CommonWidgets.WidgetWithLazyLoading[*widget.TextInput]
+	body CommonWidgets.WidgetWithLazyLoading[*CommonWidgets.TextInputWithContextMenu]
 }
 
 func (w *body_widget) SetLazyLoad(lazy_load bool) {

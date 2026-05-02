@@ -16,8 +16,7 @@ import (
 )
 
 type long_text_input_widget struct {
-	widget.TextInput
-}
+	CommonWidgets.TextInputWithContextMenu}
 
 func (w *long_text_input_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	point := w.TextInput.Measure(ctx, gui.Constraints{})
