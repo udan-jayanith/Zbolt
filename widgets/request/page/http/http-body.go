@@ -254,6 +254,8 @@ func (body *body_widget) SetBody(content string, content_type def.ContentType) {
 	t, sub_t := content_type.Parse()
 	if body.t == HTTP_Request || t == "text" || (t == "application" && sub_t == "json") || content_type == "" {
 		body.body.Widget().ForceSetValue(content)
+	} else {
+		body.body.Widget().ForceSetValue("")
 	}
 }
 
