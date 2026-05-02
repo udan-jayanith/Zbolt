@@ -28,10 +28,11 @@ func (w *long_text_input_widget) Measure(ctx *gui.Context, constraints gui.Const
 type url_panel_content struct {
 	gui.DefaultWidget
 
-	form                              widget.Form
-	scheme_text, host_text, path_text widget.Text
-	scheme                            widget.Select[struct{}]
-	host, path                        long_text_input_widget
+	form                 widget.Form
+	scheme_text          widget.Text
+	host_text, path_text CommonWidgets.TextWithInfoHint
+	scheme               widget.Select[struct{}]
+	host, path           long_text_input_widget
 	// TODO: make the scheme a select to select between http and https
 
 	query_header      widget.Text
@@ -114,6 +115,13 @@ func (w *url_panel_content) Build(ctx *gui.Context, adder *gui.ChildAdder) error
 
 	w.scheme_text.SetValue("Scheme")
 	w.host_text.SetValue("Host")
+
+	// Warning: text hints are formatted
+	w.host_text.SetHint(`"host" or "host:port"
+	ex: www.google.com or localhost:8080`)
+	w.path_text.SetHint(`URL path
+	ex: "/en-US/docs/Web/API/URL/pathname"`)
+
 	w.path_text.SetValue("Path")
 
 	w.path.OnValueChanged(func(context *gui.Context, text string, committed bool) {
