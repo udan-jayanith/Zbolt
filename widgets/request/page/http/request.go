@@ -26,7 +26,7 @@ type request_widget struct {
 	tab_content struct {
 		params, header  []attr.AttrCheck
 		table           CommonWidgets.AttributeTable
-		body            CommonWidgets.BodyWidget
+		body            body_widget
 		selected_widget gui.Widget
 	}
 }
@@ -110,7 +110,7 @@ func (rw *request_widget) OnRequestButtonClicked(fn func(ctx *gui.Context, value
 	rw.input_bar_widget.on_request_button_clicked(fn)
 }
 
-//Value is 'Request' or 'Cancel'
+// Value is 'Request' or 'Cancel'
 func (rw *request_widget) SetRequestButtonText(value string) {
 	rw.input_bar_widget.set_request_button_value(value)
 }
@@ -234,7 +234,7 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.tab_content.selected_widget = &rw.tab_content.table
 	case "body":
 		rw.tab_content.selected_widget = &rw.tab_content.body
-		rw.tab_content.body.SetType(CommonWidgets.HTTP_Request)
+		rw.tab_content.body.SetType(HTTP_Request)
 	default:
 		panic("Unknown tab was selected")
 	}

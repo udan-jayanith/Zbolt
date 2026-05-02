@@ -1,6 +1,7 @@
-package CommonWidgets
+package http_widget
 
 import (
+	CommonWidgets "API-Client/common-widgets"
 	"API-Client/widgets/request/def"
 	"image"
 	"strings"
@@ -173,24 +174,24 @@ func (rbh *http_body_header_widget) Measure(ctx *gui.Context, constraints gui.Co
 	return point
 }
 
-type BodyWidget struct {
+type body_widget struct {
 	gui.DefaultWidget
 	t RequestResponse
 
 	header http_body_header_widget
 
-	body WidgetWithLazyLoading[*widget.TextInput]
+	body CommonWidgets.WidgetWithLazyLoading[*widget.TextInput]
 }
 
-func (w *BodyWidget) SetLazyLoad(lazy_load bool) {
+func (w *body_widget) SetLazyLoad(lazy_load bool) {
 	w.body.SetLazyLoad(lazy_load)
 }
 
-func (w *BodyWidget) LazyLoad() bool {
+func (w *body_widget) LazyLoad() bool {
 	return w.body.LazyLoad()
 }
 
-func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
+func (w *body_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	adder.AddWidget(&w.header)
 
 	body := w.body.Widget()
@@ -203,7 +204,7 @@ func (w *BodyWidget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	return nil
 }
 
-func (w *BodyWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
+func (w *body_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, layouter *gui.ChildLayouter) {
 	u := widget.UnitSize(ctx)
 
 	layout := gui.LinearLayout{
@@ -222,7 +223,7 @@ func (w *BodyWidget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBounds, la
 	layout.LayoutWidgets(ctx, widgetBounds.Bounds(), layouter)
 }
 
-func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
+func (body *body_widget) Measure(ctx *gui.Context, constraints gui.Constraints) image.Point {
 	u := widget.UnitSize(ctx)
 	gap := u / 4
 	var point image.Point
@@ -244,43 +245,43 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 	return point
 }
 
-func (body *BodyWidget) SetType(t RequestResponse) {
+func (body *body_widget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
 }
 
-func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
+func (body *body_widget) SetBody(content string, content_type def.ContentType) {
 	t, sub_t := content_type.Parse()
 	if body.t == HTTP_Request || t == "text" || (t == "application" && sub_t == "json") || content_type == "" {
 		body.body.Widget().ForceSetValue(content)
 	}
 }
 
-func (body *BodyWidget) ContentType() def.ContentType {
+func (body *body_widget) ContentType() def.ContentType {
 	return body.header.content_type.content_type
 }
 
-func (body *BodyWidget) SetContentType(content_type def.ContentType) {
+func (body *body_widget) SetContentType(content_type def.ContentType) {
 	body.header.content_type.content_type = content_type
 	gui.RequestRebuild(&body.header)
 }
 
-func (body *BodyWidget) Body() string {
+func (body *body_widget) Body() string {
 	return body.body.Widget().Value()
 }
 
-func (body *BodyWidget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
+func (body *body_widget) OnAutowrapToggle(fn func(ctx *gui.Context, value bool)) {
 	body.header.options.auto_wrap.toggle.OnValueChanged(fn)
 }
 
-func (body *BodyWidget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
+func (body *body_widget) OnFormatToggle(fn func(ctx *gui.Context, value bool)) {
 	body.header.options.format.toggle.OnValueChanged(fn)
 }
 
-func (body *BodyWidget) SetAutowrap(autowrap bool) {
+func (body *body_widget) SetAutowrap(autowrap bool) {
 	body.header.options.auto_wrap.toggle.SetValue(autowrap)
 }
 
-func (body *BodyWidget) SetFormat(format bool) {
+func (body *body_widget) SetFormat(format bool) {
 	body.header.options.format.toggle.SetValue(format)
 }
