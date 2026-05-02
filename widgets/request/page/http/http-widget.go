@@ -53,7 +53,7 @@ func (brp *HTTP_Widget) SetReq(req *def.Request) {
 	// Setup request widget
 	brp.data = data
 	brp.setup_request_widget()
-	brp.setup_response_widget(false)
+	brp.setup_response_widget(data.IsFetching())
 	gui.RequestRebuild(brp)
 }
 
@@ -85,6 +85,7 @@ func (brp *HTTP_Widget) setup_request_widget() {
 func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 	// Setup response widget
 	data := brp.data
+	brp.is_fetching = is_fetching
 	data.ResponseData(func(res_data *def.HTTP_Response_Data) {
 		if is_fetching {
 			brp.response_widget.SetLazyLoading(len(res_data.Body.Content()) == 0, len(res_data.Headers) == 0)
@@ -101,10 +102,8 @@ func (brp *HTTP_Widget) setup_response_widget(is_fetching bool) {
 
 		brp.response_widget.SetHTTPVersion(res_data.Version)
 		brp.response_widget.SetResponseTime(res_data.ResponseTime)
-		if res_data.Status_code != 0 {
-			brp.response_widget.SetStatus(res_data.Status_code)
-		}
-
+		brp.response_widget.SetStatus(res_data.Status_code)
+		brp.response_widget.SetContentLength(res_data.ContentLenght)
 	})
 }
 
@@ -174,6 +173,22 @@ func (brp *HTTP_Widget) on_request_button_clicked(ctx *gui.Context, value string
 	}
 }
 
+func (brp *HTTP_Widget) on_url_input_changed(_ *gui.Context, text string, committed bool) {
+	if !committed || brp.data.URL.IsPattern() {
+		return
+	}
+	u, err := url.Parse(text)
+	if err != nil {
+		message_model.Show(err.Error(), message_model.Alert, nil)
+	}
+	brp.request_widget.SetURL(u)
+
+	url_utils.CleanURL(u)
+	brp.data.URL.SetPath(u.Path)
+	u.Path = ""
+	brp.data.URL.BaseURL = u.String()
+}
+
 func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	ctx.SetPreferredColorMode(ebiten.ColorModeDark)
 
@@ -191,21 +206,7 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		brp.data.Method = method
 	})
 
-	brp.request_widget.OnURLInputChanged(func(context *gui.Context, text string, committed bool) {
-		if !committed || brp.data.URL.IsPattern() {
-			return
-		}
-		u, err := url.Parse(text)
-		if err != nil {
-			message_model.Show(err.Error(), message_model.Alert, nil)
-		}
-		brp.request_widget.SetURL(u)
-
-		url_utils.CleanURL(u)
-		brp.data.URL.SetPath(u.Path)
-		u.Path = ""
-		brp.data.URL.BaseURL = u.String()
-	})
+	brp.request_widget.OnURLInputChanged(brp.on_url_input_changed)
 
 	brp.request_widget.OnRequestButtonClicked(brp.on_request_button_clicked)
 

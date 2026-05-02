@@ -6,6 +6,7 @@ import (
 	"API-Client/widgets/request/def"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	gui "github.com/guigui-gui/guigui"
@@ -53,6 +54,10 @@ func (rw *response_widget) SetFormat(format bool) {
 
 // SetStatus sets the http status code
 func (rw *response_widget) SetStatus(status_code int) {
+	if status_code < 200 {
+		rw.header_widget.status.SetValue("")
+		return
+	}
 	status := fmt.Sprintf("%v %s", status_code, http.StatusText(status_code))
 	rw.header_widget.status.SetValue(status)
 }
@@ -64,6 +69,10 @@ func (rw *response_widget) SetResponseTime(response_time time.Duration) {
 
 func (rw *response_widget) SetHTTPVersion(version def.Version) {
 	rw.header_widget.proto.SetValue(fmt.Sprintf("HTTP v%v.%v", version.Major, version.Minor))
+}
+
+func (rw *response_widget) SetContentLength(lenght int) {
+	rw.header_widget.content_lenght.SetValue(strconv.Itoa(lenght) + "B")
 }
 
 func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {

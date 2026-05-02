@@ -247,13 +247,12 @@ func (body *BodyWidget) Measure(ctx *gui.Context, constraints gui.Constraints) i
 func (body *BodyWidget) SetType(t RequestResponse) {
 	body.t = t
 	body.header.t = t
-	gui.RequestRebuild(body)
 }
 
 func (body *BodyWidget) SetBody(content string, content_type def.ContentType) {
 	t, sub_t := content_type.Parse()
 	if t == "text" || (t == "application" && sub_t == "json") {
-		body.body.Widget().SetValue(content)
+		body.body.Widget().ForceSetValue(content)
 	}
 }
 

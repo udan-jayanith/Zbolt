@@ -192,13 +192,13 @@ loop:
 		}
 
 		body_content = append(body_content, buffer[:n]...)
-		res_data.ResponseSize = len(body_content)
+		res_data.ContentLenght = len(body_content)
 		res_data.ResponseTime = time.Since(response_time)
 		if time.Since(update_time).Milliseconds() >= 500 {
 			data.set_response_data(res_data)
 		}
 	}
-	res_data.ResponseSize = len(body_content)
+	res_data.ContentLenght = len(body_content)
 	res_data.ResponseTime = time.Since(response_time)
 	res_data.Body.content = body_content
 	data.set_response_data(res_data)

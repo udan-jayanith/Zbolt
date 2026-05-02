@@ -143,12 +143,12 @@ type Version struct {
 }
 
 type HTTP_Response_Data struct {
-	Status_code  int
-	ResponseTime time.Duration
-	ResponseSize int // In bytes // TODO: change this to Content-Length since header size is quite hard calculate
-	Version      Version
-	Headers      []attr.AttrCheck
-	Body         HTTP_Response_Body
+	Status_code   int
+	ResponseTime  time.Duration
+	ContentLenght int // In bytes
+	Version       Version
+	Headers       []attr.AttrCheck
+	Body          HTTP_Response_Body
 
 	SelectedResponseTab int
 }
