@@ -51,7 +51,8 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 
 	// TODO: Add
 	// * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent
-	if data.Body.ContentType != "" {
+	method := strings.ToUpper(data.Method)
+	if data.Body.ContentType != "" && (method == "POST" || method == "PUT" || method == "PATCH") {
 		var content_type_found bool
 		for i, header := range data.Headers {
 			if header.Key == "Content-Type" {
