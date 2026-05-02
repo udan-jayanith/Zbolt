@@ -40,9 +40,7 @@ Traditional API clients like Postman rely on Chromium, which adds significant ov
 ### Installation
 
 ```bash
-git clone https://github.com/udan-jayanith/Zbolt.git
-cd Zbolt
-go build -o zbolt
+go run .
 ```
 
 ### Usage
