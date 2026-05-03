@@ -49,22 +49,18 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 		}, data.Headers...)
 	}
 
-	// TODO: Add
-	// * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent
+	headers_mapped := make(map[string]int, len(data.Headers))
+	var shift int
+	for i, header := range data.Headers {
+		headers_mapped[header.Key] = i
+	}
+
 	method := strings.ToUpper(data.Method)
 	if data.Body.ContentType != "" && (method == "POST" || method == "PUT" || method == "PATCH") {
-		var content_type_found bool
-		for i, header := range data.Headers {
-			if header.Key == "Content-Type" {
-				header.Value = string(data.Body.ContentType)
-				header.Checked = true
-				data.Headers[i] = header
-				content_type_found = true
-				break
-			}
-		}
-
-		if !content_type_found {
+		index, ok := headers_mapped["Content-Type"]
+		if ok {
+			data.Headers[index].Value = string(data.Body.ContentType)
+		} else {
 			data.Headers = append([]attr.AttrCheck{
 				{
 					Checked: true,
@@ -72,7 +68,44 @@ func (data *HTTP_Data) set_req_headers(req *http.Request) {
 					Value:   string(data.Body.ContentType),
 				},
 			}, data.Headers...)
+			shift++
 		}
+	}
+
+	_, ok := headers_mapped["Accept"]
+	if !ok {
+		data.Headers = append([]attr.AttrCheck{
+			{
+				Checked: true,
+				Key:     "Accept",
+				Value:   "*/*",
+			},
+		}, data.Headers...)
+		shift++
+	}
+
+	_, ok = headers_mapped["Accept-Encoding"]
+	if !ok {
+		data.Headers = append([]attr.AttrCheck{
+			{
+				Checked: true,
+				Key:     "Accept-Encoding",
+				Value:   "gzip, deflate, br, zstd",
+			},
+		}, data.Headers...)
+		shift++
+	}
+
+	_, ok = headers_mapped["User-Agent"]
+	if !ok {
+		data.Headers = append([]attr.AttrCheck{
+			{
+				Checked: true,
+				Key:     "User-Agent",
+				Value:   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+			},
+		}, data.Headers...)
+		shift++
 	}
 
 	for _, header := range data.Headers {
