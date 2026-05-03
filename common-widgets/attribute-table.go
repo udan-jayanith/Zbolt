@@ -43,8 +43,8 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.key_cell.SetEditable(!w.table.key_not_editable)
 	w.key_cell.SetEllipsisString("...")
 	adder.AddWidget(&w.key_cell)
-	adder.AddWidget(&w.value_cell)
 	w.value_cell.SetEllipsisString("...")
+	adder.AddWidget(&w.value_cell)
 
 	if !w.table.delete_disabled {
 		l := widget.LineHeight(ctx)
@@ -105,7 +105,7 @@ func (row_widget *table_row_widget) Measure(ctx *gui.Context, constraints gui.Co
 	}
 
 	padding := row_widget.padding(ctx)
-	constraints = gui.FixedWidthConstraints(point.X)
+	constraints = gui.FixedWidthConstraints(point.X - (padding.Start + padding.End))
 	y := max(row_widget.key_cell.Measure(ctx, constraints).Y, row_widget.value_cell.Measure(ctx, constraints).Y)
 	point.Y = padding.Top + padding.Bottom
 	point.Y += y
@@ -225,7 +225,7 @@ func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints
 
 	point.Y = at.header_height(ctx)
 	for i, _ := range at.rows {
-		point.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
+		point.Y += at.rows[i].Measure(ctx, gui.FixedWidthConstraints(point.X)).Y
 	}
 
 	return point
