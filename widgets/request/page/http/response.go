@@ -6,9 +6,9 @@ import (
 	"API-Client/widgets/request/def"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
+	"github.com/docker/go-units"
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 )
@@ -72,7 +72,7 @@ func (rw *response_widget) SetHTTPVersion(version def.Version) {
 }
 
 func (rw *response_widget) SetContentLength(lenght int) {
-	rw.header_widget.content_lenght.SetValue(strconv.Itoa(lenght) + "B")
+	rw.header_widget.content_lenght.SetValue(units.HumanSize(float64(lenght)))
 }
 
 func (rw *response_widget) SetHeaders(headers []attr.AttrCheck) {
