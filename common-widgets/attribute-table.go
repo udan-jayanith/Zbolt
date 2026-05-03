@@ -24,7 +24,6 @@ type table_row_widget struct {
 	index                int
 	checkbox             widget.Checkbox
 	key_cell, value_cell EditableText
-	vr                   VerticalLine
 	row_delete_btn       *icons.Icon
 }
 
@@ -44,7 +43,6 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	w.key_cell.SetEditable(!w.table.key_not_editable)
 	w.key_cell.SetEllipsisString("...")
 	adder.AddWidget(&w.key_cell)
-	adder.AddWidget(&w.vr)
 	adder.AddWidget(&w.value_cell)
 	w.value_cell.SetEllipsisString("...")
 
@@ -101,7 +99,7 @@ func (w *table_row_widget) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 			Size:   gui.FlexibleSize(1),
 		},
 		{
-			Widget: &w.vr,
+			Size: gui.FixedSize(2),
 		},
 		{
 			Layout: right_column_layout,
@@ -141,7 +139,6 @@ func (row_widget *table_row_widget) on_delete(fn func(index int)) {
 
 type attribute_table struct {
 	gui.DefaultWidget
-	vr                       VerticalLine
 	key_header, value_header widget.Text
 	rows                     []*table_row_widget
 
@@ -171,8 +168,6 @@ func (at *attribute_table) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	at.key_header.SetBold(true)
 	at.key_header.SetVerticalAlign(widget.VerticalAlignMiddle)
 	adder.AddWidget(&at.key_header)
-
-	adder.AddWidget(&at.vr)
 
 	at.value_header.SetValue("Value")
 	at.value_header.SetBold(true)
@@ -219,7 +214,7 @@ func (at *attribute_table) Layout(ctx *gui.Context, widgetBounds *gui.WidgetBoun
 				Size:   gui.FlexibleSize(1),
 			},
 			{
-				Widget: &at.vr,
+				Size: gui.FixedSize(2),
 			},
 			{
 				Widget: &at.value_header,
@@ -259,16 +254,22 @@ func (at *attribute_table) Measure(ctx *gui.Context, constraints gui.Constraints
 }
 
 func (at *attribute_table) Draw(ctx *gui.Context, widgetBounds *gui.WidgetBounds, dst *ebiten.Image) {
-	b := widgetBounds.Bounds()
-	b.Min.Y += at.header_height(ctx)
+	b1 := widgetBounds.Bounds()
+	b1.Min.Y += at.header_height(ctx)
 
 	line_color := draw_color.ScaleAlpha(draw_color.Color(ctx.ColorMode(), draw_color.ColorTypeBase, 0), 6/32.0)
 	width := 1 * float32(ctx.Scale())
 
 	for i, _ := range at.rows {
-		vector.StrokeLine(dst, float32(b.Min.X), float32(b.Min.Y), float32(b.Max.X), float32(b.Min.Y), width, line_color, true)
-		b.Min.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
+		vector.StrokeLine(dst, float32(b1.Min.X), float32(b1.Min.Y), float32(b1.Max.X), float32(b1.Min.Y), width, line_color, false)
+		b1.Min.Y += at.rows[i].Measure(ctx, gui.Constraints{}).Y
 	}
+
+	b2 := widgetBounds.Bounds()
+	b2.Min.Y += 4
+	height := b1.Min.Y - b2.Min.Y
+	middle := b2.Min.X + b2.Dx()/2
+	vector.StrokeLine(dst, float32(middle), float32(b2.Min.Y), float32(middle), float32(b2.Min.Y+height), width, line_color, false)
 }
 
 type AttributeTable struct {
