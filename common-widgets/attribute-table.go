@@ -42,9 +42,11 @@ func (w *table_row_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 	}
 
 	w.key_cell.SetEditable(!w.table.key_not_editable)
+	w.key_cell.SetEllipsisString("...")
 	adder.AddWidget(&w.key_cell)
 	adder.AddWidget(&w.vr)
 	adder.AddWidget(&w.value_cell)
+	w.value_cell.SetEllipsisString("...")
 
 	if !w.table.delete_disabled {
 		if w.row_delete_btn == nil {
