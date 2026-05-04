@@ -5,10 +5,10 @@ import (
 	"API-Client/icons"
 	"image"
 
+	opener "codeberg.org/udan-jayanith/Opener"
 	gui "github.com/guigui-gui/guigui"
 	widget "github.com/guigui-gui/guigui/basicwidget"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/pkg/browser"
 )
 
 type footer_widget struct {
@@ -39,7 +39,7 @@ func (fw *footer_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 	fw.repo_link.SetIcon("github")
 	fw.repo_link.SetSize(icon_size)
 	fw.repo_link.OnClick(func() {
-		browser.OpenURL("https://github.com/udan-jayanith/API-Client")
+		opener.Open("https://github.com/udan-jayanith/API-Client")
 	})
 	adder.AddWidget(&fw.repo_link)
 

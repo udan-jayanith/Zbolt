@@ -1,17 +1,17 @@
 module API-Client
 
-go 1.26.0
+go 1.26.1
 
 require (
+	codeberg.org/udan-jayanith/Opener v0.0.2
+	github.com/docker/go-units v0.5.0
 	github.com/golang-ds/queue v1.0.0
 	github.com/guigui-gui/guigui v0.0.0-20260502094033-cc945c13987a
 	github.com/hajimehoshi/ebiten/v2 v2.10.0-alpha.11.0.20260501045648-37cbbc56a425
 	github.com/hajimehoshi/iro v0.2.0
-	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 )
 
 require (
-	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260211053922-3d992dae95d1 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.11.0-alpha.1.0.20260430031838-fa49e74b0075 // indirect
