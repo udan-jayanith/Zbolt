@@ -3,7 +3,7 @@ module API-Client
 go 1.26.1
 
 require (
-	codeberg.org/udan-jayanith/Opener v0.0.2
+	codeberg.org/udan-jayanith/Opener v0.0.3
 	github.com/docker/go-units v0.5.0
 	github.com/golang-ds/queue v1.0.0
 	github.com/guigui-gui/guigui v0.0.0-20260502094033-cc945c13987a
