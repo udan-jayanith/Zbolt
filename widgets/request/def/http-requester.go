@@ -234,6 +234,8 @@ loop:
 	}
 	res_data.ContentLenght = len(body_content)
 	res_data.ResponseTime = time.Since(response_time)
+
+	// TODO: decode the body content if it uses some kind of encription
 	res_data.Body.content = body_content
 	data.set_response_data(res_data)
 }
