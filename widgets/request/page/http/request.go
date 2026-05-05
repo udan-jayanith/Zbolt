@@ -26,7 +26,7 @@ type request_widget struct {
 	tab_content struct {
 		params, header  []attr.AttrCheck
 		table           CommonWidgets.AttributeTable
-		body            body_widget
+		body            request_body_widget
 		selected_widget gui.Widget
 	}
 }
@@ -46,14 +46,6 @@ func (rw *request_widget) OnOpenIn(fn func(ctx *gui.Context)) {
 
 func (rw *request_widget) OnAutowrap(fn func(ctx *gui.Context, value bool)) {
 	rw.tab_content.body.OnAutowrapToggle(fn)
-}
-
-func (rw *request_widget) OnFormat(fn func(ctx *gui.Context, value bool)) {
-	rw.tab_content.body.OnFormatToggle(fn)
-}
-
-func (rw *request_widget) SetFormat(value bool) {
-	rw.tab_content.body.SetFormat(value)
 }
 
 func (rw *request_widget) SetAutowrap(value bool) {
@@ -161,7 +153,7 @@ func (rw *request_widget) Headers() []attr.AttrCheck {
 
 // SetBody set the http request body
 func (rw *request_widget) SetBody(body *def.HTTP_Request_Body) {
-	rw.tab_content.body.SetBody(body.Content, def.ContentType(body.ContentType))
+	rw.tab_content.body.SetBody(body.Content)
 }
 
 func (rw *request_widget) SelectedTab() int {
@@ -237,7 +229,6 @@ func (rw *request_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 		rw.tab_content.selected_widget = &rw.tab_content.table
 	case "body":
 		rw.tab_content.selected_widget = &rw.tab_content.body
-		rw.tab_content.body.SetType(HTTP_Request)
 	default:
 		panic("Unknown tab was selected")
 	}
