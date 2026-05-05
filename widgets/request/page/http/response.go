@@ -19,7 +19,7 @@ type response_widget struct {
 	tab           CommonWidgets.Tab
 	tab_content   struct {
 		response_header  CommonWidgets.WidgetWithLazyLoading[*widget.Table[struct{}]]
-		response_body    body_widget
+		response_body    response_body_widget
 		selected_content gui.Widget
 	}
 }
@@ -151,7 +151,6 @@ func (rw *response_widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error 
 		_, selected_tab := rw.tab.SelectedTab()
 		switch selected_tab.Value {
 		case "body":
-			rw.tab_content.response_body.SetType(HTTP_Response)
 			rw.tab_content.selected_content = &rw.tab_content.response_body
 		case "header":
 			rw.tab_content.selected_content = &rw.tab_content.response_header

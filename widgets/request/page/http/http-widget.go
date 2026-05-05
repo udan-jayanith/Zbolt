@@ -62,7 +62,6 @@ func (brp *HTTP_Widget) setup_request_widget() {
 	brp.request_widget.SetHeaders(data.Headers)
 	brp.request_widget.SetParameters(data.Parameters)
 	brp.request_widget.SetAutowrap(data.RequestConfig.AutoWrap)
-	brp.request_widget.SetFormat(data.RequestConfig.Formate)
 	brp.request_widget.SetContentType(data.Body.ContentType)
 	brp.request_widget.SetBody(&data.Body)
 	if data.Method == "" {
@@ -212,9 +211,6 @@ func (brp *HTTP_Widget) Build(ctx *gui.Context, adder *gui.ChildAdder) error {
 
 	brp.request_widget.OnAutowrap(func(ctx *gui.Context, value bool) {
 		brp.data.RequestConfig.AutoWrap = value
-	})
-	brp.request_widget.OnFormat(func(ctx *gui.Context, value bool) {
-		brp.data.RequestConfig.Formate = value
 	})
 
 	brp.response_widget.OnAutowrapToggle(func(ctx *gui.Context, value bool) {
